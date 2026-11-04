@@ -371,7 +371,11 @@ def run_hysteresis_validation(case_dir):
     hysteresis_demonstrated = (f_L_150 > 0.80) and (f_L_50 < 0.20)
     passed = (mean_alpha_melt >= 0.95) and (mean_alpha_freeze <= 0.02) and hysteresis_demonstrated
     status_str = "PASSED" if passed else "FAILED"
-    print(f"\nBony & Citherlet Hysteresis Experimental Validation Status: {status_str}")
+    print(f"\nEHC Thermal Hysteresis Path Logic Verification Status: {status_str}")
+    print("Note: Imposed windows ([308, 312] K and [303, 307] K) verify the internal state machine")
+    print("(phaseState, T_reversal) and direction-dependent capacity under thermal cycling.")
+    print("Formal experimental validation requires fitting measured DSC data and predicting an independent")
+    print("experiment (e.g. Bony & Citherlet 2007 storage unit temperature response).")
     return passed
 
 def main():

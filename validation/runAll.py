@@ -20,38 +20,38 @@ import subprocess
 VALIDATION_SUITES = [
     {
         "name": "deVahlDavis2D",
-        "title": "de Vahl Davis (1983) Natural Convection (Ra = 10^5)",
+        "title": "de Vahl Davis (1983) Natural Convection Cavity (Benchmark)",
         "script": "deVahlDavis2D/runTest.py",
         "fast": True,
-        "description": "Steady natural convection cavity, Nu_mean benchmark target 4.519 (+/- 5%) (~2s)"
+        "description": "Steady natural convection cavity at Ra = 10^5, Nu_mean benchmark target 4.519 (+/- 5%) (~3s)"
     },
     {
         "name": "pcmHysteresis_experimental",
-        "title": "Bony & Citherlet (2007) / DSC Paraffin Thermal Hysteresis",
+        "title": "EHC Thermal Hysteresis Cyclic Path Logic (Model Verification)",
         "script": "pcmHysteresis_experimental/runTest.py",
         "fast": True,
-        "description": "Physical paraffin DSC cyclic melting & freezing with 5 K thermal hysteresis (~3s)"
+        "description": "Direction-dependent melting and freezing loop with 5 K hysteresis window (~2s)"
     },
     {
         "name": "tin2D",
-        "title": "Hannoun, Alexiades & Mai (2003) Pure Tin Melting Benchmark",
+        "title": "Hannoun et al. (2003) Pure Tin Melting (Benchmark)",
         "script": "tin2D/runTest.py",
         "fast": False,
-        "description": "Liquid metal melting benchmark at Ra = 2.25e5, Pr = 0.04, Ste = 0.01 (~15s)"
+        "description": "Square cavity tin melting benchmark (Pr = 0.04, Ste = 0.01) vs 1D Stefan solution (~15s)"
     },
     {
         "name": "gallium2D",
-        "title": "Brent et al. (1988) Gallium Melting Fast Regression Gate",
+        "title": "Brent et al. (1988) / Ye & Arıcı (2023) Gallium Melting (Benchmark)",
         "script": "gallium2D/runTest.py",
         "fast": False,
         "description": "2-minute regression gate: f_L(2m) = 0.1303 +/- 0.002, |energy closure| <= 0.5% (~35s)"
     },
     {
         "name": "gallium3D_experimental",
-        "title": "Gau & Viskanta (1986) / Ben-David et al. (2013) 3D Gallium Melting",
+        "title": "Gau & Viskanta (1986) 3D Gallium Melting (Validation in Progress)",
         "script": "gallium3D_experimental/runTest.py",
         "fast": False,
-        "description": "3D experimental validation with physical no-slip sidewall braking and front tracking (~30s)"
+        "description": "3D cavity melting with physical no-slip sidewall braking and front position check (~2.5m)"
     },
 ]
 

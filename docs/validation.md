@@ -13,7 +13,9 @@ In accordance with ASME V&V 10 / Roache (1998) standards, this document distingu
 3. **Validated (Physical Experimental Validation)**: Solving the right equations — comparing model predictions against experimental physical measurements (e.g. Gau & Viskanta 1986, Bertrand et al. 1999).
 
 > [!NOTE]
-> **Status Assessment**: `phaseChangeFoam` is **formally verified against exact analytical solutions** (Carslaw & Jaeger 1D two-phase Stefan melting, two-slab contact temperature, conservation physics), **benchmarked against established numerical CFD literature** (de Vahl Davis 1983 natural convection, Ye & Arıcı 2023 / Brent et al. 1988 gallium melting, Hannoun et al. 2003 tin melting), and **physically validated against experimental datasets** (3D pure gallium melting with physical no-slip sidewall braking vs Gau & Viskanta 1986 / Ben-David et al. 2013, and cyclic paraffin thermal hysteresis vs Bony & Citherlet 2007 DSC measurements).
+> **Status Assessment**: `phaseChangeFoam` is **formally verified against exact analytical solutions** (Carslaw & Jaeger 1D two-phase Stefan melting, two-slab contact temperature, discrete conservation physics, and EHC hysteresis path logic) and **benchmarked against established numerical CFD literature** (de Vahl Davis 1983 natural convection, Ye & Arıcı 2023 / Brent et al. 1988 gallium melting, Hannoun et al. 2003 / Bertrand et al. 1999 tin melting).
+> 
+> **Physical experimental validation is in progress** (3D pure gallium cavity melting vs Gau & Viskanta 1986). It is **not yet claimed as fully validated** against physical experimental datasets until multi-time front profiles with uncertainty bounds and systematic 3D grid refinement studies are completed.
 
 ---
 
@@ -25,7 +27,8 @@ The primary verification tests reside in the `verification/` directory (13 speci
 | :--- | :--- | :--- | :--- |
 | [`verification/phaseChange1D/`](../verification/phaseChange1D/) | **Exact Two-Phase Stefan Melting (Carslaw & Jaeger 1959)**<br>Exact transcendental Stefan problem with moving boundary $s(t) = 2\lambda\sqrt{\alpha_l t}$, temperature profiles in solid and liquid, timestep convergence sweep ($\Delta t \in [1, 500]\text{ s}$). | Exact Analytical / Similarity | Phase front error $0.433\% < 1.0\%$ gate ($s_{\text{sim}} = 28.06\text{ mm}$ vs $s_{\text{exact}} = 28.18\text{ mm}$ at $2000\text{ s}$); mean profile error $0.21\text{ K}$; backward-Euler temporal order $p = 0.96 \approx 1.0$. |
 | [`verification/phaseChangeCoupled/`](../verification/phaseChangeCoupled/) | **Two-Slab Contact Temperature & CHT Interface Coupling**<br>Semi-infinite contact temperature $T_i = (e_1 T_1 + e_2 T_2)/(e_1 + e_2)$, harmonic interface conductivity $k_{\text{eff}}$, multi-region energy balance, restart invariance. | Exact Analytical / Energy Balance | Interface contact temperature error $0.024\% < 0.1\%$ gate ($T_{i,\text{sim}} = 366.75\text{ K}$ vs $T_{i,\text{exact}} = 366.67\text{ K}$); interface flux continuity $< 0.05\%$; overall coupled energy error $< 6 \times 10^{-5}$. |
-| [`verification/singleCellOvershoot/`](../verification/singleCellOvershoot/) | **EHC Thermal Hysteresis & Subcooling**<br>State-variable tracking (`phaseState`, `T_reversal`), cyclic melt/freeze loops, unequal $C_p$, mushy start, restart invariance (22 cases). | Analytic / Discrete State | Complete cycle energy closure $< 0.1\%$, exact path recovery, restart bit-invariance. |
+| [`validation/pcmHysteresis_experimental/`](../validation/pcmHysteresis_experimental/) | **EHC Thermal Hysteresis Cyclic Path Logic**<br>State-variable tracking (`phaseState`, `T_reversal`), direction-dependent effective capacity across synthetic melting ($[308, 312]\text{ K}$) and freezing ($[303, 307]\text{ K}$) windows. | Model State Verification | Complete charging at peak heating ($f_L = 1.0$), subcooling delay retaining 100% liquid at $310.9\text{ K}$ during cooling, complete crystallization at cycle end ($f_L = 0.0$). |
+| [`verification/singleCellOvershoot/`](../verification/singleCellOvershoot/) | **Single-Cell Overshoot & Subcooling Logic**<br>State-variable tracking, cyclic melt/freeze loops, unequal $C_p$, mushy start, restart invariance (22 cases). | Analytic / Discrete State | Complete cycle energy closure $< 0.1\%$, exact path recovery, restart bit-invariance ($< 10^{-9}\text{ K}$). |
 | [`verification/leeModel/`](../verification/leeModel/) | **Volumetric Species Evaporation & Boiling**<br>Clausius-Clapeyron $T_{\text{sat}}(p)$, species mass and latent/sensible energy conservation, high $C \Delta t$ limiter, heated pot liquid exhaustion and vapor superheating (9 cases). | Analytic / Thermodynamic | Mass conservation error $< 10^{-10}$, energy closure $< 0.01\%$, Clausius-Clapeyron $T_{\text{sat}}(2\text{ bar})$ rate error $< 0.1\%$. |
 | [`verification/constantSource/`](../verification/constantSource/) | **Fixed-Rate Mass/Energy Injection Baseline**<br>Baseline verification for continuity source terms and scalar transport coupling. | Exact Conservation | Integral mass and enthalpy injection match discrete source within machine precision. |
 
@@ -88,20 +91,22 @@ Laminar buoyancy-driven natural convection in an air-filled square cavity ($L = 
 * Grid: $50 \times 50$ uniform cells (structured)
 * Non-dimensional velocity scales: $u^* = u / (\alpha / L)$, $v^* = v / (\alpha / L)$ with $\alpha = \nu / \text{Pr} = 2.146 \times 10^{-6}\text{ m}^2/\text{s}$
 
-#### Quantitative Comparison with de Vahl Davis (1983)
+#### Quantitative Grid Convergence Sequence vs de Vahl Davis (1983) Benchmark
 
-| Metric | Target (de Vahl Davis 1983) | Computed (`phaseChangeFoam`) | Relative Difference | Status |
-| :--- | :---: | :---: | :---: | :---: |
-| **Mean Nusselt ($\overline{\text{Nu}}$)** | $4.519$ | $4.5506$ | $+0.70\%$ | **PASSED** (Gate: $\le 5\%$) |
-| **Max Nusselt ($\text{Nu}_{\max}$)** | $7.717$ | $7.9300$ | $+2.76\%$ | Reference |
-| **Min Nusselt ($\text{Nu}_{\min}$)** | $0.729$ | $0.7200$ | $-1.23\%$ | Reference |
-| **Peak Vertical Velocity $v_{\max}^*$ (at $y/L = 0.5$)** | $68.59$ | $68.75$ | $+0.23\%$ | **PASSED** (Gate: $\le 5\%$) |
-| **Location $x/L$ of $v_{\max}^*$** | $0.066$ | $0.070$ | Within 1 cell ($\Delta x = 0.02$) | Reference |
-| **Peak Horizontal Velocity $u_{\max}^*$ (at $x/L = 0.5$)** | $34.73$ | $35.53$ | $+2.30\%$ | **PASSED** (Gate: $\le 5\%$) |
-| **Location $y/L$ of $u_{\max}^*$** | $0.855$ | $0.850$ | Within 1 cell ($\Delta y = 0.02$) | Reference |
-| **Temperature Bounds** | $[295.0, 305.0]\text{ K}$ | $[295.0, 305.0]\text{ K}$ | $0.0\text{ K}$ overshoot | **PASSED** |
+To examine spatial convergence, the cavity was solved across three uniform grid resolutions ($40 \times 40$, $50 \times 50$, and $80 \times 80$) using bounded TVD convection schemes (`Gauss limitedLinear 1`):
 
-Execution time is ~3 s for 500 SIMPLE iterations using second-order bounded TVD convection schemes (`Gauss limitedLinear 1`). All target metrics agree within $2.8\%$ of the benchmark.
+| Metric | Target (de Vahl Davis 1983) | Grid $40 \times 40$ (500 iters) | Grid $50 \times 50$ (500 iters) | Grid $80 \times 80$ (1500 iters) | Gate Tolerance | Status |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Mean Nusselt ($\overline{\text{Nu}}$)** | $4.519$ | $4.6078$ ($+1.97\%$) | $4.5506$ ($+0.70\%$) | **$4.5478$ (+0.64%)** | $\le 5.0\%$ | **PASSED** |
+| **Max Nusselt ($\text{Nu}_{\max}$)** | $7.717$ | $8.1040$ ($+5.01\%$) | $7.9300$ ($+2.76\%$) | **$7.8240$ (+1.39%)** | Reference | **PASSED** |
+| **Min Nusselt ($\text{Nu}_{\min}$)** | $0.729$ | $0.7200$ ($-1.23\%$) | $0.7200$ ($-1.23\%$) | **$0.7360$ (+0.96%)** | Reference | **PASSED** |
+| **Peak Vertical Velocity $v_{\max}^*$** | $68.59$ | $68.90$ ($+0.45\%$) | $68.75$ ($+0.23\%$) | **$68.82$ (+0.33%)** | $\le 5.0\%$ | **PASSED** |
+| **Location $x/L$ of $v_{\max}^*$** | $0.066$ | $0.062$ | $0.070$ | **$0.069$** | $\pm 1$ cell | **PASSED** |
+| **Peak Horizontal Velocity $u_{\max}^*$** | $34.73$ | $35.09$ ($+1.03\%$) | $35.53$ ($+2.30\%$) | **$35.11$ (+1.09%)** | $\le 5.0\%$ | **PASSED** |
+| **Location $y/L$ of $u_{\max}^*$** | $0.855$ | $0.863$ | $0.850$ | **$0.856$** | $\pm 1$ cell | **PASSED** |
+| **Temperature Bounds** | $[295.0, 305.0]\text{ K}$ | $[295.0, 305.0]\text{ K}$ | $[295.0, 305.0]\text{ K}$ | $[295.0, 305.0]\text{ K}$ | Strict Bounds | **PASSED** |
+
+As the grid is refined from $40 \times 40$ to $80 \times 80$, the mean Nusselt error drops monotonically to $0.64\%$, while peak vertical and horizontal velocities converge to within $0.33\%$ and $1.09\%$ of the benchmark.
 
 ---
 
@@ -120,7 +125,7 @@ Melting of pure gallium in a rectangular enclosure ($W = 0.0889$ m, $H = 0.0635$
 
 #### Multi-Model Comparison across Full 17-Minute Transient ($42 \times 32$ Grid, $\Delta t = 0.1$ s)
 
-| Metric | Benchmark Target | EP ($\lambda = 0.2$, tutorial) | EP ($\lambda = 1.0, n_{\text{outer}}=8$) | EHCDarcy ($n_{\text{outer}}=3$) | EHCDarcy ($n_{\text{outer}}=8$) |
+| Metric | Benchmark Target | EP ($\lambda = 0.2$) | EP ($\lambda = 1.0, n_{\text{outer}}=8$) | EHCDarcy ($n_{\text{outer}}=3$) | EHCDarcy ($n_{\text{outer}}=8$) |
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Energy closure ($t = 2$ min)** | $\le 2.0\%$ | $+7.35\%$ *(FAIL)* | **-0.06% (-1.2 J)** | **-0.38% (-7.2 J)** | **-0.34% (-6.4 J)** |
 | **Energy closure ($t = 6$ min)** | $\le 2.0\%$ | $+7.37\%$ *(FAIL)* | **+0.11% (+4.2 J)** | **-0.26% (-9.6 J)** | **-0.23% (-8.4 J)** |
@@ -134,12 +139,12 @@ Melting of pure gallium in a rectangular enclosure ($W = 0.0889$ m, $H = 0.0635$
 | **Ye & Arıcı (2023) Eq. 6** | $0.5703$ | $+0.0264$ | **+0.0042** | **+0.0029** | **+0.0033 (+0.58%)** |
 | **2-Minute CPU Solver Time** | — | $38.7$ s | $39.4$ s | **15.6 s** | $35.0$ s |
 
-#### Candor on Brent et al. (1988) as a Historical Numerical Outlier
+#### Brent et al. (1988) as a Historical Numerical Outlier
 
-The simulated 17-minute liquid fraction ($f_L = 0.5736$) sits **7.5% above Brent et al.'s 1988 numerical prediction ($0.5334$)**. This difference is expected and well understood in modern literature:
+The simulated 17-minute liquid fraction ($f_L = 0.5736$) sits **7.5% above Brent et al.'s 1988 numerical prediction ($0.5334$)**. Brent et al.'s 1988 prediction is a recognized outlier in modern computational literature:
 
-1. **Historical Numerical Resolution**: Brent et al. (1988) solved the cavity using a $42 \times 32$ grid but switched to a large time step ($\Delta t = 0.5$ s) after only $t = 10$ s, using an early explicit Newton source-term formulation that lagged convergence during rapid early convection development.
-2. **Consensus of Converged Benchmarks**: Hannoun, Alexiades, and Mai (2003) and Ye and Arıcı (2023) demonstrated that grid-converged 2D solutions yield $f_L \approx 0.570\text{--}0.574$. Ye & Arıcı's numerical correlation (Eq. 6) predicts $\phi_n = 0.5703$ at 17 min, which agrees with `phaseChangeFoam` within **0.33 percentage points (0.58% relative difference)**. Brent (1988) represents a historical, under-resolved numerical prediction rather than a true grid-converged limit.
+1. **Literature Consensus on Grid Convergence**: As demonstrated in comprehensive grid-refinement studies by Hannoun, Alexiades, and Mai (2003, Section 7.2) and Ye and Arıcı (2023), 2D grid-converged numerical solutions yield $f_L \approx 0.570\text{--}0.574$.
+2. **Correlation Agreement**: Ye & Arıcı's grid-converged numerical correlation (2023, Eq. 6) predicts $\phi_n = 0.5703$ at 17 min, which agrees with `phaseChangeFoam` within **0.33 percentage points (0.58% relative difference)**. Brent (1988) represents a historical, under-resolved numerical prediction rather than a true grid-converged limit.
 
 #### Melt Front Deviation Framing
 
@@ -208,77 +213,64 @@ Sweeping $C_u$ across four orders of magnitude at $t = 17$ min:
 
 ---
 
-### Rung 3: Pure Tin Melting Benchmark (Hannoun et al. 2003)
+---
+
+### Rung 3: Pure Tin Melting Benchmark (Hannoun et al. 2003 / Bertrand et al. 1999)
 
 * **Directory**: [`validation/tin2D/`](../validation/tin2D/)
 * **Solver**: `phaseChangeMultiRegionFoam` (transient PIMPLE)
 * **Runner**: `python3 validation/tin2D/runTest.py`
 
 #### Setup & Objectives
-Melting of pure tin in a square cavity ($L = 0.10$ m) at $\text{Ra} = 2.25 \times 10^5$, $\text{Pr} = 0.04$, $\text{Ste} = 0.01$ matching the numerical benchmark of Hannoun, Alexiades, and Mai (2003):
-* Hot vertical wall: $T_h = 508.05$ K; Cold vertical wall: $T_c = 505.0$ K; Melting point: $T_m = 505.0$ K
-* Physical properties: $\rho = 7000\text{ kg/m}^3$, $C_p = 200\text{ J/(kg K)}$, $k = 60.0\text{ W/(m K)}$, $\mu = 6.0 \times 10^{-3}\text{ Pa s}$, $L_f = 6.0 \times 10^4\text{ J/kg}$
+Melting of pure tin in a square cavity ($L = 0.10$ m) at $\text{Ra} = 2.5 \times 10^5$, $\text{Pr} = 0.04$, $\text{Ste} = 0.01$ matching the numerical benchmark problem defined by Bertrand et al. (1999) and Gobin & Le Quéré (2000), and investigated by Hannoun, Alexiades, and Mai (2003):
+* Hot vertical wall: $T_h = 508.0$ K; Cold vertical wall: $T_c = 505.0$ K; Melting point: $T_m = 505.0$ K
+* Physical properties: $\rho = 7500\text{ kg/m}^3$, $C_p = 200\text{ J/(kg K)}$, $k = 60.0\text{ W/(m K)}$, $\mu = 6.0 \times 10^{-3}\text{ Pa s}$, $L_f = 6.0 \times 10^4\text{ J/kg}$, $\beta = 2.6667 \times 10^{-4}\text{ K}^{-1}$, $g = 10.0\text{ m/s}^2$
 * Grid: $40 \times 40$ uniform cells, $\Delta t = 0.1$ s
+* *Note on Rayleigh Number*: The benchmark problem (Bertrand et al. 1999, Gobin & Le Quéré 2000) is defined with $\text{Ra} = 2.5 \times 10^5$ (as cited on p. 255 of Hannoun et al. 2003). In Hannoun's Table 1, $\text{Ra} = 2.25 \times 10^5$ is printed due to a parameter rounding/misprint. With the tabulated thermophysical properties and $\beta = 2.6667 \times 10^{-4}\text{ K}^{-1}$, $\text{Ra} = \frac{g \beta \Delta T H^3}{\nu \alpha} = 2.50 \times 10^5$.
 
-#### Quantitative Results at $t = 100$ s
-* **Computed Liquid Fraction ($f_L$)**: $0.0881$ (matches expected thin liquid film regime prior to circulation transition)
-* **Cavity Mean Temperature**: $505.13$ K
-* **Temperature Bounds**: $[505.00, 507.63]$ K (strictly bounded within physical limits, no spurious overshoot)
-* **Validation Status**: **PASSED** (~15 s execution time).
-
----
-
-## 3. Validated: Physical Experimental Comparisons
-
-The solver suite is validated against experimental physical datasets across two distinct physical mechanisms: 3D sidewall boundary-layer braking in pure metal melting, and non-equilibrium thermal hysteresis in paraffin phase transitions.
+#### Quantitative Benchmark Comparison
+1. **Early-Time Conduction Limit ($t = 100$ s)**: Prior to the development of multi-roll convection, heat transfer is planar conduction. The interface position tracks the exact 1D Neumann-Stefan similarity solution $s(t) = 2\lambda\sqrt{\alpha t}$. For $\text{Ste} = 0.01$, $\lambda = 0.07054 \implies s(100\text{ s}) = 8.92\text{ mm} \implies f_L = 0.0892$:
+   * **Computed Liquid Fraction ($f_L$)**: $0.0881$ (**Relative difference: $-1.23\%$** vs exact Stefan conduction limit)
+   * **Cavity Mean Temperature**: $505.13$ K
+   * **Temperature Bounds**: $[505.00, 507.63]$ K (strictly bounded within physical limits, no spurious overshoot)
+2. **Late-Time Convective Limit ($t = 2500$ s)**: For long-time melting, grid-converged numerical solutions in the literature yield $f_L \approx 0.60$ (Hannoun et al. 2003, Section 5.4, $200 \times 200$ grid) and $f_L \in [0.54, 0.57]$ (Gobin & Le Quéré 2000 multi-code synthesis).
 
 ---
 
-### 1. 3D Pure Gallium Melting with Sidewall Drag (Gau & Viskanta 1986 / Ben-David et al. 2013)
+## 3. Physical Experimental Validation (In Progress)
+
+> [!IMPORTANT]
+> **Status: Validation In Progress (Not Yet Claimed as Validated)**  
+> Full physical experimental validation is actively underway. The preliminary 3D screening test documented below demonstrates 3D boundary-layer braking, but formal validation requires multi-time front tracking, error normalization by melted distance, experimental uncertainty bands, and a 3D grid refinement study.
+
+---
+
+### 3D Pure Gallium Cavity Melting (Gau & Viskanta 1986)
 
 * **Directory**: [`validation/gallium3D_experimental/`](../validation/gallium3D_experimental/)
 * **Solver**: `phaseChangeMultiRegionFoam` (transient 3D PIMPLE)
 * **Runner**: `python3 validation/gallium3D_experimental/runTest.py`
 
-#### Physical Motivation: Resolving the 2D CFD vs. Experiment Discrepancy
-Historical 2D numerical simulations of the Gau & Viskanta (1986) experiment consistently overpredicted the upper melt front advance rate. In their physical experiment, the rectangular test cell has finite depth ($D = 38.1$ mm, $H = 63.5$ mm, $W = 88.9$ mm; aspect ratio $D/H = 0.60$) bounded by acrylic front and back inspection windows. 
+#### Physical Context: 3D Endwall Boundary-Layer Braking
+In the physical experiments of Gau & Viskanta (1986), pure gallium melted in a rectangular test cell of finite depth ($W = 88.9$ mm, $H = 63.5$ mm, $D = 38.1$ mm; aspect ratio $D/H = 0.60$) bounded by acrylic front and back inspection windows. In 2D numerical simulations, the absence of endwalls allows unrestrained circulation, overpredicting upper melt front advance. In reality, no-slip conditions on the inspection windows ($z = 0, z = D$) develop viscous boundary layers that retard circulation velocity.
 
-As demonstrated by Ben-David et al. (2013) using ultrasonic Doppler velocimetry (UDV), the no-slip condition on these windows creates laminar boundary layers that exert substantial viscous drag on the recirculating convection roll. This 3D boundary-layer braking retards convection velocity and slows upper front tilt.
-
-#### Setup & Results ($32 \times 24 \times 16$ Structured Grid, No-Slip Windows)
+#### Preliminary Screening Run ($32 \times 24 \times 16$ Structured Grid, No-Slip Windows)
 * **Boundary conditions**: Left wall $T_h = 38.0^\circ\text{C}$ (311.15 K); Right wall $T_c = 28.3^\circ\text{C}$ (301.45 K); Top/Bottom adiabatic; Front and Back windows ($z = 0, z = D$): **Physical no-slip walls** ($\mathbf{u} = \mathbf{0}$, $\partial T/\partial z = 0$).
-* **Velocity field**: 3D endwall drag retards circulation velocity, yielding peak recirculation speeds $|U|_{\max} = 18.21$ mm/s (matching Ben-David et al.'s UDV measured velocity range of $1.2\text{--}14$ mm/s, whereas 2D models without sidewalls predict unphysically high recirculation).
-* **Melt front tracking at $t = 120$ s (midplane $z = D/2$, $y = H/2$)**:
-  * Computed front position: $11.24$ mm
+* **Results at $t = 120$ s (midplane $z = D/2$, $y = H/2$)**:
+  * Computed midplane front position: $11.24$ mm
   * Gau & Viskanta (1986) experimental measurement: $8.50$ mm
-  * Absolute deviation: $2.74$ mm (**$3.09\% W \le 5.0\% W$ engineering tolerance gate**)
-* **Validation Status**: **PASSED** (Gate Green).
+  * **Absolute deviation**: $2.74$ mm
+  * **Deviation relative to melted distance ($s = 8.50$ mm)**: **$32.2\%$**
+  * **Deviation relative to cavity width ($W = 88.9$ mm)**: $3.09\% W$
+  * Computed peak 3D velocity: $|U|_{\max} = 18.21$ mm/s
+* **Geometry Discrepancy Note**: Ben-David et al. (2013) reported UDV velocity measurements of $1.2\text{--}14$ mm/s, but their experimental container had different dimensions ($60 \times 60 \times 90$ mm) and different thermal boundary conditions. The computed velocity in the Gau & Viskanta cell cannot be directly compared against Ben-David's measurements without simulating their specific geometry.
 
----
-
-### 2. Paraffin Phase Change Material Thermal Hysteresis (Bony & Citherlet 2007 / DSC)
-
-* **Directory**: [`validation/pcmHysteresis_experimental/`](../validation/pcmHysteresis_experimental/)
-* **Solver**: `phaseChangeMultiRegionFoam` (transient PIMPLE)
-* **Runner**: `python3 validation/pcmHysteresis_experimental/runTest.py`
-
-#### Physical Motivation: Non-Equilibrium Subcooling in Real PCMs
-Real commercial paraffin waxes (e.g. RT-series, Rubitherm) and organic PCMs exhibit pronounced non-equilibrium thermal hysteresis between heating and cooling. Standard thermodynamic models (`solidificationMelting`) assume identical equilibrium melting and freezing curves, which overpredict discharge temperatures during cooling.
-
-The stateful `EHC` formulation tracks phase transition history via internal state markers (`phaseState`, `T_reversal`) and separate melting and freezing enthalpy curves based on experimental differential scanning calorimetry (DSC) data (Bony & Citherlet 2007):
-* **Melting window**: $[T_{m,\text{lower}}, T_{m,\text{upper}}] = [308.0, 312.0]$ K ($T_m = 310.0$ K)
-* **Freezing window**: $[T_{f,\text{lower}}, T_{f,\text{upper}}] = [303.0, 307.0]$ K ($T_f = 305.0$ K)
-* **Hysteresis gap**: $\Delta T_{\text{hyst}} = 5.0$ K
-
-#### Quantitative Results across Full 250 s Charging/Discharging Cycle
-
-| Thermal Stage | Time | Mean Temperature | Liquid Fraction $f_L$ | Physical Validation Check | Status |
-| :--- | :---: | :---: | :---: | :--- | :---: |
-| **Peak Heating** | $t = 100$ s | $321.63$ K | **$1.0000$** | Complete charging / 100% molten | **PASSED** |
-| **Mid-Cooling** | $t = 150$ s | $310.90$ K | **$1.0000$** | Subcooling delay: liquid state retained below $T_m$ | **PASSED** |
-| **Cycle End** | $t = 250$ s | $295.00$ K | **$0.0000$** | Complete discharge / 100% solid | **PASSED** |
-
-At $T = 310.90$ K during cooling, $f_L = 1.0000$ confirms that the material remains entirely liquid due to hysteresis delay, whereas at the exact same temperature during heating ($t = 50$ s, $T = 308.21$ K), it was partially melted ($f_L = 0.0545$).
+#### Requirements to Earn "Validated" for 3D Gallium Melting
+To claim formal experimental validation under ASME V&V 10 standards:
+1. **3D Grid Refinement Study**: Demonstrate spatial convergence across a systematic mesh sequence (e.g. $32 \times 24 \times 16 \to 48 \times 36 \times 24 \to 64 \times 48 \times 32$) with ASME GCI calculation.
+2. **Multi-Time Front Tracking**: Compare computed midplane front profiles $x(y)$ across multiple experimental times ($t = 2, 6, 10, 17$ min) against digitized Gau & Viskanta curves.
+3. **Melted-Distance Relative Error**: Report deviations normalized by the local melted distance ($s$), alongside quantified experimental measurement uncertainty bands (pour-out method uncertainty $\approx \pm 1\text{--}2$ mm).
+4. **Matched Velocity Validation**: Compare velocity fields only against experimental data obtained on a matching physical cavity geometry.
 
 ---
 
@@ -286,7 +278,7 @@ At $T = 310.90$ K during cooling, $f_L = 1.0000$ confirms that the material rema
 
 The current coverage across ASME V&V 10 tiers is summarized below:
 
-### Tier 1: Exact Analytic Verification
+### Tier 1: Exact Analytic & Code Verification
 
 | Test | Physics / Mechanisms Checked | Pass Criteria & Tolerances | Status |
 | :--- | :--- | :--- | :---: |
@@ -295,6 +287,7 @@ The current coverage across ASME V&V 10 tiers is summarized below:
 | **Two-Region Interface Flux Continuity** | Harmonic interface thermal conductivity $k_{\text{eff}}$ | Interface flux error $< 0.05\%$ | **Verified** ($0.012\%$ err) |
 | **Coupled Write-and-Restart Invariance** | $0 \to T$ vs $0 \to T/2 \to \text{restart} \to T$ across CHT interface | Temperature diff $< 10^{-9}$ K | **Verified** ($< 10^{-9}$ K diff) |
 | **Coupled EHC Energy Balance** | Discrete energy conservation on adiabatic coupled domain | Energy relative error $< 0.01\%$ | **Verified** ($5.6 \times 10^{-5}$) |
+| **EHC Thermal Hysteresis Path Logic** | Direction-dependent melting/freezing loop, subcooling state tracking | Complete cycle recovery, persistent liquid state during cooling | **Verified** (100% molten $\to$ subcooling delay $\to$ 100% solid) |
 | **Composite Wall Steady Conduction** | Interface energy coupling in `phaseChangeMultiRegionSimpleFoam` | Net wall heat flux error $< 0.1\%$ | Planned |
 | **Darcy Mushy Slab** (uniform $f_L$, imposed $\Delta P$) | Carman-Kozeny mushy-zone drag sink in isolation | Darcy velocity error $< 1\%$ | Planned |
 | **MMS (Method of Manufactured Solutions)** | Formal order for energy equation with smooth $C_{p,\text{eff}}(T)$ ramp | Observed order within $\pm 0.1$ of nominal | Planned |
@@ -303,9 +296,9 @@ The current coverage across ASME V&V 10 tiers is summarized below:
 
 | Test | Physics / Mechanisms Checked | Benchmark Source | Status |
 | :--- | :--- | :--- | :---: |
-| **2D Natural Convection Cavity** | Steady laminar circulation (Ra = 10^5, Pr = 0.71) | de Vahl Davis (1983) | **Benchmarked** (Nu diff $+0.70\%$, $v_{\max}^*$ diff $+0.23\%$) |
-| **2D Pure Gallium Melting** | Transient coupled phase change & convection | Brent et al. (1988), Ye & Arıcı (2023) | **Benchmarked** ($f_L$ diff $+0.58\%$ vs Ye & Arıcı, closure $-0.13\%$) |
-| **2D Pure Tin Melting** | Liquid metal melting (Ra = 2.25e5, Pr = 0.04) | Hannoun, Alexiades & Mai (2003) | **Benchmarked** ($f_L = 0.088$ at $100$ s, strictly bounded) |
+| **2D Natural Convection Cavity** | Steady laminar circulation (Ra = 10^5, Pr = 0.71) across $40 \times 40 \to 80 \times 80$ grid sequence | de Vahl Davis (1983) | **Benchmarked** (Nu diff $+0.64\%$, $v_{\max}^*$ diff $+0.33\%$, $u_{\max}^*$ diff $+1.09\%$ on $80 \times 80$) |
+| **2D Pure Gallium Melting** | Transient coupled phase change & convection | Brent et al. (1988), Ye & Arıcı (2023), Hannoun et al. (2003) | **Benchmarked** ($f_L$ diff $+0.58\%$ vs Ye & Arıcı correlation, closure $-0.13\%$) |
+| **2D Pure Tin Melting** | Liquid metal melting (Ra = 2.5e5, Pr = 0.04, Ste = 0.01) | Bertrand et al. (1999), Hannoun et al. (2003) | **Benchmarked** ($f_L = 0.0881$ vs Stefan limit $0.0892$, $-1.23\%$) |
 | **Lee Model Conservation Audit** | Species mass $\sum Y_i = 1$, total mass $\int \dot{m}\,dt = m_{\text{vap}}$ | Thermodynamic limit | **Benchmarked** (mass err $< 10^{-10}$, energy closure $< 0.01\%$) |
 | **Lee Model Tsat Relaxation** | Multi-component mixture relaxes to $T_{\text{sat}}(p)$ | Clausius-Clapeyron | **Benchmarked** ($|T - T_{\text{sat}}| < 0.05$ K) |
 
@@ -313,8 +306,8 @@ The current coverage across ASME V&V 10 tiers is summarized below:
 
 | Test | Physical System | Validation Dataset | Key Validation Metrics | Status |
 | :--- | :--- | :--- | :--- | :---: |
-| **3D Pure Gallium Melting** | Rectangular cavity with no-slip windows | Gau & Viskanta (1986), Ben-David et al. (2013) | 3D sidewall braking, midplane front position $\le 5\% W$ | **Validated** ($3.09\% W$ front dev, $18.2$ mm/s velocity) |
-| **Paraffin Thermal Hysteresis** | Cyclic melting and freezing loop | Bony & Citherlet (2007) / DSC | Subcooling delay, asymmetric phase transitions | **Validated** (100% melt charging, subcooling delay, 0% discharge) |
+| **3D Pure Gallium Melting** | Rectangular cavity with no-slip windows | Gau & Viskanta (1986) | 3D sidewall braking, front tracking vs time, 3D grid study | **In Progress** (preliminary $32 \times 24 \times 16$ run: dev $2.74$ mm = $32.2\%$ of front $s$) |
+| **Paraffin Thermal Hysteresis** | Cyclic melting and freezing loop | Bony & Citherlet (2007) / DSC | Fit measured DSC curves; blind prediction of independent storage experiment | Planned (path logic verified in Tier 1) |
 | **PCM Cavity Melting** | Horizontal / vertical enclosure | Bertrand et al. (1999) | Comparison across n-octadecane benchmark exercise | Planned |
 
 ---
@@ -326,30 +319,31 @@ The current coverage across ASME V&V 10 tiers is summarized below:
 python3 verification/runAll.py
 ```
 
-### Validation Ladder Fast Gate (Rung 1 natural convection & DSC hysteresis, ~5 s)
+### Validation Ladder Fast Gate (Rung 1 natural convection & DSC hysteresis logic, ~5 s)
 ```bash
 python3 validation/runAll.py --fast
 ```
 
-### Full Validation Ladder (All 5 benchmark and experimental rungs, ~3.5 min)
+### Full Validation Ladder (All 5 benchmark and screening rungs, ~3.5 min)
 ```bash
 python3 validation/runAll.py
 ```
 
-### Running Individual Validation Cases
+### Running Individual Benchmark & Validation Cases
 ```bash
 # Rung 1: de Vahl Davis natural convection cavity (Ra = 10^5)
 python3 validation/deVahlDavis2D/runTest.py
+python3 validation/deVahlDavis2D/runTest.py --grid-study  # 40x40 -> 50x50 -> 80x80
 
-# Rung 2: Paraffin DSC thermal hysteresis validation
+# Rung 2: EHC cyclic thermal hysteresis path logic verification
 python3 validation/pcmHysteresis_experimental/runTest.py
 
-# Rung 3: Hannoun pure tin melting benchmark
+# Rung 3: Pure tin melting benchmark (Ra = 2.5e5)
 python3 validation/tin2D/runTest.py
 
-# Rung 4: Brent gallium melting 2-minute regression gate
+# Rung 4: Brent / Ye & Arici gallium melting 2-minute regression gate
 python3 validation/gallium2D/runTest.py
 
-# Rung 5: Gau & Viskanta / Ben-David 3D gallium experimental validation
+# Rung 5: Gau & Viskanta 3D gallium melting preliminary screening run
 python3 validation/gallium3D_experimental/runTest.py
 ```

@@ -43,27 +43,28 @@
 
 ---
 
-## Verification and Experimental Validation
+## Verification and Validation
 
 In accordance with ASME V&V 10 standards, `phaseChangeFoam` is assessed across a three-tier verification and validation hierarchy:
 
-### Tier 1: Verified (Exact Analytical Solutions)
+### Tier 1: Verified (Exact Analytical Solutions & Discrete Physics)
 * **Two-Phase Stefan Melting (Carslaw & Jaeger 1959 / Alexiades & Solomon 1993)**: Exact moving boundary problem $s(t) = 2\lambda\sqrt{\alpha_l t}$ evaluated across timestep sweep $\Delta t \in [1, 500]$ s. Achieves **0.433% front position error** at $2000$ s ($s_{\text{sim}} = 28.06$ mm vs $s_{\text{exact}} = 28.18$ mm, well below the 1.0% gate) with 1st-order temporal convergence ($p = 0.96$).
 * **Two-Slab Contact Temperature (Carslaw & Jaeger 1959)**: Semi-infinite conjugate interface contact temperature $T_i = (e_1 T_1 + e_2 T_2)/(e_1 + e_2)$ across solid-PCM boundary. Computed $T_i = 366.75$ K matches analytical $366.67$ K with **0.024% relative error** (gate: $\le 0.1\%$).
+* **EHC Thermal Hysteresis Path Logic**: Verifies state-variable tracking (`phaseState`, `T_reversal`) and direction-dependent capacity paths under cyclic thermal loading (100% molten charging $\to$ subcooling retention at $310.9$ K $\to$ 100% crystallized discharge).
 * **Conservation Laws & Bit-Invariance**: Discrete mass conservation error $< 10^{-10}$, energy closure $< 0.01\%$, and restart bit-invariance ($< 10^{-9}$ K difference).
 
 ### Tier 2: Benchmarked (Numerical CFD Literature)
-* **Steady Natural Convection (de Vahl Davis 1983)**: Ra = $10^5$, Pr = $0.71$. Mean Nusselt number $\overline{\text{Nu}} = 4.5506$ (+0.70% vs 4.519 benchmark), peak vertical velocity $v_{\max}^* = 68.75$ (+0.23% vs 68.59).
-* **2D Pure Gallium Melting (Brent et al. 1988, Ye & Arıcı 2023)**: Ra ≈ $6.06 \times 10^5$, Pr = $0.0216$, Ste = $0.0391$. Simulated $f_L(17\text{ min}) = 0.5736$ agrees within **+0.58%** with the grid-converged correlation of Ye & Arıcı (2023, Eq. 6: $0.5703$). Discrete energy closure is **-0.13%** evaluated via right-endpoint Riemann flux summation. Brent et al.'s 1988 numerical prediction ($0.5334$) is an outlier due to historical iteration lag and large time stepping ($\Delta t = 0.5$ s).
-* **2D Pure Tin Melting (Hannoun, Alexiades & Mai 2003)**: Ra = $2.25 \times 10^5$, Pr = $0.04$, Ste = $0.01$. Captures liquid metal melting without spurious numerical temperature oscillations.
+* **Steady Natural Convection Cavity (de Vahl Davis 1983)**: Ra = $10^5$, Pr = $0.71$. Evaluated across a grid convergence sequence ($40 \times 40 \to 50 \times 50 \to 80 \times 80$). On the $80 \times 80$ grid, mean Nusselt number is $\overline{\text{Nu}} = 4.5478$ (+0.64% vs 4.519 benchmark), peak vertical velocity is $v_{\max}^* = 68.82$ (+0.33% vs 68.59), and peak horizontal velocity is $u_{\max}^* = 35.11$ (+1.09% vs 34.73).
+* **2D Pure Gallium Melting (Brent et al. 1988, Ye & Arıcı 2023)**: Ra ≈ $6.06 \times 10^5$, Pr = $0.0216$, Ste = $0.0391$. Simulated $f_L(17\text{ min}) = 0.5736$ agrees within **+0.58%** with the grid-converged correlation of Ye & Arıcı (2023, Eq. 6: $0.5703$). Discrete energy closure is **-0.13%** evaluated via right-endpoint Riemann flux summation. Brent et al.'s 1988 prediction ($0.5334$) is a recognized outlier due to under-resolved numerics as shown by Hannoun et al. (2003).
+* **2D Pure Tin Melting (Hannoun et al. 2003 / Bertrand et al. 1999)**: Ra = $2.5 \times 10^5$, Pr = $0.04$, Ste = $0.01$. At early times ($t = 100$ s), computed $f_L = 0.0881$ agrees within **-1.23%** with the exact 1D Neumann-Stefan conduction limit ($0.0892$).
 
 ![Gallium 2D Melting Animation](docs/images/gallium_melting_brent_comparison.gif)
 
 ![Gallium Melt Front & Liquid Fraction Comparison](docs/images/gallium_melt_front_comparison.png)
 
-### Tier 3: Validated (Physical Experimental Measurements)
-* **3D Pure Gallium Melting with Sidewall Braking (Gau & Viskanta 1986 / Ben-David et al. 2013)**: Resolves the historical 2D CFD over-tilt discrepancy by modeling the physical 3D test cell ($W = 88.9$ mm, $H = 63.5$ mm, $D = 38.1$ mm) with physical no-slip inspection windows ($z = 0, z = D$). Laminar sidewall boundary layers exert viscous drag, retarding circulation velocity ($|U|_{\max} = 18.21$ mm/s, matching Ben-David et al.'s ultrasonic Doppler velocimetry measurements of $1.2\text{--}14$ mm/s). Midplane front position at $y = H/2$ deviates from Gau & Viskanta experimental measurements by only **$2.74$ mm (3.09% of cavity width $W$, well within the $\le 5.0\% W$ gate)**.
-* **Paraffin Phase Change Material Thermal Hysteresis (Bony & Citherlet 2007 / DSC)**: Validates stateful direction-dependent phase transitions against experimental differential scanning calorimetry (DSC) curves across a 250 s heating/cooling cycle with 5 K hysteresis window. Captures 100% molten charging at peak heating, complete crystallization at cycle end, and persistent liquid phase during cooling ($f_L = 1.0$ at $T = 310.9$ K due to non-equilibrium subcooling).
+### Tier 3: Physical Experimental Validation (In Progress)
+* **3D Pure Gallium Melting with Sidewall Drag (Gau & Viskanta 1986)**: Modeling the physical 3D test cell ($W = 88.9$ mm, $H = 63.5$ mm, $D = 38.1$ mm) with physical no-slip inspection windows ($z = 0, z = D$). Laminar sidewall boundary layers exert viscous drag, retarding circulation velocity. In a preliminary screening run ($32 \times 24 \times 16$ grid, $t = 120$ s), midplane front position at $y = H/2$ is $11.24$ mm vs measured $8.50$ mm (deviation = $2.74$ mm, which is **32.2% of the melted distance $s = 8.50$ mm**, or 3.09% of cavity width $W$). Full validation is actively in progress and requires a 3D grid refinement study, multi-time front profiles, and experimental uncertainty bands.
+* **Paraffin PCM Thermal Hysteresis (Bony & Citherlet 2007)**: Stateful direction-dependent model logic is verified in Tier 1; experimental validation requires calibrating model curves to measured DSC data and predicting an independent physical experiment (e.g. storage unit temperature history).
 
 For full quantitative tables, ASME GCI grid studies, and parametric sweeps ($\Delta t$, $\Delta T_m$, $C_u$), see [`docs/validation.md`](docs/validation.md).
 
@@ -71,8 +72,7 @@ For full quantitative tables, ASME GCI grid studies, and parametric sweeps ($\De
 
 ## Limitations and Validation Scope
 
-* **Validated scope**: Validated against physical experimental data for laminar pure-gallium melting in 3D rectangular enclosures with no-slip sidewalls (Gau & Viskanta 1986, Ben-David et al. 2013) and paraffin PCM thermal hysteresis (Bony & Citherlet 2007 / DSC).
-* **Verified / benchmarked scope**: Code-to-code verified against exact analytical solutions (Carslaw & Jaeger 1D Stefan melting and contact temperature) and numerical benchmarks (de Vahl Davis 1983 natural convection, Ye & Arıcı 2023 / Brent 1988 gallium melting, Hannoun et al. 2003 tin melting). High Rayleigh number turbulent regimes are not modeled.
+* **Verification and validation status**: The solver suite is **verified against exact analytical solutions** (Stefan problem, contact temperature, conservation physics, hysteresis state logic) and **benchmarked against numerical CFD literature** (de Vahl Davis natural convection, Ye & Arıcı / Brent gallium melting, Hannoun tin melting). **Physical experimental validation is in progress**; full physical validation is not yet claimed. High Rayleigh number turbulent regimes are not modeled.
 * **Fluid-region PCM property constraint**: In fluid regions with solid-liquid PCM, thermophysical properties must satisfy $\rho_s = \rho_l = \rho_{\text{thermo}}$ and $C_{p,s} = C_{p,l} = C_{p,\text{thermo}}$ (constant-property Boussinesq approximation).
 * **Lee model kinetics**: Models volumetric boiling and condensation driven by deviation from total-pressure saturation temperature $T_{\text{sat}}(p)$; it does not model sub-boiling partial-pressure surface evaporation or free-surface liquid-gas interfaces.
 * **Parallel execution**: Multi-region parallel decomposition (`decomposePar`) is currently untested; all verification runs have been performed in serial execution.

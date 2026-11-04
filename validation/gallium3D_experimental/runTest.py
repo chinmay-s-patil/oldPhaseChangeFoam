@@ -462,17 +462,30 @@ def run_gallium3d_validation(case_dir, nx=32, ny=24, nz=16, endTime=120):
     dev_gv_mm = abs(front_mid_height - gv_front_mm)
     dev_gv_pct = dev_gv_mm / (W * 1000.0) * 100.0
 
-    print(f"\n3D Experimental Validation Results at t = {endTime} s:")
+    dev_melt_pct = (dev_gv_mm / gv_front_mm) * 100.0 if gv_front_mm > 0 else 0.0
+
+    print(f"\n3D Gallium Cavity Melting Preliminary Comparison at t = {endTime} s:")
     print(f"  - Liquid Phase Fraction f_L        : {f_L:.4f} (Expected: [{f_L_min:.4f}, {f_L_max:.4f}])")
     print(f"  - Mean Temperature                 : {T_mean:.2f} K")
-    print(f"  - 3D Peak Velocity |U|_max         : {u_max_3d:.2f} mm/s (Ben-David measured: 1.2 - 14 mm/s)")
+    print(f"  - 3D Peak Velocity |U|_max         : {u_max_3d:.2f} mm/s")
+    print(f"    * Note on velocity: Ben-David et al. (2013) measured 1.2 - 14 mm/s via UDV,")
+    print(f"      but on a different cavity (60 x 60 x 90 mm) and different delta T.")
+    print(f"      Direct velocity validation requires a geometry matching Gau & Viskanta (1986).")
     print(f"  - Midplane Melt Front at y = H/2   : {front_mid_height:.2f} mm")
     print(f"  - Gau & Viskanta (1986) Experiment : {gv_front_mm:.2f} mm")
-    print(f"  - Experimental Deviation           : {dev_gv_mm:.2f} mm ({dev_gv_pct:.2f}% of width W)")
+    print(f"  - Experimental Deviation           : {dev_gv_mm:.2f} mm")
+    print(f"    * As fraction of melted front (s): {dev_melt_pct:.1f}%")
+    print(f"    * As fraction of cavity width (W): {dev_gv_pct:.2f}%")
 
     passed = (dev_gv_pct <= 5.0) and (f_L_min <= f_L <= f_L_max)
-    status_str = "PASSED" if passed else "FAILED"
-    print(f"\n3D Gallium Experimental Validation Status: {status_str} (Deviation {dev_gv_pct:.2f}% <= 5.0% W Gate)")
+    print("\n" + "=" * 80)
+    print("STATUS: VALIDATION IN PROGRESS (Preliminary 3D screening test passed engineering width gate)")
+    print("To claim formal physical validation, the following must be completed:")
+    print("  1. 3D grid refinement study (e.g. 32x24x16 -> 48x36x24 -> 64x48x32).")
+    print("  2. Full midplane front profiles across multiple times (t = 2, 6, 10, 17 min) vs digitized experimental curves.")
+    print("  3. Quantified experimental uncertainty bands and front-relative error metrics.")
+    print("  4. Hydrodynamic velocity validation against matched experimental geometry.")
+    print("=" * 80)
     return passed
 
 def main():

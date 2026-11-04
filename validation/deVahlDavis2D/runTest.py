@@ -474,17 +474,38 @@ def run_devahldavis(case_dir, n_cells=50, iters=400):
 
     return passed
 
+def run_grid_study(case_dir):
+    print("=" * 85)
+    print("  de Vahl Davis (1983) Mesh Convergence Study: 40x40 -> 50x50 -> 80x80 (Ra = 10^5)")
+    print("=" * 85)
+    configs = [
+        (40, 500),
+        (50, 500),
+        (80, 1500),
+    ]
+    all_passed = True
+    study_results = []
+    for n, iters in configs:
+        p = run_devahldavis(case_dir, n_cells=n, iters=iters)
+        if not p:
+            all_passed = False
+    return all_passed
+
 def main():
     parser = argparse.ArgumentParser(description="de Vahl Davis (1983) Natural Convection Benchmark")
     parser.add_argument("--mesh", type=int, default=50, help="Grid points in each direction (default: 50)")
     parser.add_argument("--iters", type=int, default=500, help="Number of SIMPLE iterations (default: 500)")
+    parser.add_argument("--grid-study", action="store_true", help="Run full grid convergence study (40x40, 50x50, 80x80)")
     parser.add_argument("--clean", action="store_true", help="Remove simulation directory after running")
     args = parser.parse_args()
 
     this_dir = os.path.dirname(os.path.abspath(__file__))
     case_dir = os.path.join(this_dir, "case")
 
-    passed = run_devahldavis(case_dir, n_cells=args.mesh, iters=args.iters)
+    if args.grid_study:
+        passed = run_grid_study(case_dir)
+    else:
+        passed = run_devahldavis(case_dir, n_cells=args.mesh, iters=args.iters)
 
     if args.clean and os.path.exists(case_dir):
         shutil.rmtree(case_dir)
