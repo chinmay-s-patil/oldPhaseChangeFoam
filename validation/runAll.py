@@ -6,8 +6,8 @@ Master validation ladder runner for phaseChangeFoam repository.
 Runs validation suites under validation/ and exits non-zero if any benchmark fails.
 
 Usage:
-    python3 validation/runAll.py          # Runs full validation ladder (Rungs 1 & 2)
-    python3 validation/runAll.py --fast   # Runs Rung 1 only (de Vahl Davis ~2s)
+    python3 validation/runAll.py          # Runs full validation ladder (All 5 rungs, ~3.5 min)
+    python3 validation/runAll.py --fast   # Runs fast validation gate (Rungs 1 & 2: de Vahl Davis ~2s, EHC hysteresis ~2s)
     python3 validation/runAll.py --clean  # Cleans case directories after running
 """
 
@@ -57,7 +57,7 @@ VALIDATION_SUITES = [
 
 def main():
     parser = argparse.ArgumentParser(description="Master Validation Ladder Runner for phaseChangeFoam")
-    parser.add_argument("--fast", action="store_true", help="Run only fast benchmarks (de Vahl Davis 2D)")
+    parser.add_argument("--fast", action="store_true", help="Run only fast benchmarks (Rungs 1 & 2: de Vahl Davis & EHC hysteresis)")
     parser.add_argument("--clean", action="store_true", help="Remove simulation directories after completion")
     args = parser.parse_args()
 
@@ -69,7 +69,7 @@ def main():
     print("=" * 80)
     print(f"Repository Root: {repo_dir}")
     print(f"Validation Root: {validation_dir}")
-    mode_str = "FAST (Rung 1 only)" if args.fast else "FULL VALIDATION LADDER (Rungs 1 & 2)"
+    mode_str = "FAST GATE (Rungs 1 & 2)" if args.fast else "FULL VALIDATION LADDER (All 5 rungs)"
     print(f"Execution Mode:  {mode_str}\n")
 
     suites_to_run = [s for s in VALIDATION_SUITES if not args.fast or s["fast"]]

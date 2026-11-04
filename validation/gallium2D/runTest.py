@@ -13,8 +13,7 @@ Reference:
   A. D. Brent, V. R. Voller, and K. J. Reid (1988),
   "Enthalpy-Porosity Technique for Modeling Convection-Diffusion Phase Change:
    Application to the Melting of a Pure Metal",
-  Numerical Heat Transfer, 13(3), pp. 297-318.
-  Paper copy: validation/papers/brent1988.pdf
+  DOI: 10.1080/10407788808913615
   Digitized reference data: validation/gallium2D/reference_data/
 """
 

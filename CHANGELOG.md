@@ -12,6 +12,8 @@ All notable changes, license alignments, and code hygiene updates to `phaseChang
 * **Local Path Leakage & Broken Links**: Sanitized all hardcoded `/home/lavender` fallbacks across 20 test runners and analysis scripts with portable dynamic OpenFOAM lookups (`os.path.expanduser` and `glob`). Converted absolute file-scheme links (`/home/lavender/...`) to relative repository paths in `validation/gallium2D/README.md` and `ANALYSIS_REPORT.md`.
 * **CI Link Verification**: Expanded GitHub Actions link checker to recursively validate all markdown files across the repository (`**/*.md`).
 * **Release & Citation Metadata**: Synchronized `CITATION.cff` version and release date with repository tags and changelog.
+* **Reference Evidence & Digitization Clarity**: Removed stale references to deleted third-party paper PDF in `validation/gallium2D/reference_data/README.md` and `runTest.py`, plainly documenting that Brent curves were traced directly from Fig. 9 with $\pm 1\text{ mm}$ uncertainty.
+* **Cross-Document Consistency**: Reconciled de Vahl Davis cavity dimensions ($L = 0.01\text{ m}$), iterations ($500$), and Nusselt results in `validation/README.md`. Harmonized gallium aspect ratio notations ($A_{H/W} = 0.714$, $A_{W/H} = 1.40$) and updated `validation/runAll.py` and `validation/README.md` to consistently represent the complete 5-rung validation ladder.
 
 ## [0.2.0] - 2026-11-04
 
