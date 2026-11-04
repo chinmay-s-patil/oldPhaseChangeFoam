@@ -26,11 +26,32 @@ VALIDATION_SUITES = [
         "description": "Steady natural convection cavity, Nu_mean benchmark target 4.519 (+/- 5%) (~2s)"
     },
     {
+        "name": "pcmHysteresis_experimental",
+        "title": "Bony & Citherlet (2007) / DSC Paraffin Thermal Hysteresis",
+        "script": "pcmHysteresis_experimental/runTest.py",
+        "fast": True,
+        "description": "Physical paraffin DSC cyclic melting & freezing with 5 K thermal hysteresis (~3s)"
+    },
+    {
+        "name": "tin2D",
+        "title": "Hannoun, Alexiades & Mai (2003) Pure Tin Melting Benchmark",
+        "script": "tin2D/runTest.py",
+        "fast": False,
+        "description": "Liquid metal melting benchmark at Ra = 2.25e5, Pr = 0.04, Ste = 0.01 (~15s)"
+    },
+    {
         "name": "gallium2D",
         "title": "Brent et al. (1988) Gallium Melting Fast Regression Gate",
         "script": "gallium2D/runTest.py",
         "fast": False,
         "description": "2-minute regression gate: f_L(2m) = 0.1303 +/- 0.002, |energy closure| <= 0.5% (~35s)"
+    },
+    {
+        "name": "gallium3D_experimental",
+        "title": "Gau & Viskanta (1986) / Ben-David et al. (2013) 3D Gallium Melting",
+        "script": "gallium3D_experimental/runTest.py",
+        "fast": False,
+        "description": "3D experimental validation with physical no-slip sidewall braking and front tracking (~30s)"
     },
 ]
 

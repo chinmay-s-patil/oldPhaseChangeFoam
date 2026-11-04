@@ -601,10 +601,93 @@ boundaryField {
     print(f"Computed Interface Flux : {q_flux_sim:.2f} W/m^2 (Expected: 1600.00 W/m^2; with erased override: 1000.00 W/m^2)")
     print(f"Flux Relative Error     : {flux_err:.4e}")
 
-    # Pass if flux error < 2% and interface cell temperature is within 1.5 K of 329.2 K
-    # (Erased override would give flux error ~37.5% and T ~ 299.5 K)
+    # Test 5: Coupled Interface with k_s != k_l in PCM (Verifying Interface Flux Uses k_eff)
     pass_t5 = (flux_err < 0.02) and (abs(T_s2_interface_cell - 329.2) < 1.5)
     print(f"Test 5 Status: {'PASSED' if pass_t5 else 'FAILED'}")
+
+    # Test 6: Semi-Infinite Two-Slab Contact Temperature (Carslaw & Jaeger 1959, Incropera & DeWitt)
+    print("\n--- Test 6: Semi-Infinite Two-Slab Contact Temperature Verification (T_i = (e1*T1 + e2*T2)/(e1 + e2)) ---")
+    case6_dir = os.path.join(base_dir, "case_coupled_two_slab_contact")
+    os.makedirs(case6_dir, exist_ok=True)
+    setup_coupled_case(case6_dir, nOuterCorr=10, endTime=1, writeInterval=1)
+
+    # Slab 1 (pcm): k1 = 1.0, cp1 = 1000, rho1 = 1000 => e1 = 1000, T1 = 300 K
+    # Slab 2 (solid2): k2 = 4.0, cp2 = 1000, rho2 = 1000 => e2 = 2000, T2 = 400 K
+    with open(os.path.join(case6_dir, "constant/pcm/thermophysicalProperties"), "w") as f:
+        f.write("""FoamFile { version 2.0; format ascii; class dictionary; location "constant/pcm"; object thermophysicalProperties; }
+thermoType { type heSolidThermo; mixture pureMixture; transport constIso; thermo hConst; equationOfState rhoConst; specie specie; energy sensibleEnthalpy; }
+mixture { specie { molWeight 100; } transport { kappa 1.00; } thermodynamics { Cp 1000; Hf 0; } equationOfState { rho 1000; } }
+""")
+    with open(os.path.join(case6_dir, "constant/pcm/phaseChangeDict"), "w") as f:
+        f.write("""FoamFile { version 2.0; format ascii; class dictionary; location "constant/pcm"; object phaseChangeDict; }
+active false;
+""")
+    with open(os.path.join(case6_dir, "constant/solid2/thermophysicalProperties"), "w") as f:
+        f.write("""FoamFile { version 2.0; format ascii; class dictionary; location "constant/solid2"; object thermophysicalProperties; }
+thermoType { type heSolidThermo; mixture pureMixture; transport constIso; thermo hConst; equationOfState rhoConst; specie specie; energy sensibleEnthalpy; }
+mixture { specie { molWeight 100; } transport { kappa 4.00; } thermodynamics { Cp 1000; Hf 0; } equationOfState { rho 1000; } }
+""")
+    with open(os.path.join(case6_dir, "constant/solid2/phaseChangeDict"), "w") as f:
+        f.write("""FoamFile { version 2.0; format ascii; class dictionary; location "constant/solid2"; object phaseChangeDict; }
+active false;
+""")
+    with open(os.path.join(case6_dir, "system/controlDict"), "w") as f:
+        f.write("""FoamFile { version 2.0; format ascii; class dictionary; location "system"; object controlDict; }
+application phaseChangeMultiRegionFoam;
+startFrom startTime; startTime 0; stopAt endTime; endTime 1; deltaT 0.05;
+writeControl runTime; writeInterval 1; purgeWrite 0; writeFormat ascii; writePrecision 12;
+""")
+
+    for reg, T_init, nbr_reg in [("pcm", 300.0, "solid2"), ("solid2", 400.0, "pcm")]:
+        patch_name = f"{reg}_to_{nbr_reg}"
+        outer_patch = f"{reg}_cold" if reg == "pcm" else f"{reg}_hot"
+        with open(os.path.join(case6_dir, f"0/{reg}/T"), "w") as f:
+            f.write(f"""FoamFile {{ version 2.0; format ascii; class volScalarField; location "0/{reg}"; object T; }}
+dimensions [0 0 0 1 0 0 0]; internalField uniform {T_init};
+boundaryField {{
+    {outer_patch} {{ type zeroGradient; }}
+    {patch_name} {{ type compressible::turbulentTemperatureRadCoupledMixed; value uniform {T_init}; Tnbr T; kappaMethod solidThermo; }}
+    emptyFaces {{ type empty; }}
+}}
+""")
+        with open(os.path.join(case6_dir, f"0/{reg}/h"), "w") as f:
+            h_val = T_init * 1000.0
+            f.write(f"""FoamFile {{ version 2.0; format ascii; class volScalarField; location "0/{reg}"; object h; }}
+dimensions [0 2 -2 0 0 0 0]; internalField uniform {h_val};
+boundaryField {{
+    {outer_patch} {{ type zeroGradient; }}
+    {patch_name} {{ type calculated; value uniform {h_val}; }}
+    emptyFaces {{ type empty; }}
+}}
+""")
+
+    run_cmd(f"bash -c '{of_env}; {solver_bin}'", cwd=case6_dir)
+
+    # Read interface boundary temperature
+    def parse_patch_value(filepath, patch_name):
+        with open(filepath, 'r') as f:
+            text = f.read()
+        p_idx = text.find(patch_name)
+        if p_idx == -1:
+            return None
+        sub = text[p_idx:p_idx+600]
+        m = re.search(r"^\s*value\s+uniform\s+([0-9\.\-\+eE]+);", sub, re.M)
+        if m:
+            return float(m.group(1))
+        return None
+
+    T_i_pcm = parse_patch_value(os.path.join(case6_dir, "1/pcm/T"), "pcm_to_solid2")
+    T_i_s2 = parse_patch_value(os.path.join(case6_dir, "1/solid2/T"), "solid2_to_pcm")
+    T_i_exact = (1000.0 * 300.0 + 2000.0 * 400.0) / (1000.0 + 2000.0)
+    err_t_contact = abs(T_i_pcm - T_i_exact) / T_i_exact * 100.0
+
+    print(f"Exact Analytical Interface Contact T : {T_i_exact:.6f} K")
+    print(f"Computed Interface T (PCM patch)     : {T_i_pcm:.6f} K")
+    print(f"Computed Interface T (Solid2 patch)  : {T_i_s2:.6f} K")
+    print(f"Interface Temperature Relative Error : {err_t_contact:.4e}%")
+
+    pass_t6 = (err_t_contact < 0.1) and (abs(T_i_pcm - T_i_s2) < 1e-4)
+    print(f"Test 6 Status: {'PASSED' if pass_t6 else 'FAILED'}")
 
     summary_lines = [
         "=======================================================",
@@ -630,10 +713,14 @@ boundaryField {
         f"  - Relative Flux Error              : {flux_err:.4e}",
         f"  - Solid2 Interface Cell T          : {T_s2_interface_cell:.4f} K",
         f"  - PCM Interface Cell T             : {T_pcm_interface_cell:.4f} K",
+        f"Test 6 (Two-Slab Contact Temperature): {'PASSED' if pass_t6 else 'FAILED'}",
+        f"  - Exact Interface Temperature      : {T_i_exact:.6f} K",
+        f"  - Computed Interface Temperature   : {T_i_pcm:.6f} K",
+        f"  - Relative Interface Error         : {err_t_contact:.4e}%",
         "-------------------------------------------------------"
     ]
 
-    all_coupled_passed = pass_t1 and pass_t2 and pass_t3 and pass_t4 and pass_t5
+    all_coupled_passed = pass_t1 and pass_t2 and pass_t3 and pass_t4 and pass_t5 and pass_t6
     if all_coupled_passed:
         summary_lines.append("ALL COUPLED MULTI-REGION VERIFICATION TESTS PASSED SUCCESSFULLY!")
     else:
@@ -652,5 +739,6 @@ boundaryField {
 
 if __name__ == "__main__":
     main()
+
 
 

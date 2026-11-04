@@ -176,6 +176,66 @@ def main():
 
     print(f"\nObserved Temporal Convergence Order between dt=200s and dt=500s: p = {expected_order:.2f} (Expected ~1.0 for Backward Euler)")
 
+    # Exact Analytical Two-Phase Stefan Problem Comparison (Carslaw & Jaeger 1959, Alexiades & Solomon 1993)
+    Th, Tm, Tc = 350.0, 305.0, 280.0
+    k_pcm, cp_pcm, rho_pcm, L_pcm = 1.0, 2000.0, 1000.0, 100000.0
+    alpha_pcm = k_pcm / (rho_pcm * cp_pcm)
+    Ste_l = cp_pcm * (Th - Tm) / L_pcm
+    Ste_s = cp_pcm * (Tm - Tc) / L_pcm
+
+    def f_stefan(lam):
+        t1 = Ste_l / (math.sqrt(math.pi) * math.exp(lam**2) * math.erf(lam))
+        t2 = Ste_s / (math.sqrt(math.pi) * math.exp(lam**2) * math.erfc(lam))
+        return t1 - t2 - lam
+
+    low, high = 0.01, 2.0
+    for _ in range(60):
+        mid = 0.5 * (low + high)
+        if f_stefan(low) * f_stefan(mid) <= 0:
+            high = mid
+        else:
+            low = mid
+    lam_exact = 0.5 * (low + high)
+    s_exact = 2.0 * lam_exact * math.sqrt(alpha_pcm * 2000.0)
+
+    s_sim_dt1 = results[1]["x_front"]
+    front_err_pct = abs(s_sim_dt1 - s_exact) / s_exact * 100.0
+
+    dx = 0.001
+    x_cells = [(i + 0.5) * dx for i in range(len(baseline_T))]
+    T_exact = []
+    denom_l = math.erf(lam_exact)
+    denom_s = math.erfc(lam_exact)
+    for x in x_cells:
+        eta = x / (2.0 * math.sqrt(alpha_pcm * 2000.0))
+        if x <= s_exact:
+            T_exact.append(Th - (Th - Tm) * math.erf(eta) / denom_l)
+        else:
+            T_exact.append(Tc + (Tm - Tc) * math.erfc(eta) / denom_s)
+
+    T_diff = [abs(t_sim - t_ex) for t_sim, t_ex in zip(baseline_T, T_exact)]
+    T_mean_err = sum(T_diff) / len(T_diff)
+    T_max_err = max(T_diff)
+    T_rms_err = math.sqrt(sum(d**2 for d in T_diff) / len(T_diff))
+
+    print("\n===========================================================================================")
+    print("           EXACT ANALYTICAL TWO-PHASE STEFAN MELTING VERIFICATION (t = 2000 s)            ")
+    print("===========================================================================================")
+    print(f"Transcendental Eigenvalue lambda: {lam_exact:.6f}")
+    print(f"Exact Melt Front Position:        {s_exact*1000:.3f} mm")
+    print(f"Computed Melt Front (dt = 1 s):   {s_sim_dt1*1000:.3f} mm (Relative Error: {front_err_pct:.3f}%)")
+    print(f"Temperature Profile Mean Error:   {T_mean_err:.3f} K")
+    print(f"Temperature Profile RMS Error:    {T_rms_err:.3f} K")
+    print(f"Temperature Profile Max Error:    {T_max_err:.3f} K")
+    print("-------------------------------------------------------------------------------------------")
+
+    stefan_passed = front_err_pct < 1.0  # Gate: front error < 1%
+    if stefan_passed:
+        print(f"STATUS: EXACT STEFAN VERIFICATION PASSED (Front Error {front_err_pct:.3f}% < 1.0% Gate)")
+    else:
+        print(f"STATUS: EXACT STEFAN VERIFICATION FAILED (Front Error {front_err_pct:.3f}% >= 1.0% Gate)")
+        sys.exit(1)
+
     if 0.7 <= expected_order <= 1.4:
         print("STATUS: VERIFICATION SUCCESSFUL! Verified 1st-order numerical error convergence.")
     else:
@@ -183,3 +243,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

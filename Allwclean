@@ -1,4 +1,6 @@
 #!/bin/sh
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Chinmay S Patil
 cd "${0%/*}" || exit 1
 
 echo "Cleaning phaseChangeFoam..."

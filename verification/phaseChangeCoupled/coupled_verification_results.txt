@@ -21,5 +21,9 @@ Test 5 (Coupled k_eff Interface Flux): PASSED
   - Relative Flux Error              : 1.1858e-02
   - Solid2 Interface Cell T          : 328.2609 K
   - PCM Interface Cell T             : 329.8419 K
+Test 6 (Two-Slab Contact Temperature): PASSED
+  - Exact Interface Temperature      : 366.666667 K
+  - Computed Interface Temperature   : 366.754405 K
+  - Relative Interface Error         : 2.3929e-02%
 -------------------------------------------------------
 ALL COUPLED MULTI-REGION VERIFICATION TESTS PASSED SUCCESSFULLY!
