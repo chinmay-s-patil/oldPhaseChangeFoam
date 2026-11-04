@@ -43,6 +43,9 @@ validation/**/ep_relaxation_study/**
 ideas/
 scratch/
 # src/solvers/phaseChangeMultiRegionSimpleFoam/
-validation/papers
+validation/papers/
+**/papers/
+*.pdf
 tutorials/
 log.tree
+
