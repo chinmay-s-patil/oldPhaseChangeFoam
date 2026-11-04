@@ -71,13 +71,20 @@ jobs:
 
       - name: Build phaseChangeFoam solvers
         run: |
+          set +e
           source /usr/lib/openfoam/openfoam2412/etc/bashrc
+          set -e
           ./Allwmake
+          mkdir -p /usr/local/bin
+          cp -f ${FOAM_USER_APPBIN}/* /usr/local/bin/ 2>/dev/null || true
         shell: bash
 
       - name: Run Benchmark Ladder
         run: |
+          set +e
           source /usr/lib/openfoam/openfoam2412/etc/bashrc
+          set -e
           python3 validation/runAll.py
         shell: bash
+
 
