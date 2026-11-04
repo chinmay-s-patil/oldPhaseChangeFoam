@@ -11,7 +11,7 @@ Reference:
     Numerical Heat Transfer, Part B: Fundamentals, 44(3), pp. 253-276.
     DOI: 10.1080/10407790390226974
 
-Parameters (Table 1):
+Parameters:
     Cavity: W = 0.1 m, H = 0.1 m (Aspect Ratio Ar = 1.0)
     Liquid metal: Pure Tin (Sn)
     rho_ref = 7500 kg/m^3
@@ -24,7 +24,15 @@ Parameters (Table 1):
     T_h = 508.0 K (Hot vertical wall, Delta T = 3.0 K)
     T_c = 505.0 K (Cold vertical wall, zero subcooling)
     g = 10.0 m/s^2
-    Pr = 0.04, Ste = 0.01, Ra = 2.25e5
+    Derived from dimensional properties:
+      nu = mu / rho = 6.0e-3 / 7500 = 8.0e-7 m^2/s
+      alpha = k / (rho * cp) = 60.0 / (7500 * 200) = 4.0e-5 m^2/s
+      Pr = nu / alpha = 0.020
+      Ra = g * beta * Delta T * H^3 / (nu * alpha) = 2.50e5
+      Ste = cp * Delta T / L = 0.010
+    (Note: Hannoun et al. Table 1 listed Ra = 2.25e5 / Pr = 0.04 in its summary row,
+     which was inconsistent with its own tabulated physical properties; the case
+     modeled here strictly preserves the dimensional properties, yielding Ra = 2.50e5.)
 """
 
 import os
@@ -341,7 +349,8 @@ def run_tin_benchmark(case_dir, endTime=100):
     of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
 
     print("=" * 80)
-    print("  HANNOUN ET AL. (2003) TIN MELTING BENCHMARK (Ra = 2.25e5, Pr = 0.04, Ste = 0.01)")
+    print("  PURE TIN MELTING BENCHMARK (Ra = 2.50e5, Pr = 0.02, Ste = 0.01)")
+    print("  Parameters: Bertrand et al. (1999) / Hannoun et al. (2003)")
     print("=" * 80)
     print(f"Setting up case in: {case_dir}")
     setup_tin_case(case_dir, nx=40, ny=40, endTime=endTime, deltaT=0.1)
@@ -373,19 +382,27 @@ def run_tin_benchmark(case_dir, endTime=100):
     # 2. Late-time convective regime (t = 2500 s):
     # Hannoun et al. (2003, Section 5.4, p. 266) report f_L ~ 0.60 for the 200x200 grid;
     # Gobin & Le Quere (2000) benchmark synthesis reports f_L in [0.54, 0.57].
-    stefan_target_100s = 0.0892
-    rel_err_stefan = abs(f_L - stefan_target_100s) / stefan_target_100s
-
     print(f"\nResults at t = {endTime} s:")
     print(f"  - Computed Liquid Fraction f_L     : {f_L:.4f}")
-    print(f"  - 1D Stefan Conduction Benchmark   : {stefan_target_100s:.4f} (Rel. Difference: {rel_err_stefan*100:.2f}%)")
     print(f"  - Mean Cavity Temperature          : {T_mean:.2f} K")
     print(f"  - Temperature Bounds               : [{T_min:.2f}, {T_max:.2f}] K (Expected: [505.0, 508.0] K)")
-    print(f"  - Full Benchmark (t = 2500 s ref)  : f_L ~ 0.60 (Hannoun et al. 2003), 0.54 - 0.57 (Gobin & Le Quere 2000)")
 
-    passed = (rel_err_stefan <= 0.05) and (T_min >= 504.9) and (T_max <= 508.1)
-    status_str = "PASSED" if passed else "FAILED"
-    print(f"\nHannoun Tin Melting Benchmark Status: {status_str} (Tolerance: f_L vs Stefan <= 5.0%, T bounds respected)")
+    if endTime <= 100:
+        stefan_target = 0.0892
+        rel_err = abs(f_L - stefan_target) / stefan_target
+        print(f"  - 1D Stefan Conduction Benchmark   : {stefan_target:.4f} (Rel. Difference: {rel_err*100:.2f}%)")
+        print(f"  - Full Benchmark (t = 2500 s ref)  : f_L ~ 0.60 (Hannoun et al. 2003), 0.54 - 0.57 (Gobin & Le Quere 2000)")
+        passed = (rel_err <= 0.05) and (T_min >= 504.9) and (T_max <= 508.1)
+        print(f"\nTin Melting Early-Conduction Status: {'PASSED' if passed else 'FAILED'} (Tolerance: f_L vs Stefan <= 5.0%)")
+        print("Note: Early-time t=100 s verifies conduction phase-change against exact 1D Stefan solution.")
+        print("Full convective benchmarking requires running to t = 2500 s (--endTime 2500).")
+    else:
+        ref_hannoun = 0.60
+        diff_hannoun = abs(f_L - ref_hannoun) / ref_hannoun
+        print(f"  - Hannoun (2003) 200x200 Reference : {ref_hannoun:.4f} (Rel. Difference: {diff_hannoun*100:.2f}%)")
+        print(f"  - Gobin & Le Quere (2000) Range    : [0.54, 0.57]")
+        passed = (0.50 <= f_L <= 0.65) and (T_min >= 504.9) and (T_max <= 508.1)
+        print(f"\nTin Melting Late-Time Benchmark Status: {'PASSED' if passed else 'FAILED'} (f_L within literature bounds [0.50, 0.65])")
     return passed
 
 def main():

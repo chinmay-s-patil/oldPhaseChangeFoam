@@ -34,10 +34,10 @@ VALIDATION_SUITES = [
     },
     {
         "name": "tin2D",
-        "title": "Hannoun et al. (2003) Pure Tin Melting (Benchmark)",
+        "title": "Bertrand / Hannoun Pure Tin Melting (Conduction Verified)",
         "script": "tin2D/runTest.py",
         "fast": False,
-        "description": "Square cavity tin melting benchmark (Pr = 0.04, Ste = 0.01) vs 1D Stefan solution (~15s)"
+        "description": "Square cavity tin melting (Ra = 2.50e5, Pr = 0.02, Ste = 0.01) vs 1D Stefan solution (~15s)"
     },
     {
         "name": "gallium2D",
