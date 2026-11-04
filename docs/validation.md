@@ -216,29 +216,41 @@ Sweeping $C_u$ across four orders of magnitude at $t = 17$ min:
 
 ---
 
-### Rung 3: Pure Tin Melting (Bertrand et al. 1999 / Hannoun et al. 2003) [Benchmark in Progress]
+### Rung 3: Pure Tin Melting (Bertrand et al. 1999 / Hannoun et al. 2003) [Conduction Phase-Change Verified]
 
 * **Directory**: [`validation/tin2D/`](../validation/tin2D/)
 * **Solver**: `phaseChangeMultiRegionFoam` (transient PIMPLE)
 * **Runner**: `python3 validation/tin2D/runTest.py`
-* **Status**: **Partial Benchmark / Conduction Phase-Change Verified** ($t = 100$ s); full convective benchmark ($t = 2500$ s) in progress.
+* **Status**: **Tier 1 Conduction Phase-Change Verified** ($t = 100$ s); convective benchmarking ($t = 2500$ s) in progress.
 
-#### Setup & Objectives
-Melting of pure tin in a square cavity ($L = 0.10$ m) following the benchmark problem defined by Bertrand et al. (1999) and Gobin & Le Quéré (2000), and investigated by Hannoun, Alexiades, and Mai (2003):
-* Hot vertical wall: $T_h = 508.0$ K; Cold vertical wall: $T_c = 505.0$ K; Melting point: $T_m = 505.0$ K
-* Dimensional properties: $\rho = 7500\text{ kg/m}^3$, $C_p = 200\text{ J/(kg K)}$, $k = 60.0\text{ W/(m K)}$, $\mu = 6.0 \times 10^{-3}\text{ Pa s}$, $L_f = 6.0 \times 10^4\text{ J/kg}$, $\beta = 2.67 \times 10^{-4}\text{ K}^{-1}$, $g = 10.0\text{ m/s}^2$
-* Derived dimensionless numbers from case properties:
-  $$\nu = \frac{\mu}{\rho} = 8.0 \times 10^{-7}\text{ m}^2/\text{s}, \quad \alpha = \frac{k}{\rho C_p} = 4.0 \times 10^{-5}\text{ m}^2/\text{s}$$
-  $$\text{Pr} = \frac{\nu}{\alpha} = 0.020, \quad \text{Ra} = \frac{g \beta \Delta T H^3}{\nu \alpha} = 2.50 \times 10^5, \quad \text{Ste} = \frac{C_p \Delta T}{L_f} = 0.010$$
-* *Note on Table 1 Printing*: Hannoun et al. (2003, Table 1) listed $\text{Ra} = 2.25 \times 10^5$ and $\text{Pr} = 0.04$ in the summary row, whereas the text (p. 255) cited $\text{Ra} = 2.5 \times 10^5$. Direct evaluation of Table 1's dimensional properties yields $\text{Ra} = 2.50 \times 10^5$ and $\text{Pr} = 0.020$, which is the exact physical setup solved here.
-* Grid: $40 \times 40$ uniform cells, $\Delta t = 0.1$ s
+#### Setup & Physical Properties Analysis
+Melting of pure tin in a square cavity ($L = 0.10$ m) following the physical problem formulated by Bertrand et al. (1999) and investigated by Hannoun, Alexiades, and Mai (2003, *Numer. Heat Transfer B*, 44(3), pp. 253–276):
+* **Tabulated Physical Properties (Hannoun et al. 2003, Table 1, p. 258)**:
+  * Reference density $\rho_{\text{ref}} = 7.5 \times 10^3\text{ kg/m}^3$
+  * Specific heat $c_p = 200.\text{ J/(kg}\cdot\text{K)}$
+  * Dynamic viscosity $\mu = 6.0 \times 10^{-3}\text{ N}\cdot\text{s/m}^2$
+  * Thermal conductivity $k = 60.0\text{ W/(m}\cdot\text{K)}$
+  * Volumetric thermal expansion $\beta = 2.67 \times 10^{-4}\text{ K}^{-1}$
+  * Latent heat of fusion $L_f = 6.0 \times 10^4\text{ J/kg}$ ($\text{Ste} = c_p \Delta T / L_f = 0.010$)
+  * Boundary & initial conditions: $T_h = 508.0\text{ K}$, $T_c = T_m = 505.0\text{ K}$ ($\Delta T = 3.0\text{ K}$), $g = 10.0\text{ m/s}^2$, $H = W = 0.10\text{ m}$
 
-#### Benchmark Assessment
-1. **Early-Time Conduction Limit ($t = 100$ s)**: Prior to the development of multi-roll convection, heat transfer is planar conduction. The interface position tracks the exact 1D Neumann-Stefan similarity solution $s(t) = 2\lambda\sqrt{\alpha t}$. For $\text{Ste} = 0.01$, $\lambda = 0.07054 \implies s(100\text{ s}) = 8.92\text{ mm} \implies f_L = 0.0892$:
+* **Dimensional Property Calculation**:
+  Evaluating the standard dimensionless groups directly from the tabulated physical properties yields:
+  $$\nu = \frac{\mu}{\rho_{\text{ref}}} = \frac{6.0 \times 10^{-3}}{7500} = 8.0 \times 10^{-7}\text{ m}^2/\text{s}, \quad \alpha = \frac{k}{\rho_{\text{ref}} c_p} = \frac{60.0}{7500 \times 200} = 4.0 \times 10^{-5}\text{ m}^2/\text{s}$$
+  $$\text{Pr} = \frac{\nu}{\alpha} = \frac{\mu c_p}{k} = \frac{6.0 \times 10^{-3} \times 200}{60.0} = \mathbf{0.020}$$
+  $$\text{Ra} = \frac{g \beta \Delta T H^3}{\nu \alpha} = \frac{10.0 \times 2.67 \times 10^{-4} \times 3.0 \times (0.1)^3}{8.0 \times 10^{-7} \times 4.0 \times 10^{-5}} = \mathbf{2.503 \times 10^5}$$
+
+* **Discrepancy in Literature Dimensionless Values**:
+  In Table 1's bottom dimensionless summary row (p. 258), the paper printed $\text{Pr} = 0.04$ and $\text{Ra} = 2.25 \times 10^5$, whereas the text on page 255 stated: *"The tin melting configuration with $Ar = 1, \text{Ra} = 2.5 \times 10^5, \text{St} = 0.01$, and $\text{Pr} = 0.04$ is very similar to the gallium melting problem"*. A factor-of-two difference in Prandtl number ($\text{Pr} = 0.020$ vs $0.040$) alters momentum boundary layer thickness and roll merging dynamics. The case modeled in `phaseChangeFoam` strictly enforces the dimensional properties ($\text{Pr} = 0.020, \text{Ra} = 2.50 \times 10^5$).
+
+#### Quantitative Assessment
+1. **Early-Time Conduction Limit ($t = 100$ s)**: Prior to convective circulation, the planar melt front follows the exact 1D Neumann-Stefan similarity solution $s(t) = 2\lambda\sqrt{\alpha t}$. For $\text{Ste} = 0.01$, $\lambda = 0.07054 \implies s(100\text{ s}) = 8.92\text{ mm} \implies f_L = 0.0892$:
    * **Computed Liquid Fraction ($f_L$)**: $0.0881$ (**Relative difference: $-1.23\%$** vs exact Stefan conduction limit)
    * **Cavity Mean Temperature**: $505.13$ K
-   * **Temperature Bounds**: $[505.00, 507.63]$ K (strictly bounded within physical limits, no spurious overshoot)
-2. **Late-Time Convective Limit ($t = 2500$ s, In Progress)**: In the literature, grid-converged numerical solutions yield $f_L \approx 0.60$ (Hannoun et al. 2003, Section 5.4, $200 \times 200$ grid) and $f_L \in [0.54, 0.57]$ (Gobin & Le Quéré 2000 multi-code synthesis). Full multi-roll convective benchmarking requires extending simulation execution to $2500$ s.
+   * **Temperature Bounds**: $[505.00, 507.63]$ K (strictly bounded, zero unphysical overshoot)
+2. **Late-Time Convection Benchmark ($t = 2500$ s, In Progress)**: In Section 5.4 (*Volume of Melt*, p. 266, lines 18–21), Hannoun et al. report:
+   > *"The value of the total liquid fraction in the cavity at time 2,500 s obtained in the present study with the 200 × 200—centered simulation is about 0.6, a value 5% larger than the largest prediction from the tin-melting benchmark exercise contributors [36]."* (Gobin & Le Quéré 2000 multi-code synthesis reported $f_L \in [0.54, 0.57]$).
+   Because convective benchmark targets depend on the resolved Prandtl number, tin remains classified as **conduction-verified only** until the 2500 s transient is completed.
 
 ---
 
@@ -269,17 +281,23 @@ In the physical experiments of Gau & Viskanta (1986), pure gallium melted in a r
   * **Deviation relative to melted distance ($s = 8.50$ mm)**: **$32.2\%$**
   * **Deviation relative to cavity width ($W = 88.9$ mm)**: $3.09\% W$
   * Computed peak 3D velocity: $|U|_{\max} = 18.21$ mm/s
-* **Physical Origin of Early Front Deviation**:
-  The computed front ($11.24$ mm) sits almost exactly on the theoretical 1D Stefan conduction limit for a step-change wall temperature ($\approx 11.3$ mm for $\text{Ste} = 0.039, \alpha = 1.38 \times 10^{-5}\text{ m}^2/\text{s}$). The physical experimental front ($8.50$ mm) lags this limit because the physical copper heat exchanger required a finite warm-up ramp ($\sim 60\text{--}90$ s) to reach $38.3^\circ\text{C}$ from $28.3^\circ\text{C}$. Because natural convection and 3D sidewall drag have barely developed at $120$ s, the $32.2\%$ deviation is primarily an unmodeled experimental heater transient rather than a 3D fluid-dynamics error.
+* **Working Hypothesis on Early Front Discrepancy (Heater Transient)**:
+  The computed front ($11.24$ mm) closely matches the theoretical 1D Stefan conduction limit for an instantaneous step wall temperature ($\approx 11.3$ mm for $\text{Ste} = 0.039, \alpha = 1.38 \times 10^{-5}\text{ m}^2/\text{s}$). In the physical experiment of Gau & Viskanta (1986), the hot vertical copper wall was maintained by circulating constant-temperature water from a constant-temperature bath ($T_h = 38.3^\circ\text{C} = 311.45\text{ K}$, whereas the numerical benchmark modeled $38.0^\circ\text{C} = 311.15\text{ K}$). The measured front at $120$ s ($8.50$ mm) physically lags the step-conduction solution. A leading working hypothesis is that the physical copper heat exchanger required a finite warm-up period to reach the setpoint temperature, reducing the early effective Stefan number.
+  * *Verification Strategy to Test Hypothesis*:
+    1. **Later-time front evaluation**: Evaluate midplane front profiles across later times ($t = 6, 10, 17$ min). If front deviations decrease significantly as time advances, early error is predominantly attributable to initial heater transient rather than 3D flow modeling.
+    2. **Parametric ramp-time fitting**: Fit a transient wall boundary condition $T_{\text{hot}}(t) = T_c + (T_h - T_c)(1 - e^{-t/\tau})$ to test whether a realistic time constant $\tau$ reproduces $8.50$ mm at $120$ s while leaving later convective times undisturbed.
 * **Geometry Discrepancy Note**: Ben-David et al. (2013) reported UDV velocity measurements of $1.2\text{--}14$ mm/s, but their experimental container had different dimensions ($60 \times 60 \times 90$ mm) and different thermal boundary conditions. The computed velocity in the Gau & Viskanta cell cannot be directly compared against Ben-David's measurements without simulating their specific geometry.
 
-#### Requirements to Earn "Validated" for 3D Gallium Melting
-To claim formal experimental validation under ASME V&V 10 standards:
-1. **Heater Thermal Transient**: Impose the experimental copper hot-wall temperature ramp $T_{\text{hot}}(t)$ rather than an idealized Dirichlet step jump.
-2. **3D Grid Refinement Study**: Demonstrate spatial convergence across a systematic mesh sequence (e.g. $32 \times 24 \times 16 \to 48 \times 36 \times 24 \to 64 \times 48 \times 32$) with ASME GCI calculation.
-3. **Multi-Time Front Tracking**: Compare computed midplane front profiles $x(y)$ across multiple experimental times ($t = 2, 6, 10, 17$ min) against digitized Gau & Viskanta curves.
-4. **Melted-Distance Relative Error**: Report deviations normalized by the local melted distance ($s$), alongside quantified experimental measurement uncertainty bands (pour-out method uncertainty $\approx \pm 1\text{--}2$ mm).
-5. **Matched Velocity Validation**: Compare velocity fields only against experimental data obtained on a matching physical cavity geometry.
+#### ASME V&V 20 Framework to Earn "Validated" for 3D Gallium Melting
+To claim formal experimental validation under ASME V&V 20 standards, the comparison error $E = S - D$ must satisfy $|E| \le u_{\text{val}}$ across a predefined validation scope:
+$$E = S - D, \quad u_{\text{val}} = \sqrt{u_{\text{num}}^2 + u_{\text{input}}^2 + u_D^2}$$
+where:
+1. **$S$ and $D$**: Simulation prediction ($S$) and experimental measurement ($D$) evaluated at matched coordinates and times.
+2. **$u_{\text{num}}$ (Numerical Uncertainty)**: Quantified via a systematic 3D grid refinement study ($\ge 3$ grids with refinement ratio $r \ge 1.3$, e.g. $32 \times 24 \times 16 \to 48 \times 36 \times 24 \to 64 \times 48 \times 32$) combined with a timestep sensitivity study, reporting ASME GCI.
+3. **$u_{\text{input}}$ (Input Parameter Uncertainty)**: Propagated across credible physical property bounds (thermal conductivity anisotropy $k \in [28, 41]\text{ W/(m K)}$, dynamic viscosity $\mu$, thermal expansion $\beta$, latent heat $L_f$, Darcy constant $C_u$, and melting window $\Delta T_m$).
+4. **$u_D$ (Experimental Uncertainty)**: Quantified experimental uncertainty from pour-out front measurements ($\sim \pm 1\text{--}2$ mm) plus image digitization uncertainty.
+5. **Matched Geometry & Boundary Conditions**: Separate simulations matching (a) Gau & Viskanta (1986) for multi-time melt front tracking ($t = 2, 6, 10, 17$ min) and (b) Ben-David et al. (2013) for ultrasonic Doppler velocity and internal temperature distributions.
+6. **Multi-Quantity Validation**: Front positions evaluated alongside local temperature histories and velocities without tuning numerical parameters ($C_u, \Delta T_m$) on the validation dataset.
 
 ---
 
@@ -292,11 +310,14 @@ The current coverage across ASME V&V 10 tiers is summarized below:
 | Test | Physics / Mechanisms Checked | Pass Criteria & Tolerances | Status |
 | :--- | :--- | :--- | :---: |
 | **Neumann 1D Stefan Melting** (Carslaw & Jaeger 1959) | Moving melt front $s(t) = 2\lambda\sqrt{\alpha_l t}$, $T$ profile, temporal order | Front error $< 1\%$; order $p \approx 1.0$ | **Verified** ($0.43\%$ front err, $p = 0.96$) |
-| **Two-Slab Contact Temperature** (Carslaw & Jaeger 1959) | Semi-infinite contact $T_i = \frac{e_1 T_1 + e_2 T_2}{e_1 + e_2}$, CHT interface coupling | Interface $T_i$ error $< 0.1\%$ | **Verified** ($0.024\%$ err) |
+| **Two-Slab Contact Temperature** (Carslaw & Jaeger 1959) | Semi-infinite contact $T_i = \frac{e_1 T_1 + e_2 T_2}{e_1 + e_2}$, CHT interface coupling | Interface $T_i$ error $< 0.1\%$ | **Verified** ($0.024\%$ err, $\Delta T = 0.088$ K) |
 | **Two-Region Interface Flux Continuity** | Harmonic interface thermal conductivity $k_{\text{eff}}$ | Interface flux error $< 0.05\%$ | **Verified** ($0.012\%$ err) |
 | **Coupled Write-and-Restart Invariance** | $0 \to T$ vs $0 \to T/2 \to \text{restart} \to T$ across CHT interface | Temperature diff $< 10^{-9}$ K | **Verified** ($< 10^{-9}$ K diff) |
 | **Coupled EHC Energy Balance** | Discrete energy conservation on adiabatic coupled domain | Energy relative error $< 0.01\%$ | **Verified** ($5.6 \times 10^{-5}$) |
 | **EHC Thermal Hysteresis Path Logic** | Direction-dependent melting/freezing loop, subcooling state tracking | Complete cycle recovery, persistent liquid state during cooling | **Verified** (100% molten $\to$ subcooling delay $\to$ 100% solid) |
+| **Lee Model Conservation Audit** | Species mass $\sum Y_i = 1$, total mass $\int \dot{m}\,dt = m_{\text{vap}}$ | Analytic mass & energy conservation | **Verified** (mass err $< 10^{-10}$, energy closure $< 0.01\%$) |
+| **Lee Model Tsat Relaxation** | Multi-component mixture relaxes to $T_{\text{sat}}(p)$ | Clausius-Clapeyron thermodynamic limit | **Verified** ($|T - T_{\text{sat}}| < 0.05$ K) |
+| **Pure Tin 1D Stefan Limit** | Conduction regime melt front at $t = 100$ s | Exact similarity solution ($s = 8.92$ mm) | **Verified** ($f_L = 0.0881$ vs $0.0892$, $-1.23\%$) |
 | **Composite Wall Steady Conduction** | Interface energy coupling in `phaseChangeMultiRegionSimpleFoam` | Net wall heat flux error $< 0.1\%$ | Planned |
 | **Darcy Mushy Slab** (uniform $f_L$, imposed $\Delta P$) | Carman-Kozeny mushy-zone drag sink in isolation | Darcy velocity error $< 1\%$ | Planned |
 | **MMS (Method of Manufactured Solutions)** | Formal order for energy equation with smooth $C_{p,\text{eff}}(T)$ ramp | Observed order within $\pm 0.1$ of nominal | Planned |
@@ -307,15 +328,13 @@ The current coverage across ASME V&V 10 tiers is summarized below:
 | :--- | :--- | :--- | :---: |
 | **2D Natural Convection Cavity** | Steady laminar circulation (Ra = 10^5, Pr = 0.71) across $40 \times 40 \to 80 \times 80$ grid sequence | de Vahl Davis (1983) | **Benchmarked** (Nu diff $+0.64\%$, $v_{\max}^*$ diff $+0.33\%$, $u_{\max}^*$ diff $+1.09\%$ on $80 \times 80$) |
 | **2D Pure Gallium Melting** | Transient coupled phase change & convection | Brent et al. (1988), Ye & Arıcı (2023) | **Benchmarked** ($f_L$ diff $+0.58\%$ vs Ye & Arıcı correlation, closure $-0.13\%$) |
-| **2D Pure Tin Melting** | Liquid metal melting (Ra = 2.50e5, Pr = 0.02, Ste = 0.01) | Bertrand et al. (1999), Hannoun et al. (2003) | **Benchmark in Progress** (early conduction verified: $f_L = 0.0881$ vs Stefan $0.0892$, $-1.23\%$; 2500 s convective run underway) |
-| **Lee Model Conservation Audit** | Species mass $\sum Y_i = 1$, total mass $\int \dot{m}\,dt = m_{\text{vap}}$ | Thermodynamic limit | **Benchmarked** (mass err $< 10^{-10}$, energy closure $< 0.01\%$) |
-| **Lee Model Tsat Relaxation** | Multi-component mixture relaxes to $T_{\text{sat}}(p)$ | Clausius-Clapeyron | **Benchmarked** ($|T - T_{\text{sat}}| < 0.05$ K) |
+| **2D Pure Tin Melting (Convective)** | Multi-roll liquid metal melting ($t = 2500$ s, Ra = 2.50e5, Pr = 0.02) | Bertrand et al. (1999), Hannoun et al. (2003) | **Benchmark in Progress** (conduction verified in Tier 1; 2500 s convective run underway) |
 
-### Tier 3: Physical Experimental Validation
+### Tier 3: Physical Experimental Validation (In Progress)
 
 | Test | Physical System | Validation Dataset | Key Validation Metrics | Status |
 | :--- | :--- | :--- | :--- | :---: |
-| **3D Pure Gallium Melting** | Rectangular cavity with no-slip windows | Gau & Viskanta (1986) | 3D sidewall braking, front tracking vs time, 3D grid study | **In Progress** (preliminary $32 \times 24 \times 16$ run: dev $2.74$ mm = $32.2\%$ of front $s$) |
+| **3D Pure Gallium Melting** | Rectangular cavity with no-slip windows | Gau & Viskanta (1986) | ASME V&V 20: $E \le u_{\text{val}}$, 3D sidewall braking, multi-time fronts | **Screening Run** (preliminary $32 \times 24 \times 16$ run: dev $2.74$ mm = $32.2\%$ of front $s$) |
 | **Paraffin Thermal Hysteresis** | Cyclic melting and freezing loop | Bony & Citherlet (2007) / DSC | Fit measured DSC curves; blind prediction of independent storage experiment | Planned (path logic verified in Tier 1) |
 | **PCM Cavity Melting** | Horizontal / vertical enclosure | Bertrand et al. (1999) | Comparison across n-octadecane benchmark exercise | Planned |
 
