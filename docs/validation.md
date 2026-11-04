@@ -145,7 +145,7 @@ Melting of pure gallium in a rectangular enclosure ($W = 0.0889\text{ m}$, $H = 
 The simulated 17-minute liquid fraction ($f_L = 0.5736$) sits **7.5% above Brent et al.'s 1988 numerical prediction ($0.5334$)**. Brent et al.'s 1988 prediction is a recognized outlier in modern computational literature:
 
 1. **Literature Consensus on Grid Convergence**: As demonstrated in the resolved fine-grid numerical study of Ye and Arıcı (2023), 2D grid-converged numerical solutions yield $f_L \approx 0.570\text{--}0.574$.
-2. **Correlation Agreement**: Ye & Arıcı's grid-converged numerical correlation (2023, Eq. 6) predicts $\phi_n = 0.5703$ at 17 min, which agrees with `phaseChangeFoam` within **0.33 percentage points (0.58% relative difference)**. Brent (1988) represents a historical, under-resolved numerical prediction rather than a true grid-converged limit.
+2. **Correlation Agreement**: Ye & Arıcı's grid-converged numerical correlation (2023, Vol. 144, 106780, Eq. 6) predicts $\phi_n = 0.5703$ at 17 min, which agrees with `phaseChangeFoam` within **0.33 percentage points (0.58% relative difference)**. Brent (1988) represents a historical, under-resolved numerical prediction rather than a true grid-converged limit.
 
 #### Melt Front Deviation Framing
 

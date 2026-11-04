@@ -14,6 +14,7 @@ All notable changes, license alignments, and code hygiene updates to `phaseChang
 * **Release & Citation Metadata**: Synchronized `CITATION.cff` version and release date with repository tags and changelog.
 * **Reference Evidence & Digitization Clarity**: Removed stale references to deleted third-party paper PDF in `validation/gallium2D/reference_data/README.md` and `runTest.py`, plainly documenting that Brent curves were traced directly from Fig. 9 with $\pm 1\text{ mm}$ uncertainty.
 * **Cross-Document Consistency**: Reconciled de Vahl Davis cavity dimensions ($L = 0.01\text{ m}$), iterations ($500$), and Nusselt results in `validation/README.md`. Harmonized gallium aspect ratio notations ($A_{H/W} = 0.714$, $A_{W/H} = 1.40$) and updated `validation/runAll.py` and `validation/README.md` to consistently represent the complete 5-rung validation ladder.
+* **Ye & Arıcı Citation Precision**: Disambiguated citations between the two 2023 papers by Ye & Arıcı in *Int. Commun. Heat Mass Transfer*: properly attributed Eq. (6) to Vol. 144, 106780 (*"3D validation, 2D feasibility, corrected and developed correlations..."*), and 2D interface benchmark data to Vol. 147, 106952 (*"Redefined interface error, 2D verification and validation..."*), fixing paper titles and DOIs across `README.md`, `validation/README.md`, and `docs/validation.md`.
 
 ## [0.2.0] - 2026-11-04
 

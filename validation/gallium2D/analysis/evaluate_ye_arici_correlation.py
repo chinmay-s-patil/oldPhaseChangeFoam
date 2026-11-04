@@ -2,6 +2,12 @@
 """
 Evaluates the Ye & Arıcı (2023) benchmark correlation (Eq. 6) for 2D pure gallium melting:
   phi_n = 2.708 * tau^{0.712} * Ra^{0.0243} * Ar^{-0.0515}
+from:
+  W.-B. Ye and M. Arıcı, "3D validation, 2D feasibility, corrected and developed correlations
+  for pure solid-gallium phase change modeling by enthalpy-porosity methodology",
+  International Communications in Heat and Mass Transfer, Vol. 144, 106780 (2023).
+  DOI: 10.1016/j.icheatmasstransfer.2023.106780
+
 where:
   tau = Fo * Ste
   Fo = alpha * t / W^2

@@ -640,7 +640,7 @@ Gau and Viskanta (1986) performed the foundational physical experiments. While q
 3. **3D Endwall Drag & Crystal Anisotropy**: Physical gallium crystals exhibit anisotropic thermal conductivity ($k \\in [28, 41]\\text{{ W/(m K)}}$), and side glass windows introduce 3D viscous drag.
 
 ### 7.3 Consistency Check with Ye & Arıcı (2023) Numerical Correlation
-Ye & Arıcı (2023, Section 3.2.2, Eq. 6) correlated their grid-converged numerical liquid fractions as:
+Ye & Arıcı (2023, Vol. 144, 106780, Section 3.2.2, Eq. 6) correlated their grid-converged numerical liquid fractions as:
 $$\\phi_n = 2.708\\,\\tau^{{0.712}}\\,\\mathrm{{Ra}}^{{0.0243}}\\,\\mathrm{{Ar}}^{{-0.0515}}$$
 where $\\tau = \\mathrm{{Fo}} \\cdot \\mathrm{{Ste}} = 1.7761 \\times 0.03912 = 0.06948$, $\\mathrm{{Ra}} = 6.063 \\times 10^5$, and $\\mathrm{{Ar}} = 0.7143$.
 
