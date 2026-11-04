@@ -54,3 +54,30 @@ jobs:
               exit(1)
           print('All links and media paths valid!')
           "
+
+  openfoam-validation:
+    name: Run Benchmark Ladder in OpenFOAM v2412 Container
+    runs-on: ubuntu-latest
+    container:
+      image: opencfd/openfoam-default:2412
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Python dependencies
+        run: |
+          apt-get update && apt-get install -y --no-install-recommends python3-numpy python3-matplotlib python3-pil
+        shell: bash
+
+      - name: Build phaseChangeFoam solvers
+        run: |
+          source /usr/lib/openfoam/openfoam2412/etc/bashrc
+          ./Allwmake
+        shell: bash
+
+      - name: Run Benchmark Ladder
+        run: |
+          source /usr/lib/openfoam/openfoam2412/etc/bashrc
+          python3 validation/runAll.py
+        shell: bash
+

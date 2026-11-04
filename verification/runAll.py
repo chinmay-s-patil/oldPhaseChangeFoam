@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Chinmay S Patil
 """
 Master verification gate runner for phaseChangeFoam repository.
 Runs all verification test suites under verification/ and exits non-zero if any test suite fails.

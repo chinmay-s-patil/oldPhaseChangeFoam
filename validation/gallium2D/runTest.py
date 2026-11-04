@@ -544,6 +544,17 @@ def run_gallium(case_dir, nx=42, ny=32, end_time=120, deltaT_melt=0.5, cu=1.6e6,
         if alpha is None or len(alpha) != nx * ny:
             continue
 
+        # Physical bounds assertions: alpha in [0, 1] and T in [T_cold, T_hot]
+        a_min, a_max = float(np.min(alpha)), float(np.max(alpha))
+        assert a_min >= -1e-4 and a_max <= 1.0 + 1e-4, f"FAIL: Phase fraction out of bounds at t={t_val}s: [{a_min}, {a_max}]"
+
+        t_field_path = os.path.join(case_dir, t_str, "fluid", "T")
+        if os.path.exists(t_field_path):
+            t_fld = parse_scalar_field(t_field_path)
+            if t_fld is not None:
+                t_min_val, t_max_val = float(np.min(t_fld)), float(np.max(t_fld))
+                assert t_min_val >= 301.45 - 0.2 and t_max_val <= 311.15 + 0.2, f"FAIL: Temperature out of bounds at t={t_val}s: [{t_min_val}, {t_max_val}]"
+
         f_L_computed = float(np.mean(alpha))
         nearest_ref_time = None
         for ref_t in sorted(BENCHMARK_LIQUID_FRACTIONS.keys()):
@@ -551,10 +562,6 @@ def run_gallium(case_dir, nx=42, ny=32, end_time=120, deltaT_melt=0.5, cu=1.6e6,
                 nearest_ref_time = ref_t
                 break
 
-        if nearest_ref_time is not None:
-            f_L_ref = BENCHMARK_LIQUID_FRACTIONS[nearest_ref_time]
-            abs_err = abs(f_L_computed - f_L_ref)
-            rel_err = abs_err / f_L_ref
         if nearest_ref_time is not None:
             f_L_ref = BENCHMARK_LIQUID_FRACTIONS[nearest_ref_time]
             abs_err = abs(f_L_computed - f_L_ref)
@@ -649,9 +656,11 @@ def run_gallium(case_dir, nx=42, ny=32, end_time=120, deltaT_melt=0.5, cu=1.6e6,
         from exact_energy_balance_audit import run_exact_audit
         audit_results = run_exact_audit(case_dir)
         for r in audit_results:
+            if abs(r['rel_err']) > 2.0:
+                audit_passed = False
+                print(f"FAIL: Energy closure at t={r['t_sec']}s ({r['rel_err']:+.3f}%) exceeds 2.0% tolerance!")
             if abs(r['t_sec'] - 120.0) < 1e-3:
                 closure_2min = r['rel_err']
-                break
     except Exception as e:
         print(f"Note: Energy audit could not be evaluated ({e})")
 
@@ -663,7 +672,7 @@ def run_gallium(case_dir, nx=42, ny=32, end_time=120, deltaT_melt=0.5, cu=1.6e6,
     if fl_2min is not None:
         fl_regression_passed = abs(fl_2min - 0.1303) <= 0.002
     if closure_2min is not None:
-        audit_passed = abs(closure_2min) <= 0.50
+        audit_passed = audit_passed and (abs(closure_2min) <= 0.50)
 
     if fl_2min is not None or closure_2min is not None:
         print("\n" + "=" * 75)

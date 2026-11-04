@@ -152,7 +152,7 @@ boundaryField { ".*" { type calculated; value uniform 101325; } emptyFaces { typ
 
     run_cmd(f"cd {case_dir} && bash -c '{of_env}; blockMesh'", cwd=case_dir)
     run_cmd(f"mkdir -p {case_dir}/constant/pcm {case_dir}/system/pcm")
-    run_cmd(f"cp -r {case_dir}/constant/polyMesh {case_dir}/constant/pcm/polyMesh 2>/dev/null || true")
+    run_cmd(f"rm -rf {case_dir}/constant/pcm/polyMesh && cp -r {case_dir}/constant/polyMesh {case_dir}/constant/pcm/polyMesh")
     run_cmd(f"cp {case_dir}/system/fvSchemes {case_dir}/system/pcm/fvSchemes 2>/dev/null || true")
     run_cmd(f"cp {case_dir}/system/fvSolution {case_dir}/system/pcm/fvSolution 2>/dev/null || true")
 
@@ -285,7 +285,7 @@ boundaryField { ".*" { type calculated; value uniform 1967; } emptyFaces { type 
 """)
     run_cmd(f"cd {case_dir} && bash -c '{of_env}; blockMesh'", cwd=case_dir)
     run_cmd(f"mkdir -p {case_dir}/constant/pcm {case_dir}/system/pcm")
-    run_cmd(f"cp -r {case_dir}/constant/polyMesh {case_dir}/constant/pcm/polyMesh 2>/dev/null || true")
+    run_cmd(f"rm -rf {case_dir}/constant/pcm/polyMesh && cp -r {case_dir}/constant/polyMesh {case_dir}/constant/pcm/polyMesh")
     run_cmd(f"cp {case_dir}/system/fvSchemes {case_dir}/system/pcm/fvSchemes 2>/dev/null || true")
     run_cmd(f"cp {case_dir}/system/fvSolution {case_dir}/system/pcm/fvSolution 2>/dev/null || true")
 

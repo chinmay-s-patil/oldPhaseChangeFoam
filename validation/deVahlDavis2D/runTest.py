@@ -27,7 +27,13 @@ import numpy as np
 BENCHMARK_NU_MEAN = 4.519
 BENCHMARK_NU_MAX = 7.717
 BENCHMARK_NU_MIN = 0.729
-TOLERANCE_NU_REL = 0.05  # Within 5% of benchmark
+BENCHMARK_U_MAX = 34.73
+BENCHMARK_Y_UMAX = 0.855
+BENCHMARK_V_MAX = 68.59
+BENCHMARK_X_VMAX = 0.066
+TOLERANCE_NU_REL = 0.05    # Mean Nu within 5% of benchmark
+TOLERANCE_VMAX_REL = 0.05  # v_max* within 5% of benchmark
+TOLERANCE_UMAX_REL = 0.05  # u_max* within 5% of benchmark
 
 def find_solver(solver_name="phaseChangeMultiRegionSimpleFoam"):
     user_appbin = os.environ.get("FOAM_USER_APPBIN")
@@ -132,9 +138,9 @@ gradSchemes { default Gauss linear; }
 divSchemes
 {
     default none;
-    div(phi,U) Gauss upwind;
-    div(phi,h) Gauss upwind;
-    div(phi,K) Gauss upwind;
+    div(phi,U) Gauss limitedLinear 1;
+    div(phi,h) Gauss limitedLinear 1;
+    div(phi,K) Gauss limitedLinear 1;
     div(phi,phaseFraction) Gauss upwind;
     div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;
 }
@@ -327,6 +333,22 @@ def parse_temperature_field(filepath, n_cells):
     t_vals = [float(lines[i]) for i in range(idx + 1, idx + 1 + total_cells)]
     return t_vals
 
+def parse_velocity_field(filepath, n_cells):
+    if not os.path.exists(filepath):
+        raise FileNotFoundError(f"U field not found at {filepath}")
+    with open(filepath, 'r') as f:
+        content = f.read()
+    idx = content.find('(')
+    end = content.rfind(')')
+    block = content[idx+1:end].strip()
+    lines = [l.strip().strip('()') for l in block.split('\n') if l.strip()]
+    u_list = []
+    for l in lines:
+        parts = l.split()
+        if len(parts) == 3:
+            u_list.append([float(parts[0]), float(parts[1]), float(parts[2])])
+    return np.array(u_list)
+
 def run_devahldavis(case_dir, n_cells=50, iters=400):
     print("=" * 70)
     print("  de Vahl Davis (1983) Natural Convection Benchmark (Ra = 10^5)")
@@ -353,6 +375,11 @@ def run_devahldavis(case_dir, n_cells=50, iters=400):
     t_file = os.path.join(case_dir, str(iters), "fluid", "T")
     t_vals = parse_temperature_field(t_file, n_cells)
 
+    # Physical bounds assert: T in [T_cold - 0.1, T_hot + 0.1]
+    t_min = float(np.min(t_vals))
+    t_max = float(np.max(t_vals))
+    assert t_min >= 295.0 - 0.1 and t_max <= 305.0 + 0.1, f"FAIL: Temperature out of bounds: [{t_min}, {t_max}]"
+
     # In OpenFOAM blockMesh with (Nx Ny 1), cell ordering is:
     # cell = i + n_cells * j
     # For hot wall (x=0), adjacent cells are i=0:
@@ -373,42 +400,84 @@ def run_devahldavis(case_dir, n_cells=50, iters=400):
 
     rel_err = abs(nu_mean - BENCHMARK_NU_MEAN) / BENCHMARK_NU_MEAN
 
-    print("\n" + "-" * 70)
-    print("  RESULTS COMPARISON WITH DE VAHL DAVIS (1983) BENCHMARK")
-    print("-" * 70)
-    print(f"  {'Metric':<25} {'Computed':<15} {'Benchmark':<15} {'Rel. Difference':<15}")
-    print("-" * 70)
-    print(f"  {'Mean Nusselt (Nu_mean)':<25} {nu_mean:<15.4f} {BENCHMARK_NU_MEAN:<15.4f} {rel_err*100:<14.2f}%")
-    print(f"  {'Max Nusselt (Nu_max)':<25} {nu_max:<15.4f} {BENCHMARK_NU_MAX:<15.4f} {(nu_max - BENCHMARK_NU_MAX)/BENCHMARK_NU_MAX*100:<14.2f}%")
-    print(f"  {'Min Nusselt (Nu_min)':<25} {nu_min:<15.4f} {BENCHMARK_NU_MIN:<15.4f} {(nu_min - BENCHMARK_NU_MIN)/BENCHMARK_NU_MIN*100:<14.2f}%")
-    print("-" * 70)
+    # Parse U at endTime and evaluate non-dimensional midplane extrema
+    u_file = os.path.join(case_dir, str(iters), "fluid", "U")
+    U_arr = parse_velocity_field(u_file, n_cells)
+    u_x = U_arr[:, 0].reshape((n_cells, n_cells))
+    u_y = U_arr[:, 1].reshape((n_cells, n_cells))
 
-    passed = rel_err <= TOLERANCE_NU_REL
+    alpha_therm = 1.5237e-06 / 0.71
+    u_scale = alpha_therm / L
+    u_star = u_x / u_scale
+    v_star = u_y / u_scale
+
+    mid_col = n_cells // 2
+    if n_cells % 2 == 0:
+        mid_x_u = 0.5 * (u_star[:, mid_col - 1] + u_star[:, mid_col])
+    else:
+        mid_x_u = u_star[:, mid_col]
+    y_coords = (np.arange(n_cells) + 0.5) / float(n_cells)
+    idx_umax = int(np.argmax(np.abs(mid_x_u)))
+    u_max_comp = float(np.abs(mid_x_u[idx_umax]))
+    y_umax_comp = float(y_coords[idx_umax])
+
+    mid_row = n_cells // 2
+    if n_cells % 2 == 0:
+        mid_y_v = 0.5 * (v_star[mid_row - 1, :] + v_star[mid_row, :])
+    else:
+        mid_y_v = v_star[mid_row, :]
+    x_coords = (np.arange(n_cells) + 0.5) / float(n_cells)
+    idx_vmax = int(np.argmax(np.abs(mid_y_v)))
+    v_max_comp = float(np.abs(mid_y_v[idx_vmax]))
+    x_vmax_comp = float(x_coords[idx_vmax])
+
+    rel_err_vmax = abs(v_max_comp - BENCHMARK_V_MAX) / BENCHMARK_V_MAX
+    rel_err_umax = abs(u_max_comp - BENCHMARK_U_MAX) / BENCHMARK_U_MAX
+
+    print("\n" + "-" * 75)
+    print("  RESULTS COMPARISON WITH DE VAHL DAVIS (1983) BENCHMARK (Ra = 10^5)")
+    print("-" * 75)
+    print(f"  {'Metric':<30} {'Computed':<15} {'Benchmark':<15} {'Rel. Difference':<15}")
+    print("-" * 75)
+    print(f"  {'Mean Nusselt (Nu_mean)':<30} {nu_mean:<15.4f} {BENCHMARK_NU_MEAN:<15.4f} {rel_err*100:<14.2f}%")
+    print(f"  {'Max Nusselt (Nu_max)':<30} {nu_max:<15.4f} {BENCHMARK_NU_MAX:<15.4f} {(nu_max - BENCHMARK_NU_MAX)/BENCHMARK_NU_MAX*100:<14.2f}%")
+    print(f"  {'Min Nusselt (Nu_min)':<30} {nu_min:<15.4f} {BENCHMARK_NU_MIN:<15.4f} {(nu_min - BENCHMARK_NU_MIN)/BENCHMARK_NU_MIN*100:<14.2f}%")
+    print(f"  {'Max v* on y/L = 0.5':<30} {v_max_comp:<15.2f} {BENCHMARK_V_MAX:<15.2f} {rel_err_vmax*100:<14.2f}%")
+    print(f"  {'Location x/L of v_max*':<30} {x_vmax_comp:<15.3f} {BENCHMARK_X_VMAX:<15.3f} -")
+    print(f"  {'Max u* on x/L = 0.5':<30} {u_max_comp:<15.2f} {BENCHMARK_U_MAX:<15.2f} {rel_err_umax*100:<14.2f}%")
+    print(f"  {'Location y/L of u_max*':<30} {y_umax_comp:<15.3f} {BENCHMARK_Y_UMAX:<15.3f} -")
+    print("-" * 75)
+
+    passed = (rel_err <= TOLERANCE_NU_REL) and (rel_err_vmax <= TOLERANCE_VMAX_REL) and (rel_err_umax <= TOLERANCE_UMAX_REL)
     status_str = "PASSED" if passed else "FAILED"
-    print(f"Validation Status: {status_str} (Tolerance: <= {TOLERANCE_NU_REL*100:.1f}%)\n")
+    print(f"Validation Status: {status_str} (Tolerances: Nu_mean <= {TOLERANCE_NU_REL*100:.1f}%, v_max* <= {TOLERANCE_VMAX_REL*100:.1f}%, u_max* <= {TOLERANCE_UMAX_REL*100:.1f}%, T bounds respected)\n")
 
     # Save results to text file
     res_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "devahldavis_validation_results.txt")
     with open(res_path, "w") as f:
-        f.write("=" * 70 + "\n")
+        f.write("=" * 75 + "\n")
         f.write("  de Vahl Davis (1983) Natural Convection Benchmark (Ra = 10^5)\n")
-        f.write("=" * 70 + "\n")
+        f.write("=" * 75 + "\n")
         f.write(f"Mesh resolution: {n_cells} x {n_cells}\n")
         f.write(f"SIMPLE iterations: {iters}\n\n")
-        f.write(f"{'Metric':<25} {'Computed':<15} {'Benchmark':<15} {'Rel. Diff':<15}\n")
-        f.write("-" * 70 + "\n")
-        f.write(f"{'Mean Nusselt (Nu_mean)':<25} {nu_mean:<15.4f} {BENCHMARK_NU_MEAN:<15.4f} {rel_err*100:<14.2f}%\n")
-        f.write(f"{'Max Nusselt (Nu_max)':<25} {nu_max:<15.4f} {BENCHMARK_NU_MAX:<15.4f} {(nu_max - BENCHMARK_NU_MAX)/BENCHMARK_NU_MAX*100:<14.2f}%\n")
-        f.write(f"{'Min Nusselt (Nu_min)':<25} {nu_min:<15.4f} {BENCHMARK_NU_MIN:<15.4f} {(nu_min - BENCHMARK_NU_MIN)/BENCHMARK_NU_MIN*100:<14.2f}%\n")
-        f.write("-" * 70 + "\n")
-        f.write(f"Validation Status: {status_str} (Tolerance: <= {TOLERANCE_NU_REL*100:.1f}%)\n")
+        f.write(f"{'Metric':<30} {'Computed':<15} {'Benchmark':<15} {'Rel. Diff':<15}\n")
+        f.write("-" * 75 + "\n")
+        f.write(f"{'Mean Nusselt (Nu_mean)':<30} {nu_mean:<15.4f} {BENCHMARK_NU_MEAN:<15.4f} {rel_err*100:<14.2f}%\n")
+        f.write(f"{'Max Nusselt (Nu_max)':<30} {nu_max:<15.4f} {BENCHMARK_NU_MAX:<15.4f} {(nu_max - BENCHMARK_NU_MAX)/BENCHMARK_NU_MAX*100:<14.2f}%\n")
+        f.write(f"{'Min Nusselt (Nu_min)':<30} {nu_min:<15.4f} {BENCHMARK_NU_MIN:<15.4f} {(nu_min - BENCHMARK_NU_MIN)/BENCHMARK_NU_MIN*100:<14.2f}%\n")
+        f.write(f"{'Max v* on y/L = 0.5':<30} {v_max_comp:<15.2f} {BENCHMARK_V_MAX:<15.2f} {rel_err_vmax*100:<14.2f}%\n")
+        f.write(f"{'Location x/L of v_max*':<30} {x_vmax_comp:<15.3f} {BENCHMARK_X_VMAX:<15.3f} -\n")
+        f.write(f"{'Max u* on x/L = 0.5':<30} {u_max_comp:<15.2f} {BENCHMARK_U_MAX:<15.2f} {rel_err_umax*100:<14.2f}%\n")
+        f.write(f"{'Location y/L of u_max*':<30} {y_umax_comp:<15.3f} {BENCHMARK_Y_UMAX:<15.3f} -\n")
+        f.write("-" * 75 + "\n")
+        f.write(f"Validation Status: {status_str} (Tolerances: Nu_mean <= {TOLERANCE_NU_REL*100:.1f}%, v_max* <= {TOLERANCE_VMAX_REL*100:.1f}%, u_max* <= {TOLERANCE_UMAX_REL*100:.1f}%)\n")
 
     return passed
 
 def main():
     parser = argparse.ArgumentParser(description="de Vahl Davis (1983) Natural Convection Benchmark")
     parser.add_argument("--mesh", type=int, default=50, help="Grid points in each direction (default: 50)")
-    parser.add_argument("--iters", type=int, default=400, help="Number of SIMPLE iterations (default: 400)")
+    parser.add_argument("--iters", type=int, default=500, help="Number of SIMPLE iterations (default: 500)")
     parser.add_argument("--clean", action="store_true", help="Remove simulation directory after running")
     args = parser.parse_args()
 

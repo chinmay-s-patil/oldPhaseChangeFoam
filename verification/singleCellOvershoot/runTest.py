@@ -67,6 +67,7 @@ def calc_h_sens(T, traj, Cps, Cpl, Tlm=300.0, Tum=310.0, Tlf=295.0, Tuf=305.0):
             return h_l
 
 def setup_single_cell_case(case_dir, T0, Q_source, L_heat, T_lm=300.0, T_um=310.0, T_lf=295.0, T_uf=305.0, alpha0=None, traj0=None, Cps=2000.0, Cpl=2000.0, rhoS=1000.0, rhoL=1000.0, direction="both", hysteresis=True, nNonLinearCorrectors=50):
+    orig_cwd = os.getcwd()
     os.makedirs(case_dir, exist_ok=True)
     os.chdir(case_dir)
     run_cmd("rm -rf [1-9]* 0.* constant/phaseChange/polyMesh constant/polyMesh")
@@ -211,7 +212,7 @@ boundaryField { walls { type empty; } }
 
     run_cmd(f"bash -c '{of_env}; blockMesh'")
     run_cmd("mkdir -p constant/phaseChange")
-    run_cmd("cp -r constant/polyMesh constant/phaseChange/polyMesh 2>/dev/null || true")
+    run_cmd("rm -rf constant/phaseChange/polyMesh && cp -r constant/polyMesh constant/phaseChange/polyMesh")
     run_cmd("cp system/fvSchemes system/phaseChange/fvSchemes 2>/dev/null || true")
     run_cmd("cp system/fvSolution system/phaseChange/fvSolution 2>/dev/null || true")
     run_cmd("cp system/fvOptions system/phaseChange/fvOptions 2>/dev/null || true")
@@ -221,6 +222,7 @@ boundaryField { walls { type empty; } }
     T_sim = parse_openfoam_field("100/phaseChange/T")[0]
     alpha_sim = parse_openfoam_field("100/phaseChange/phaseFraction")[0]
 
+    os.chdir(orig_cwd)
     return T_sim, alpha_sim, output
 
 

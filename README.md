@@ -43,23 +43,23 @@
 
 ---
 
-## Benchmark Showcase: Gallium Melting (Brent et al. 1988)
+## Benchmark Verification: Gallium Melting (Brent et al. 1988, Ye & Arıcı 2023)
 
-The solver suite is verified against the 2D pure gallium melting benchmark (Ra ≈ 6 × 10⁵, Pr = 0.0216, Ste = 0.039). Heated from the left vertical wall (38.0°C) into an initially subcooled solid cavity (28.3°C, Tm = 29.78°C), buoyancy-driven natural convection develops a clockwise circulation roll, producing the characteristic top-dominated melt morphology.
+The solver suite is verified against 2D pure gallium melting numerical benchmarks (Ra ≈ 6.06 × 10⁵, Pr = 0.0216, Ste = 0.0391). Heated from the left vertical wall (38.0°C) into an initially subcooled solid cavity (28.3°C, Tm = 29.78°C), buoyancy-driven natural convection develops a clockwise circulation roll, producing the characteristic top-dominated melt morphology.
 
 ![Gallium 2D Melting Animation](docs/images/gallium_melting_brent_comparison.gif)
 
 ![Gallium Melt Front & Liquid Fraction Comparison](docs/images/gallium_melt_front_comparison.png)
 
-* **Melt front tracking**: The computed interface tracks digitized benchmark contours from Brent et al. (1988, Fig. 9) with mean spatial deviations of 1.7 mm at 2 min, 1.9 mm at 6 min, 2.4 mm at 10 min, and 3.5 mm at 17 min (3.89% of cavity width). These deviations are comparable to the front's diffuse numerical thickness ($\Delta T_m = 0.5$ K, cell width $\Delta x \approx 2.1$ mm).
-* **Liquid fraction progression**: Simulated $f_L$ follows the Ye and Arıcı (2023) benchmark correlation (0.5736 vs 0.5703 at 17 min), while sitting above Brent et al.'s 1988 coarse numerical prediction (0.5334).
+* **Melt front tracking**: The computed interface tracks digitized benchmark contours from Brent et al. (1988, Fig. 9) with mean spatial deviations growing monotonically from 1.67 mm at 2 min to 3.46 mm at 17 min (3.89% of cavity width). These deviations are comparable to the front's diffuse numerical thickness ($\Delta T_m = 0.5$ K, cell width $\Delta x = W/42 = 2.12$ mm) and approach the 5.0% $W$ engineering tolerance gate at late times.
+* **Liquid fraction progression**: Simulated $f_L$ at 17 min ($0.5736$) closely follows the modern grid-converged numerical correlation of Ye and Arıcı (2023, Eq. 6: $0.5703$, $+0.58\%$ relative difference) and agrees with Hannoun et al. (2003). Brent et al.'s 1988 numerical prediction ($0.5334$) is an outlier due to numerical iteration lag and large time stepping ($\Delta t = 0.5$ s) after $t = 10$ s on their $42 \times 32$ grid.
 * **Energy conservation**: `EHCDarcy` achieves discrete energy closure of -0.13% over the full 17-minute transient ($42 \times 32$ grid, $n_{\text{outer}} = 8$, $\Delta t = 0.1$ s) evaluated via right-endpoint Riemann flux summation. For fast 2-minute screening runs, $n_{\text{outer}} = 3$ achieves -0.38% closure in 15.6 s CPU time.
 
 ---
 
 ## Limitations
 
-* **Validation scope**: Benchmark verification is currently limited to 2D laminar natural convection (Rung 1) and 2D laminar melting (Rung 2). High Rayleigh number turbulent regimes are not modeled.
+* **Verification vs. Validation scope**: The solver suite is **verified against numerical benchmarks** (code-to-code) for 2D laminar natural convection (de Vahl Davis 1983) and 2D laminar melting (Brent et al. 1988, Ye & Arıcı 2023). It is **not yet validated against physical experimental measurements** (e.g. Gau & Viskanta 1986). High Rayleigh number turbulent regimes are not modeled.
 * **Fluid-region PCM property constraint**: In fluid regions with solid-liquid PCM, thermophysical properties must satisfy $\rho_s = \rho_l = \rho_{\text{thermo}}$ and $C_{p,s} = C_{p,l} = C_{p,\text{thermo}}$ (constant-property Boussinesq approximation).
 * **Lee model kinetics**: Models volumetric boiling and condensation driven by deviation from total-pressure saturation temperature $T_{\text{sat}}(p)$; it does not model sub-boiling partial-pressure surface evaporation or free-surface liquid-gas interfaces.
 * **Parallel execution**: Multi-region parallel decomposition (`decomposePar`) is currently untested; all verification runs have been performed in serial execution.
@@ -130,7 +130,7 @@ Detailed reference documentation is versioned in the `docs/` directory:
 | [`docs/models.md`](docs/models.md) | Governing equations, thermodynamic consistency, species evaporation, and PCM formulations |
 | [`docs/dictionary.md`](docs/dictionary.md) | Keyword reference tables, minimal templates per model, and solver controls |
 | [`docs/tutorials.md`](docs/tutorials.md) | Tutorial status note (work in progress) |
-| [`docs/validation.md`](docs/validation.md) | Verification ladder, Brent gallium melting benchmark, and Roache GCI spatial study |
+| [`docs/validation.md`](docs/validation.md) | Verification and validation guide: analytic suites, benchmark ladder, sensitivity studies, and experimental roadmap |
 | [`docs/development.md`](docs/development.md) | Code architecture, PIMPLE execution sequence, Picard loop, and adding new models |
 
 ---

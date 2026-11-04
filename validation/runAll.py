@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Chinmay S Patil
 """
 Master validation ladder runner for phaseChangeFoam repository.
 Runs validation suites under validation/ and exits non-zero if any benchmark fails.

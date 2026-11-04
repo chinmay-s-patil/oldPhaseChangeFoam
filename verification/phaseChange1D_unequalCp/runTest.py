@@ -212,7 +212,7 @@ boundaryField { ".*" { type calculated; value uniform 101325; } "(top|bottom|fro
     # Run Phase 1: Heating (0 -> 2000s)
     run_cmd(f"bash -c '{of_env}; blockMesh'")
     run_cmd("mkdir -p constant/pcm")
-    run_cmd("cp -r constant/polyMesh constant/pcm/polyMesh 2>/dev/null || true")
+    run_cmd("rm -rf constant/pcm/polyMesh && cp -r constant/polyMesh constant/pcm/polyMesh")
     run_cmd("cp system/fvSchemes system/pcm/fvSchemes 2>/dev/null || true")
     run_cmd("cp system/fvSolution system/pcm/fvSolution 2>/dev/null || true")
 
@@ -288,7 +288,7 @@ startFrom startTime; startTime 0; stopAt endTime; endTime 1000; deltaT 2;
 writeControl runTime; writeInterval 2; purgeWrite 0; writeFormat ascii; writePrecision 12;
 """)
     run_cmd(f"bash -c '{of_env}; blockMesh'")
-    run_cmd("mkdir -p constant/pcm && cp -r constant/polyMesh constant/pcm/polyMesh 2>/dev/null || true")
+    run_cmd("rm -rf constant/pcm/polyMesh && mkdir -p constant/pcm && cp -r constant/polyMesh constant/pcm/polyMesh")
     run_cmd("cp system/fvSchemes system/pcm/fvSchemes 2>/dev/null || true")
     run_cmd("cp system/fvSolution system/pcm/fvSolution 2>/dev/null || true")
     run_cmd(f"bash -c '{of_env}; {solver_bin}'")
@@ -336,7 +336,7 @@ startFrom startTime; startTime 0; stopAt endTime; endTime 2000; deltaT 2;
 writeControl runTime; writeInterval 2; purgeWrite 0; writeFormat ascii; writePrecision 12;
 """)
     run_cmd(f"bash -c '{of_env}; blockMesh'")
-    run_cmd("mkdir -p constant/pcm && cp -r constant/polyMesh constant/pcm/polyMesh 2>/dev/null || true")
+    run_cmd("rm -rf constant/pcm/polyMesh && mkdir -p constant/pcm && cp -r constant/polyMesh constant/pcm/polyMesh")
     run_cmd("cp system/fvSchemes system/pcm/fvSchemes 2>/dev/null || true")
     run_cmd("cp system/fvSolution system/pcm/fvSolution 2>/dev/null || true")
     run_cmd(f"bash -c '{of_env}; {solver_bin}'")
