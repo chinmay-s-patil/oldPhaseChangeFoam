@@ -2,22 +2,25 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Chinmay S Patil
 """
-Bony & Citherlet (2007) / DSC Paraffin Thermal Hysteresis Experimental Validation Case
-Validates the Effective Heat Capacity (EHC) phase change engine with thermal hysteresis
-against physical paraffin DSC heating and cooling curves.
+Paraffin PCM Thermal Hysteresis Cyclic Path Logic Verification Case
+Verifies the Effective Heat Capacity (EHC) phase change engine with stateful thermal
+hysteresis across a complete melt/freeze cycle using synthetic phase-change windows
+representative of paraffin transitions reported in the literature (Bony & Citherlet 2007).
 
 Reference:
     J. Bony and S. Citherlet (2007),
     "Numerical model and experimental validation of heat storage with phase change materials",
-    Energy and Buildings, 39(9), pp. 1065-1072.
-    DOI: 10.1016/j.enbuild.2006.10.010
+    Energy and Buildings, 39(10), pp. 1065-1072.
+    DOI: 10.1016/j.enbuild.2006.10.017
 
 Phenomenon:
-    Commercial paraffins and salt hydrates exhibit thermal hysteresis between charging (melting)
+    Commercial paraffins exhibit thermal hysteresis between charging (melting)
     and discharging (freezing/solidification).
-    Melting interval:        T_melt in [308.0, 312.0] K (peak ~310.0 K = 37 C)
-    Solidification interval:  T_freeze in [303.0, 307.0] K (peak ~305.0 K = 32 C)
-    Hysteresis temperature gap: Delta T_hyst = 5.0 K
+    Synthetic melting window:        T_melt in [308.0, 312.0] K (peak ~310.0 K = 37 C)
+    Synthetic solidification window:  T_freeze in [303.0, 307.0] K (peak ~305.0 K = 32 C)
+    Hysteresis temperature gap:       Delta T_hyst = 5.0 K
+    Note: This test uses synthetic linear windows to verify the state-machine logic
+    (direction tracking, subcooling delay, reversal recovery) rather than curve-fitting raw DSC data.
 """
 
 import os
@@ -380,7 +383,7 @@ def run_hysteresis_validation(case_dir):
     return passed
 
 def main():
-    parser = argparse.ArgumentParser(description="Paraffin Thermal Hysteresis Experimental Validation")
+    parser = argparse.ArgumentParser(description="Paraffin Thermal Hysteresis Path Logic Verification")
     parser.add_argument("--clean", action="store_true", help="Clean case directory after run")
     args = parser.parse_args()
 

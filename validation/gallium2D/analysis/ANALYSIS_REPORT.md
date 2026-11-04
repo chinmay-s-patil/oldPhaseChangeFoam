@@ -331,7 +331,7 @@ $$\phi_n^{\text{Ye \& Arıcı (2023)}} = \mathbf{0.5703}$$
 - `phaseChangeFoam` (EP, $\lambda = 1.0, n=8$): **$f_L = 0.5745$** (Discrepancy: **$+0.0042$, or +0.42 percentage points**).
 
 **Notes on Scaling Dominance**:  
-Because the exponent on $\mathrm{Ra}$ is only $0.0243$, varying $\mathrm{Ra}$ by a factor of 10 alters the predicted liquid fraction by only $10^{0.0243} = +5.75\%$. Agreement with this correlation primarily verifies transient conduction and Stefan scaling ($\tau^{0.712}$), rather than fine convective boundary-layer dynamics.
+Because the exponent on $\mathrm{Ra}$ is only $0.0243$, varying $\mathrm{Ra}$ by a factor of 10 alters the predicted liquid fraction by only $10^{0.0243} = +5.75\%$. However, pure 1D Stefan conduction scaling at $17\text{ min}$ yields $f_L \approx 0.37$, whereas the correlation gives $0.5703$ (a $+54\%$ increase over pure conduction). Thus, the effective dimensionless time exponent $\tau^{0.712}$ (steeper than pure diffusive scaling $\tau^{0.5}$) and pre-factor incorporate substantial natural convection enhancement over conduction, even though direct sensitivity to further $\mathrm{Ra}$ variations remains mild.
 
 ---
 

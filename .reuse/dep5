@@ -19,10 +19,6 @@ Files: validation/*
 Copyright: 2026 Chinmay S Patil
 License: GPL-3.0-or-later
 
-Files: tutorials/*
-Copyright: 2026 Chinmay S Patil
-License: GPL-3.0-or-later
-
 Files: src/solvers/phaseChangeMultiRegionFoam/*
 Copyright: 2011-2016 OpenFOAM Foundation
            2017-2022 OpenCFD Ltd.

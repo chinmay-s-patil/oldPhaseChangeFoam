@@ -14,9 +14,10 @@ where:
   Ste = Cp * (T_hot - T_m) / L
   Ra = g * beta * (T_hot - T_m) * H^3 / (nu * alpha)
   Ar = H / W
-Also evaluates sensitivity to the Rayleigh number exponent (0.0243),
-confirming that the correlation is primarily governed by conduction/Stefan scaling (tau^0.712)
-with weak convection sensitivity (Ra^0.0243).
+Also evaluates sensitivity to the Rayleigh number exponent (0.0243).
+While direct sensitivity to further Ra variation is weak (Ra^0.0243),
+the exponent tau^0.712 and prefactor 2.708 embody substantial natural
+convection enhancement over pure conduction (~0.57 vs ~0.37).
 """
 
 import numpy as np
@@ -100,5 +101,5 @@ if __name__ == "__main__":
     print("\nPhysical Note on Scaling:")
     print("Because the Rayleigh exponent is only 0.0243, varying Ra by an order of magnitude (10x)")
     print(f"alters the Ra factor by only 10^0.0243 = {10**0.0243:.4f} (+5.7%).")
-    print("The correlation is therefore primarily governed by tau^0.712 (conduction/Stefan scaling),")
-    print("rather than strong convective scaling.")
+    print("However, pure 1D Stefan conduction yields f_L ~ 0.37 at 17 min vs 0.5703 from the correlation (+54%),")
+    print("confirming that tau^0.712 and prefactor 2.708 embody substantial convective enhancement over conduction.")

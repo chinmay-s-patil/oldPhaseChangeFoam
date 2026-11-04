@@ -447,7 +447,7 @@ def run_gallium3d_validation(case_dir, nx=32, ny=24, nz=16, endTime=120):
 
     front_mid_height = float(x_front_mid[ny // 2]) * 1000.0 # mm
 
-    # Gau & Viskanta (1986) experimental data targets across times
+    # Gau & Viskanta (1986) experimental data targets across times (traced from Fig. 5 pour-out midplane curves)
     gv_benchmarks = {
         30: {"front_mid_mm": 5.5, "f_L_range": (0.04, 0.08)},
         60: {"front_mid_mm": 6.8, "f_L_range": (0.06, 0.11)},
@@ -474,7 +474,7 @@ def run_gallium3d_validation(case_dir, nx=32, ny=24, nz=16, endTime=120):
     print(f"      Direct velocity validation requires a geometry matching Gau & Viskanta (1986).")
     print(f"  - Midplane Melt Front at y = H/2   : {front_mid_height:.2f} mm")
     print(f"  - Theoretical 1D Stefan Step Limit : ~11.3 mm (Instantaneous step Dirichlet limit)")
-    print(f"  - Gau & Viskanta (1986) Experiment : {gv_front_mm:.2f} mm")
+    print(f"  - Gau & Viskanta (1986) Experiment : {gv_front_mm:.2f} mm (traced from Fig. 5 at y/H=0.5)")
     print(f"  - Experimental Deviation           : {dev_gv_mm:.2f} mm")
     print(f"    * As fraction of melted front (s): {dev_melt_pct:.1f}%")
     print(f"    * As fraction of cavity width (W): {dev_gv_pct:.2f}%")
@@ -486,6 +486,10 @@ def run_gallium3d_validation(case_dir, nx=32, ny=24, nz=16, endTime=120):
     passed = (dev_gv_pct <= 5.0) and (f_L_min <= f_L <= f_L_max)
     print("\n" + "=" * 80)
     print("STATUS: VALIDATION IN PROGRESS (Preliminary 3D screening test passed engineering width gate)")
+    print("NOTE ON PASS CRITERION: The script returns PASSED based on broad cavity-width screening")
+    print(f"(dev <= 5% W = 4.45 mm) and f_L envelope [{f_L_min}, {f_L_max}]. However, the local relative")
+    print(f"error on the melt front itself is {dev_melt_pct:.1f}% ({front_mid_height:.2f} mm vs {gv_front_mm:.2f} mm).")
+    print("This is an early screening run, NOT proof of physical validation.")
     print("To claim formal physical validation, the following must be completed:")
     print("  1. Impose experimental hot-wall warm-up transient T_hot(t) instead of step Dirichlet.")
     print("  2. 3D grid refinement study (e.g. 32x24x16 -> 48x36x24 -> 64x48x32).")

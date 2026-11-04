@@ -37,7 +37,7 @@
 `phaseChangeFoam` is derived from OpenFOAM's `chtMultiRegionFoam` (OpenCFD / ESI-OpenCFD), inheriting its multi-region conjugate heat transfer structure and monolithic coupled energy framework (`coupledEnergyField`, `useImplicit`). The primary additions are:
 
 * **Thermal hysteresis in solid-liquid PCM**: Stateful direction-dependent melting and freezing paths with subcooling tracking (`phaseState`, `T_reversal`).
-* **Effective Heat Capacity formulation (`EHCDarcy`, `EHC`)**: Directly incorporates latent heat into cell capacity $C_{p,\text{eff}}$, avoiding the explicit source term under-relaxation oscillations characteristic of enthalpy-porosity.
+* **Effective Heat Capacity formulation (`EHCDarcy`, `EHC`)**: Directly incorporates latent heat into cell capacity $C_{p,\text{eff}}$, providing robust energy closure at low outer correctors ($n_{\text{outer}} = 3\text{--}4$) without requiring the extensive outer corrector passes ($n_{\text{outer}} \ge 8$) needed by Enthalpy-Porosity to converge source-term updates.
 * **Adaptive time-step limiting (`maxAlphaCo`)**: Constrains $\Delta t$ based on maximum cell-wise rate of phase fraction change, preventing the interface from stepping over cells without resolving the transition.
 * **Volumetric species phase change (`Lee`)**: Implements volumetric evaporation and boiling coupled with multi-component species transport across solid-fluid conjugate boundaries (in contrast to free-surface VOF solvers such as `interCondensatingEvaporatingFoam` which resolve sharp liquid-gas interfaces).
 
@@ -45,19 +45,19 @@
 
 ## Verification and Validation
 
-In accordance with ASME V&V 10 standards, `phaseChangeFoam` is assessed across a three-tier verification and validation hierarchy:
+Guided by ASME V&V 20 / Roache (1998) principles for computational fluid dynamics and heat transfer, `phaseChangeFoam` is evaluated across three assessment tiers:
 
 ### Tier 1: Verified (Exact Analytical Solutions & Discrete Physics)
-* **Two-Phase Stefan Melting (Carslaw & Jaeger 1959 / Alexiades & Solomon 1993)**: Exact moving boundary problem $s(t) = 2\lambda\sqrt{\alpha_l t}$ evaluated across timestep sweep $\Delta t \in [1, 500]$ s. Achieves **0.433% front position error** at $2000$ s ($s_{\text{sim}} = 28.06$ mm vs $s_{\text{exact}} = 28.18$ mm, well below the 1.0% gate) with 1st-order temporal convergence ($p = 0.96$).
+* **Two-Phase Stefan Melting (Carslaw & Jaeger 1959 / Alexiades & Solomon 1993)**: Exact moving boundary problem $s(t) = 2\lambda\sqrt{\alpha_l t}$ evaluated across timestep sweep $\Delta t \in [1, 500]$ s. Achieves **0.433% front position error** at $2000$ s ($s_{\text{sim}} = 28.06$ mm vs $s_{\text{exact}} = 28.18$ mm, well below the 1.0% gate) with 1st-order temporal self-convergence ($p = 0.96$ relative to $\Delta t = 1$ s numerical baseline on a fixed 1 mm mesh).
 * **Two-Slab Contact Temperature (Carslaw & Jaeger 1959)**: Semi-infinite conjugate interface contact temperature $T_i = (e_1 T_1 + e_2 T_2)/(e_1 + e_2)$ across solid-PCM boundary. Computed $T_i = 366.75$ K matches analytical $366.67$ K with **0.024% relative error** ($\Delta T = 0.088$ K, gate: $\le 0.1\%$).
-* **Lee Model Conservation Audit & Tsat Relaxation**: Thermodynamic verification: total species mass conservation ($\sum Y_i = 1$), time-integrated vapor mass balance ($\int \dot{m}\,dt = m_{\text{vap}}$), discrete energy closure $< 0.01\%$, and interface temperature relaxation to Clausius-Clapeyron $T_{\text{sat}}(p)$ within $0.05$ K.
+* **Lee Model Conservation Audit & Tsat Relaxation**: Thermodynamic verification: total species mass conservation ($\sum Y_i = 1$), time-integrated vapor mass balance ($\int \dot{m}\,dt = m_{\text{vap}}$), discrete energy closure $< 0.01\%$, and interface temperature relaxation to Clausius-Clapeyron $T_{\text{sat}}(p)$ within $0.05$ K (committed artifact in `verification/leeModel/`).
 * **EHC Thermal Hysteresis Path Logic**: Verifies state-variable tracking (`phaseState`, `T_reversal`) and direction-dependent capacity paths under cyclic thermal loading (100% molten charging $\to$ subcooling retention at $310.9$ K $\to$ 100% crystallized discharge).
-* **Pure Tin Early-Conduction Limit (Bertrand et al. 1999 / Hannoun et al. 2003)**: Modeled with case dimensional properties yielding $\text{Ra} = 2.50 \times 10^5, \text{Pr} = 0.020, \text{Ste} = 0.010$. At $t = 100$ s, computed $f_L = 0.0881$ matches the exact 1D Stefan solution ($0.0892$, $-1.23\%$).
-* **Conservation Laws & Bit-Invariance**: Discrete mass conservation error $< 10^{-10}$, energy closure $< 0.01\%$, and restart bit-invariance ($< 10^{-9}$ K difference).
+* **Pure Tin Early-Conduction Check (Bertrand et al. 1999 / Hannoun et al. 2003)**: Modeled with case dimensional properties yielding $\text{Ra} = 2.50 \times 10^5, \text{Pr} = 0.020, \text{Ste} = 0.010$. At $t = 100$ s, computed $f_L = 0.0881$ matches the 1D Stefan similarity check ($0.0893$, $-1.23\%$).
+* **Conservation Laws & Write Precision**: Discrete mass conservation error $< 10^{-10}$, energy closure $< 0.01\%$, and restart-consistent to write precision ($< 10^{-9}$ K difference).
 
 ### Tier 2: Benchmarked (Numerical CFD Literature)
-* **Steady Natural Convection Cavity (de Vahl Davis 1983)**: Ra = $10^5$, Pr = $0.71$. Evaluated across a grid convergence sequence ($40 \times 40 \to 50 \times 50 \to 80 \times 80$). On the $80 \times 80$ grid, mean Nusselt number is $\overline{\text{Nu}} = 4.5478$ (+0.64% vs 4.519 benchmark), peak vertical velocity is $v_{\max}^* = 68.82$ (+0.33% vs 68.59), and peak horizontal velocity is $u_{\max}^* = 35.11$ (+1.09% vs 34.73).
-* **2D Pure Gallium Melting (Brent et al. 1988, Ye & Arıcı 2023)**: Ra ≈ $6.06 \times 10^5$, Pr = $0.0216$, Ste = $0.0391$. Simulated $f_L(17\text{ min}) = 0.5736$ agrees within **+0.58%** with the grid-converged correlation of Ye & Arıcı (2023, Vol. 144, 106780, Eq. 6: $0.5703$). Discrete energy closure is **-0.13%** evaluated via right-endpoint Riemann flux summation. Brent et al.'s 1988 prediction ($0.5334$) differs from resolved fine-grid numerical results (Ye & Arıcı 2023, $f_L \approx 0.570\text{--}0.574$).
+* **Steady Natural Convection Cavity (de Vahl Davis 1983)**: Ra = $10^5$, Pr = $0.71$. Evaluated across a grid convergence sequence ($40 \times 40 \to 50 \times 50 \to 80 \times 80$). Mean Nusselt converges monotonically to $\overline{\text{Nu}} = 4.5478$ (+0.64% vs 4.519 benchmark on $80 \times 80$), while peak velocities match within 1–2% ($v_{\max}^* = 68.82$, +0.33%; $u_{\max}^* = 35.11$, +1.09%).
+* **2D Pure Gallium Melting (Brent et al. 1988, Ye & Arıcı 2023)**: Ra ≈ $6.06 \times 10^5$, Pr = $0.0216$, Ste = $0.0391$. Simulated $f_L(17\text{ min}) = 0.5736$ agrees within **+0.58%** with the 2D grid-converged numerical correlation of Ye & Arıcı (2023, Vol. 144, 106780, Eq. 6: $0.5703$). Discrete energy closure is **-0.13%** evaluated via right-endpoint Riemann flux summation. Modern simulations with fine grids consistently predict $f_L \approx 0.570\text{--}0.574$, whereas historical coarse-grid predictions (Brent et al. 1988: $0.5334$) exhibit a systematic lower offset.
 * **2D Pure Tin Convective Melting (In Progress)**: Late-time multi-roll convective benchmark ($t = 2500$ s, target $f_L \approx 0.60$ Hannoun 2003 / $[0.54, 0.57]$ Gobin & Le Quéré 2000) is underway; early conduction regime is verified in Tier 1.
 
 ![Gallium 2D Melting Animation](docs/images/gallium_melting_brent_comparison.gif)
@@ -109,9 +109,9 @@ Compiled binaries (`phaseChangeMultiRegionFoam`, `phaseChangeMultiRegionSimpleFo
 A container image pre-equipped with OpenFOAM-v2412 and compiled `phaseChangeFoam` binaries is available via GitHub Container Registry:
 
 ```bash
-# Pull and start an interactive simulation shell mounting current directory
+# Pull and start an interactive simulation shell mounting current directory (pinned release v0.2.1)
 docker run --rm -it -v "$PWD":/home/openfoam/run -w /home/openfoam/run \
-    ghcr.io/chinmay-s-patil/phasechangefoam:latest
+    ghcr.io/chinmay-s-patil/phasechangefoam:v0.2.1
 ```
 
 ---
@@ -124,7 +124,7 @@ docker run --rm -it -v "$PWD":/home/openfoam/run -w /home/openfoam/run \
 ### Running Test Suites
 
 ```bash
-# 1. Master verification suite (13 suites, 60+ quantitative checks, ~90 s)
+# 1. Master verification suite (13 suites, 90+ quantitative checks, ~3.3 min)
 python3 verification/runAll.py
 
 # 2. Validation ladder fast gate (Rung 1 natural convection & DSC hysteresis, ~5 s)
