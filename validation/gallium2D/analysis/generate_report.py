@@ -20,8 +20,8 @@ import re
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 ENERGY_DIR = os.path.join(SCRIPT_DIR, "energy_balance")
 REPORT_PATH = os.path.join(SCRIPT_DIR, "ANALYSIS_REPORT.md")
-ARTIFACT_DIR = "/home/lavender/.gemini/antigravity-ide/brain/6e10d676-3179-4ccd-8848-a30db5d9e81a"
-ARTIFACT_PATH = os.path.join(ARTIFACT_DIR, "gallium_validation_analysis_report.md")
+ARTIFACT_DIR = os.environ.get("ARTIFACT_DIR")
+ARTIFACT_PATH = os.path.join(ARTIFACT_DIR, "gallium_validation_analysis_report.md") if ARTIFACT_DIR else None
 
 BRENT_FL_17M = 0.5334
 YE_ARICI_FL_17M = 0.5703
@@ -472,7 +472,7 @@ When the physically correct definition is enforced ($E_{{\\text{{net, in}}}} = E
 - At $t = 6\\text{{ min}}$: $E_{{\\text{{net, in}}}} = {r6['E_in_hot']:.2f} - {r6['E_out_cold']:.2f} = {r6['E_net']:.2f}\\text{{ J}}$, $E_{{\\text{{stored}}}} = {r6['E_stored']:.2f}\\text{{ J}} \\implies \\Delta E = \\mathbf{{{r6['surplus']:+.2f}\\text{{ J}}}}$ ($\\mathbf{{{r6['rel_err']:+.2f}\\%}}$).
 - At $t = 17\\text{{ min}}$: $E_{{\\text{{net, in}}}} = {r17['E_in_hot']:.2f} - {r17['E_out_cold']:.2f} = {r17['E_net']:.2f}\\text{{ J}}$, $E_{{\\text{{stored}}}} = {r17['E_stored']:.2f}\\text{{ J}} \\implies \\Delta E = \\mathbf{{{r17['surplus']:+.2f}\\text{{ J}}}}$ ($\\mathbf{{{r17['rel_err']:+.2f}\\%}}$).
 
-To ensure this sign error cannot reoccur, a formal unit test with synthetic boundary fluxes (hot $+10\\text{{ W}}$, cold $-2\\text{{ W}} \\implies E_{{\\text{{net}}}} = 8\\text{{ J/s}}$) and linearly decaying fluxes is committed in [test_exact_energy_balance_audit.py](file:///home/lavender/OpenFoamUbu/solvers/phaseChangeFoam/validation/gallium2D/analysis/energy_balance/test_exact_energy_balance_audit.py).
+To ensure this sign error cannot reoccur, a formal unit test with synthetic boundary fluxes (hot $+10\\text{{ W}}$, cold $-2\\text{{ W}} \\implies E_{{\\text{{net}}}} = 8\\text{{ J/s}}$) and linearly decaying fluxes is committed in [test_exact_energy_balance_audit.py](energy_balance/test_exact_energy_balance_audit.py).
 
 ---
 
@@ -644,7 +644,7 @@ Ye & Arıcı (2023, Section 3.2.2, Eq. 6) correlated their grid-converged numeri
 $$\\phi_n = 2.708\\,\\tau^{{0.712}}\\,\\mathrm{{Ra}}^{{0.0243}}\\,\\mathrm{{Ar}}^{{-0.0515}}$$
 where $\\tau = \\mathrm{{Fo}} \\cdot \\mathrm{{Ste}} = 1.7761 \\times 0.03912 = 0.06948$, $\\mathrm{{Ra}} = 6.063 \\times 10^5$, and $\\mathrm{{Ar}} = 0.7143$.
 
-Evaluating Eq. (6) via the committed verification script ([evaluate_ye_arici_correlation.py](file:///home/lavender/OpenFoamUbu/solvers/phaseChangeFoam/validation/gallium2D/analysis/evaluate_ye_arici_correlation.py)) at $t = 17\\text{{ min}}$ ($1020\\text{{ s}}$) yields:
+Evaluating Eq. (6) via the committed verification script ([evaluate_ye_arici_correlation.py](evaluate_ye_arici_correlation.py)) at $t = 17\\text{{ min}}$ ($1020\\text{{ s}}$) yields:
 $$\\phi_n^{{\\text{{Ye \\& Arıcı (2023)}}}} = \\mathbf{{{YE_ARICI_FL_17M:.4f}}}$$
 - `phaseChangeFoam` (EHCDarcy, $42 \\times 32$): **$f_L = {ehc.get('f_L_17m', 0.5736):.4f}$** (Discrepancy: **${ehc.get('f_L_17m', 0.5736) - YE_ARICI_FL_17M:+.4f}$, or {(ehc.get('f_L_17m', 0.5736) - YE_ARICI_FL_17M)*100:+.2f} percentage points**).
 - `phaseChangeFoam` (EP, $\\lambda = 1.0, n=8$): **$f_L = {ep_lam1.get('f_L_17m', 0.5745):.4f}$** (Discrepancy: **${ep_lam1.get('f_L_17m', 0.5745) - YE_ARICI_FL_17M:+.4f}$, or {(ep_lam1.get('f_L_17m', 0.5745) - YE_ARICI_FL_17M)*100:+.2f} percentage points**).
@@ -713,10 +713,11 @@ To preserve complete arithmetic traceability for how the initial post-processing
         f.write(report_content)
     print(f"Generated report at: {REPORT_PATH}")
 
-    # Copy to artifact
-    os.makedirs(ARTIFACT_DIR, exist_ok=True)
-    shutil.copyfile(REPORT_PATH, ARTIFACT_PATH)
-    print(f"Synchronized artifact at: {ARTIFACT_PATH}")
+    # Copy to artifact if configured
+    if ARTIFACT_PATH and ARTIFACT_DIR:
+        os.makedirs(ARTIFACT_DIR, exist_ok=True)
+        shutil.copyfile(REPORT_PATH, ARTIFACT_PATH)
+        print(f"Synchronized artifact at: {ARTIFACT_PATH}")
 
 if __name__ == "__main__":
     generate_report()

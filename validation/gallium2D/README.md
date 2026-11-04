@@ -88,5 +88,4 @@ python3 analysis/generate_report.py
 
 Generated reports:
 
-- [ANALYSIS_REPORT.md](file:///home/lavender/OpenFoamUbu/solvers/phaseChangeFoam/validation/gallium2D/analysis/ANALYSIS_REPORT.md)
-- Artifact: [gallium_validation_analysis_report.md](file:///home/lavender/.gemini/antigravity-ide/brain/6e10d676-3179-4ccd-8848-a30db5d9e81a/gallium_validation_analysis_report.md)
+- [ANALYSIS_REPORT.md](analysis/ANALYSIS_REPORT.md)

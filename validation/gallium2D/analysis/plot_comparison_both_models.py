@@ -336,9 +336,9 @@ def main():
     plt.close(fig)
     print(f"\nSaved master comparison plot to: {out_png}")
 
-    # Copy to brain artifact directory if possible
-    brain_dir = "/home/lavender/.gemini/antigravity-ide/brain/6e10d676-3179-4ccd-8848-a30db5d9e81a"
-    if os.path.exists(brain_dir):
+    # Copy to brain artifact directory if configured
+    brain_dir = os.environ.get("ARTIFACT_DIR")
+    if brain_dir and os.path.exists(brain_dir):
         dst_art = os.path.join(brain_dir, "gallium_melt_fraction_comparison.png")
         shutil.copyfile(out_png, dst_art)
         print(f"Copied master plot to artifact directory: {dst_art}")

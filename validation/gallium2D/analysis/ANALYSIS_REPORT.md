@@ -88,7 +88,7 @@ When the physically correct definition is enforced ($E_{\text{net, in}} = E_{\te
 - At $t = 6\text{ min}$: $E_{\text{net, in}} = 3733.53 - 48.25 = 3685.28\text{ J}$, $E_{\text{stored}} = 3676.92\text{ J} \implies \Delta E = \mathbf{-8.36\text{ J}}$ ($\mathbf{-0.23\%}$).
 - At $t = 17\text{ min}$: $E_{\text{net, in}} = 8400.01 - 246.64 = 8153.37\text{ J}$, $E_{\text{stored}} = 8143.06\text{ J} \implies \Delta E = \mathbf{-10.31\text{ J}}$ ($\mathbf{-0.13\%}$).
 
-To ensure this sign error cannot reoccur, a formal unit test with synthetic boundary fluxes (hot $+10\text{ W}$, cold $-2\text{ W} \implies E_{\text{net}} = 8\text{ J/s}$) and linearly decaying fluxes is committed in [test_exact_energy_balance_audit.py](file:///home/lavender/OpenFoamUbu/solvers/phaseChangeFoam/validation/gallium2D/analysis/energy_balance/test_exact_energy_balance_audit.py).
+To ensure this sign error cannot reoccur, a formal unit test with synthetic boundary fluxes (hot $+10\text{ W}$, cold $-2\text{ W} \implies E_{\text{net}} = 8\text{ J/s}$) and linearly decaying fluxes is committed in [test_exact_energy_balance_audit.py](energy_balance/test_exact_energy_balance_audit.py).
 
 ---
 
@@ -325,7 +325,7 @@ Ye & Arıcı (2023, Section 3.2.2, Eq. 6) correlated their grid-converged numeri
 $$\phi_n = 2.708\,\tau^{0.712}\,\mathrm{Ra}^{0.0243}\,\mathrm{Ar}^{-0.0515}$$
 where $\tau = \mathrm{Fo} \cdot \mathrm{Ste} = 1.7761 \times 0.03912 = 0.06948$, $\mathrm{Ra} = 6.063 \times 10^5$, and $\mathrm{Ar} = 0.7143$.
 
-Evaluating Eq. (6) via the committed verification script ([evaluate_ye_arici_correlation.py](file:///home/lavender/OpenFoamUbu/solvers/phaseChangeFoam/validation/gallium2D/analysis/evaluate_ye_arici_correlation.py)) at $t = 17\text{ min}$ ($1020\text{ s}$) yields:
+Evaluating Eq. (6) via the committed verification script ([evaluate_ye_arici_correlation.py](evaluate_ye_arici_correlation.py)) at $t = 17\text{ min}$ ($1020\text{ s}$) yields:
 $$\phi_n^{\text{Ye \& Arıcı (2023)}} = \mathbf{0.5703}$$
 - `phaseChangeFoam` (EHCDarcy, $42 \times 32$): **$f_L = 0.5736$** (Discrepancy: **$+0.0033$, or +0.33 percentage points**).
 - `phaseChangeFoam` (EP, $\lambda = 1.0, n=8$): **$f_L = 0.5745$** (Discrepancy: **$+0.0042$, or +0.42 percentage points**).

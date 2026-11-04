@@ -12,23 +12,21 @@ import sys
 import shutil
 import subprocess
 
-def find_solver(name="phaseChangeMultiRegionSimpleFoam"):
+def find_solver(solver_name="phaseChangeMultiRegionSimpleFoam"):
+    import glob
     user_appbin = os.environ.get("FOAM_USER_APPBIN")
     if user_appbin:
-        path = os.path.join(user_appbin, name)
-        if os.path.exists(path):
-            return path
-    path = shutil.which(name)
-    if path:
-        return path
-    home = os.environ.get("HOME", "/home/lavender")
-    matches = [
-        os.path.join(home, "OpenFOAM", f"lavender-v2412/platforms/linux64GccDPInt32Opt/bin/{name}")
-    ]
-    for m in matches:
-        if os.path.exists(m):
-            return m
-    return name
+        p = os.path.join(user_appbin, solver_name)
+        if os.path.exists(p):
+            return p
+    which_p = shutil.which(solver_name)
+    if which_p:
+        return which_p
+    home = os.path.expanduser("~")
+    for cand in glob.glob(os.path.join(home, "OpenFOAM", "*-v*", "platforms", "*", "bin", solver_name)):
+        if os.path.exists(cand):
+            return cand
+    return solver_name
 
 def run_cmd(cmd, cwd=None):
     res = subprocess.run(cmd, shell=True, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)

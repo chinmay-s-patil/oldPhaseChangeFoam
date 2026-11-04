@@ -36,6 +36,7 @@ TOLERANCE_VMAX_REL = 0.05  # v_max* within 5% of benchmark
 TOLERANCE_UMAX_REL = 0.05  # u_max* within 5% of benchmark
 
 def find_solver(solver_name="phaseChangeMultiRegionSimpleFoam"):
+    import glob
     user_appbin = os.environ.get("FOAM_USER_APPBIN")
     if user_appbin:
         p = os.path.join(user_appbin, solver_name)
@@ -44,10 +45,10 @@ def find_solver(solver_name="phaseChangeMultiRegionSimpleFoam"):
     which_p = shutil.which(solver_name)
     if which_p:
         return which_p
-    home = os.environ.get("HOME", "/home/lavender")
-    cand = os.path.join(home, "OpenFOAM", "lavender-v2412/platforms/linux64GccDPInt32Opt/bin", solver_name)
-    if os.path.exists(cand):
-        return cand
+    home = os.path.expanduser("~")
+    for cand in glob.glob(os.path.join(home, "OpenFOAM", "*-v*", "platforms", "*", "bin", solver_name)):
+        if os.path.exists(cand):
+            return cand
     return solver_name
 
 def run_cmd(cmd, cwd=None, allow_failure=False):

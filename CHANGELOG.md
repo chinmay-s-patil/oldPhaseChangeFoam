@@ -4,7 +4,24 @@ All notable changes, license alignments, and code hygiene updates to `phaseChang
 
 ---
 
-## [Unreleased] - 2026-10-27
+## [0.2.1] - 2026-11-05
+
+### Fixed
+* **Stefan Benchmark Setup Documentation**: Corrected documented Stefan problem parameters in `docs/validation.md` to $T_{\text{hot}} = 350\text{ K}$, $T_m = 305\text{ K}$, and $T_{\text{init}} = 280\text{ K}$ (matching `verification/phaseChange1D` case files and transcendental root $\lambda = 0.445590$, $s_{\text{exact}} = 28.182\text{ mm}$).
+* **Interface Heat Flux Reporting**: Corrected interface heat flux error from a unit slip of $0.012\%$ to $1.19\%$ ($1581\text{ W/m}^2$ vs $1600\text{ W/m}^2$) and aligned pass tolerance with the actual script gate ($< 2.0\%$).
+* **Local Path Leakage & Broken Links**: Sanitized all hardcoded `/home/lavender` fallbacks across 20 test runners and analysis scripts with portable dynamic OpenFOAM lookups (`os.path.expanduser` and `glob`). Converted absolute file-scheme links (`/home/lavender/...`) to relative repository paths in `validation/gallium2D/README.md` and `ANALYSIS_REPORT.md`.
+* **CI Link Verification**: Expanded GitHub Actions link checker to recursively validate all markdown files across the repository (`**/*.md`).
+* **Release & Citation Metadata**: Synchronized `CITATION.cff` version and release date with repository tags and changelog.
+
+## [0.2.0] - 2026-11-04
+
+### Added
+* **Three-Tier Verification & Validation Hierarchy**: Formalized ASME V&V 10 / Roache structure into Tier 1 (Verified exact analytic solutions), Tier 2 (Benchmarked numerical CFD literature), and Tier 3 (Physical experimental validation roadmap).
+* **ASME V&V 20 Framework**: Outlined roadmap for 3D pure gallium cavity validation against Gau & Viskanta (1986) with experimental uncertainty quantification and grid convergence index (GCI).
+* **de Vahl Davis Natural Convection Benchmark**: Multi-grid spatial convergence sequence ($40 \times 40$, $50 \times 50$, $80 \times 80$) demonstrating monotonic convergence of mean Nusselt and peak velocities.
+* **Master Automated Verification Gate**: Suite runner `verification/runAll.py` consolidating 13 suites and 60+ quantitative gates.
+
+## [0.1.1] - 2026-10-27
 
 ### License and Attribution Alignment
 * **Full GNU GPL v3 Text Restored**: Restored the complete, unmodified 674-line text of the GNU General Public License Version 3 (`LICENSE`), including Preamble, Sections 0–17, and the "How to Apply" appendix.
@@ -28,3 +45,7 @@ All notable changes, license alignments, and code hygiene updates to `phaseChang
 ### Documentation Updates
 * **Tutorial Status Clarification**: Updated `README.md` and `docs/tutorials.md` with clear notes indicating standalone demonstration tutorials are actively undergoing development as a work in progress and pointing users to verified test and benchmark suites for runnable cases.
 * **CI Verification Compatibility**: Ensured all documentation links in `README.md` and `docs/*.md` resolve properly in automated continuous integration workflows.
+
+## [0.1.0] - 2026-10-26
+
+* Initial release of `phaseChangeFoam` multi-region solver suite for OpenFOAM v2412.

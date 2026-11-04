@@ -33,7 +33,7 @@ jobs:
         run: |
           python3 -c "
           import re, os, glob
-          files = glob.glob('docs/*.md') + ['README.md']
+          files = sorted([f for f in glob.glob('**/*.md', recursive=True) if not f.startswith('.git/')])
           broken = []
           for f in files:
               content = open(f).read()
