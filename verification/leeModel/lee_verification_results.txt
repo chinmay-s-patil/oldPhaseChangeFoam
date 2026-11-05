@@ -2,15 +2,19 @@
       LEE FLUID PHASE CHANGE VERIFICATION RESULTS      
 =======================================================
 Test 1 (Quantitative Evaporation)      : PASSED
+  - Species Mass Sum |sum Yi - 1|       : 2.01e-13
+  - Interspecies Mass Balance |dYl+dYv| : 2.01e-13
   - Numerical deltaYl                   : -3.67144600e-06
-  - Relative error                      : 5.467087e-08
+  - Analytic deltaYl increment rel error: 5.467087e-08
   - Numerical deltaT                    : -0.008297 K
-  - Relative error                      : 5.949510e-08
+  - Analytic deltaT increment rel error : 5.949510e-08
 Test 2 (Quantitative Condensation)     : PASSED
+  - Species Mass Sum |sum Yi - 1|       : 2.03e-14
+  - Interspecies Mass Balance |dYl+dYv| : 2.04e-14
   - Numerical deltaYv                   : -7.04810400e-06
-  - Relative error                      : 2.891515e-09
+  - Analytic deltaYv increment rel error: 2.891515e-09
   - Numerical deltaT                    : 0.015929 K
-  - Relative error                      : 3.768350e-10
+  - Analytic deltaT increment rel error : 3.768350e-10
 Test 3 (Clausius-Clapeyron Tsat(p))    : PASSED
   - Analytical Tsat(200 kPa)            : 393.5422 K
   - Sub-saturated (390 K) evap prevented: True
@@ -36,6 +40,7 @@ Test 8b (Liquid Exhaustion/Superheat)  : PASSED
   - Superheated Final T                 : 543.5526 K
   - Energy Balance Rel Error            : 0.000000%
 Test 9 (Unequal-Cp Enthalpy Cons.)     : PASSED
+  - Species Mass Sum |sum Yi - 1|       : 2.01e-13
   - Initial E_abs                       : 110945.214728 J/m^3
   - Final E_abs                         : 110944.584397 J/m^3
   - Absolute Enthalpy Rel Error         : 5.681456e-06

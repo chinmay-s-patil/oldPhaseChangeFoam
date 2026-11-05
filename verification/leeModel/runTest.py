@@ -348,14 +348,24 @@ def main():
     deltaYl_num1 = Yl_final1 - Yl_init1
     deltaT_num1 = T_final1 - T_init1
 
+    Yair_final1 = parse_openfoam_field(os.path.join(c1_dir, f"{dt1}/air/air"))[0]
+    sum_Y1 = Yl_final1 + Yv_final1 + Yair_final1
+    err_sumY1 = abs(sum_Y1 - 1.0)
+    deltaYv_num1 = Yv_final1 - 0.0
+    err_interphase1 = abs(deltaYl_num1 + deltaYv_num1)
+
     err_Y1 = abs(deltaYl_num1 - deltaYl_anal1) / abs(deltaYl_anal1)
     err_T1 = abs(deltaT_num1 - deltaT_anal1) / abs(deltaT_anal1)
 
-    print(f"Numerical deltaYl:  {deltaYl_num1:.8e}")
-    print(f"Analytic deltaYl:   {deltaYl_anal1:.8e} (rel error: {err_Y1:.6e})")
-    print(f"Numerical deltaT:   {deltaT_num1:.6f} K")
-    print(f"Analytic deltaT:    {deltaT_anal1:.6f} K (rel error: {err_T1:.6e})")
+    print(f"Species Mass Sum (sum Yi): {sum_Y1:.12f} (diff from 1: {err_sumY1:.2e})")
+    print(f"Interspecies Mass Balance: {err_interphase1:.2e} (delta Yl + delta Yv)")
+    print(f"Numerical deltaYl:         {deltaYl_num1:.8e}")
+    print(f"Analytic deltaYl:          {deltaYl_anal1:.8e} (rel error: {err_Y1:.6e})")
+    print(f"Numerical deltaT:          {deltaT_num1:.6f} K")
+    print(f"Analytic deltaT:           {deltaT_anal1:.6f} K (rel error: {err_T1:.6e})")
 
+    assert err_sumY1 < 1e-10, f"FAIL: Species mass sum error ({err_sumY1}) > 1e-10!"
+    assert err_interphase1 < 1e-10, f"FAIL: Interspecies mass balance error ({err_interphase1}) > 1e-10!"
     assert err_Y1 < 1e-3, f"FAIL: deltaYl relative error ({err_Y1}) > 1e-3!"
     assert err_T1 < 1e-3, f"FAIL: deltaT relative error ({err_T1}) > 1e-3!"
     print("PASS: Quantitative Evaporation Verification Passed!")
@@ -386,14 +396,25 @@ def main():
     deltaYv_num2 = Yv_final2 - Yv_init2
     deltaT_num2 = T_final2 - T_init2
 
+    Yl_final2 = parse_openfoam_field(os.path.join(c2_dir, f"{dt2}/air/H2O_l"))[0]
+    Yair_final2 = parse_openfoam_field(os.path.join(c2_dir, f"{dt2}/air/air"))[0]
+    sum_Y2 = Yl_final2 + Yv_final2 + Yair_final2
+    err_sumY2 = abs(sum_Y2 - 1.0)
+    deltaYl_num2 = Yl_final2 - 0.0
+    err_interphase2 = abs(deltaYl_num2 + deltaYv_num2)
+
     err_Y2 = abs(deltaYv_num2 - deltaYv_anal2) / abs(deltaYv_anal2)
     err_T2 = abs(deltaT_num2 - deltaT_anal2) / abs(deltaT_anal2)
 
-    print(f"Numerical deltaYv:  {deltaYv_num2:.8e}")
-    print(f"Analytic deltaYv:   {deltaYv_anal2:.8e} (rel error: {err_Y2:.6e})")
-    print(f"Numerical deltaT:   {deltaT_num2:.6f} K")
-    print(f"Analytic deltaT:    {deltaT_anal2:.6f} K (rel error: {err_T2:.6e})")
+    print(f"Species Mass Sum (sum Yi): {sum_Y2:.12f} (diff from 1: {err_sumY2:.2e})")
+    print(f"Interspecies Mass Balance: {err_interphase2:.2e} (delta Yl + delta Yv)")
+    print(f"Numerical deltaYv:         {deltaYv_num2:.8e}")
+    print(f"Analytic deltaYv:          {deltaYv_anal2:.8e} (rel error: {err_Y2:.6e})")
+    print(f"Numerical deltaT:          {deltaT_num2:.6f} K")
+    print(f"Analytic deltaT:           {deltaT_anal2:.6f} K (rel error: {err_T2:.6e})")
 
+    assert err_sumY2 < 1e-10, f"FAIL: Species mass sum error ({err_sumY2}) > 1e-10!"
+    assert err_interphase2 < 1e-10, f"FAIL: Interspecies mass balance error ({err_interphase2}) > 1e-10!"
     assert err_Y2 < 1e-3, f"FAIL: deltaYv relative error ({err_Y2}) > 1e-3!"
     assert err_T2 < 1e-3, f"FAIL: deltaT relative error ({err_T2}) > 1e-3!"
     print("PASS: Quantitative Condensation Verification Passed!")
@@ -782,13 +803,18 @@ phaseChange
 
     err_E9 = abs(E_abs_final - E_abs_init) / E_abs_init
 
-    print(f"Initial T:              {T_init9:.4f} K")
-    print(f"Final T:                {T_final9:.4f} K")
-    print(f"Evaporated Yv:          {Yv_final9:.8e}")
-    print(f"Initial E_abs:          {E_abs_init:.6f} J/m^3")
-    print(f"Final E_abs:            {E_abs_final:.6f} J/m^3")
-    print(f"Enthalpy Rel Error:     {err_E9:.6e}")
+    sum_Y9 = Yl_final9 + Yv_final9 + Yair_final9
+    err_sumY9 = abs(sum_Y9 - 1.0)
 
+    print(f"Species Mass Sum (sum Yi): {sum_Y9:.12f} (diff from 1: {err_sumY9:.2e})")
+    print(f"Initial T:                 {T_init9:.4f} K")
+    print(f"Final T:                   {T_final9:.4f} K")
+    print(f"Evaporated Yv:             {Yv_final9:.8e}")
+    print(f"Initial E_abs:             {E_abs_init:.6f} J/m^3")
+    print(f"Final E_abs:               {E_abs_final:.6f} J/m^3")
+    print(f"Enthalpy Rel Error:        {err_E9:.6e}")
+
+    assert err_sumY9 < 1e-10, f"FAIL: Test 9 species mass sum error ({err_sumY9}) > 1e-10!"
     assert err_E9 < 1e-4, f"FAIL: Closed adiabatic unequal-Cp absolute enthalpy conservation error ({err_E9:.6e}) > 1e-4!"
     print("PASS: Closed Adiabatic Unequal-Cp Absolute Enthalpy Conservation Passed!")
 
@@ -799,15 +825,19 @@ phaseChange
         f.write("      LEE FLUID PHASE CHANGE VERIFICATION RESULTS      \n")
         f.write("=======================================================\n")
         f.write("Test 1 (Quantitative Evaporation)      : PASSED\n")
+        f.write(f"  - Species Mass Sum |sum Yi - 1|       : {err_sumY1:.2e}\n")
+        f.write(f"  - Interspecies Mass Balance |dYl+dYv| : {err_interphase1:.2e}\n")
         f.write(f"  - Numerical deltaYl                   : {deltaYl_num1:.8e}\n")
-        f.write(f"  - Relative error                      : {err_Y1:.6e}\n")
+        f.write(f"  - Analytic deltaYl increment rel error: {err_Y1:.6e}\n")
         f.write(f"  - Numerical deltaT                    : {deltaT_num1:.6f} K\n")
-        f.write(f"  - Relative error                      : {err_T1:.6e}\n")
+        f.write(f"  - Analytic deltaT increment rel error : {err_T1:.6e}\n")
         f.write("Test 2 (Quantitative Condensation)     : PASSED\n")
+        f.write(f"  - Species Mass Sum |sum Yi - 1|       : {err_sumY2:.2e}\n")
+        f.write(f"  - Interspecies Mass Balance |dYl+dYv| : {err_interphase2:.2e}\n")
         f.write(f"  - Numerical deltaYv                   : {deltaYv_num2:.8e}\n")
-        f.write(f"  - Relative error                      : {err_Y2:.6e}\n")
+        f.write(f"  - Analytic deltaYv increment rel error: {err_Y2:.6e}\n")
         f.write(f"  - Numerical deltaT                    : {deltaT_num2:.6f} K\n")
-        f.write(f"  - Relative error                      : {err_T2:.6e}\n")
+        f.write(f"  - Analytic deltaT increment rel error : {err_T2:.6e}\n")
         f.write("Test 3 (Clausius-Clapeyron Tsat(p))    : PASSED\n")
         f.write(f"  - Analytical Tsat(200 kPa)            : {Tsat_anal_2bar:.4f} K\n")
         f.write("  - Sub-saturated (390 K) evap prevented: True\n")
@@ -833,6 +863,7 @@ phaseChange
         f.write(f"  - Superheated Final T                 : {T_final8b:.4f} K\n")
         f.write(f"  - Energy Balance Rel Error            : {rel_err_8b:.6%}\n")
         f.write("Test 9 (Unequal-Cp Enthalpy Cons.)     : PASSED\n")
+        f.write(f"  - Species Mass Sum |sum Yi - 1|       : {err_sumY9:.2e}\n")
         f.write(f"  - Initial E_abs                       : {E_abs_init:.6f} J/m^3\n")
         f.write(f"  - Final E_abs                         : {E_abs_final:.6f} J/m^3\n")
         f.write(f"  - Absolute Enthalpy Rel Error         : {err_E9:.6e}\n")
