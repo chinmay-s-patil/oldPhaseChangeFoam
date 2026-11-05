@@ -83,14 +83,18 @@ def main():
         if status != "PASSED":
             all_passed = False
 
+    passed_count = sum(1 for _, status, _ in results if status == "PASSED")
+    total_count = len(results)
+
     print("-" * 80)
+    print(f"Verification Suites Evaluated: {passed_count} / {total_count} PASSED")
     print(f"Total Verification Execution Time: {total_duration:.2f}s")
 
     if all_passed:
-        print("\nALL VERIFICATION SUITES PASSED SUCCESSFULLY! (GATE GREEN)")
+        print("\nALL 13 VERIFICATION SUITES PASSED SUCCESSFULLY! (GATE GREEN)")
         sys.exit(0)
     else:
-        print("\nONE OR MORE VERIFICATION SUITES FAILED! (GATE RED)")
+        print(f"\n{total_count - passed_count} VERIFICATION SUITE(S) FAILED! (GATE RED)")
         sys.exit(1)
 
 if __name__ == "__main__":

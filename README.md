@@ -124,7 +124,7 @@ docker run --rm -it -v "$PWD":/home/openfoam/run -w /home/openfoam/run \
 ### Running Test Suites
 
 ```bash
-# 1. Master verification suite (13 suites, 90+ quantitative checks, ~3.3 min)
+# 1. Master verification suite (13 suites)
 python3 verification/runAll.py
 
 # 2. Validation ladder fast gate (Rung 1 natural convection & DSC hysteresis, ~5 s)

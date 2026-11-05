@@ -21,7 +21,7 @@ Guided by ASME V&V 20 / Roache (1998) principles for computational fluid dynamic
 
 ## 1. Verified: Analytic Solutions, MMS & Conservation Physics
 
-The primary verification tests reside in the `verification/` directory (13 specialized test suites, 90+ quantitative checks, run via `python3 verification/runAll.py`). These cases verify specific mathematical and physical components against exact analytical solutions and discrete conservation laws:
+The primary verification tests reside in the `verification/` directory (13 specialized test suites, run via `python3 verification/runAll.py`). These cases verify specific mathematical and physical components against exact analytical solutions and discrete conservation laws:
 
 | Suite & Directory | Physics & Mechanisms Verified | Verification Type | Key Acceptance Metrics |
 | :--- | :--- | :--- | :--- |
@@ -343,7 +343,7 @@ The current coverage across ASME V&V 20 tiers is summarized below:
 
 ## 5. Running the Test Suites
 
-### Master Verification Gate (13 suites, 90+ quantitative checks, ~3.3 min)
+### Master Verification Gate (13 suites)
 ```bash
 python3 verification/runAll.py
 ```

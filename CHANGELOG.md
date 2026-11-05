@@ -28,7 +28,7 @@ All notable changes, license alignments, and code hygiene updates to `phaseChang
   * *EHC vs Enthalpy-Porosity Outer Correctors*: Clarified that EP with $\lambda = 1.0, n_{\text{outer}} = 8$ achieves excellent energy closure ($-0.06\%$), while EHC's key advantage is maintaining closure at low outer correctors ($n_{\text{outer}} = 3\text{--}4$).
   * *Gau & Viskanta 3D Screening Front Provenance*: Traced midplane front targets to Gau & Viskanta (1986) Fig. 5 pour-out curves, documenting that while broad cavity-width regression screens pass, the local front position exhibits $32.2\%$ deviation ($11.24\text{ mm}$ vs $8.50\text{ mm}$) due to initial heater transient inertia.
   * *Hysteresis Case Scope & Citation*: Clarified that `pcmHysteresis_experimental` evaluates cyclic path logic on synthetic windows ($[308, 312]\text{ K}$ and $[303, 307]\text{ K}$) rather than fitting raw experimental DSC curves; corrected Bony & Citherlet citation to *Energy and Buildings*, Vol. 39, Issue 10, DOI `10.1016/j.enbuild.2006.10.017`.
-  * *Master Verification Gate Verification*: Verified actual runtime (~3.3 min / ~200 s) and check count (13 suites, 90+ quantitative checks) across `verification/runAll.py`.
+  * *Master Verification Gate Scope*: Streamlined verification reporting to the 13 specialized test suites across physical and mathematical components, dropping unaudited check and timing counts.
   * *Build and Packaging Cleanup*: Removed nonexistent include directories (`porousFluid`, `porousSolid`) from solver `Make/options` and nonexistent `tutorials/*` path from `.reuse/dep5`. Pointed Docker command in `README.md` to tagged `v0.2.1`.
 
 ## [0.2.0] - 2026-11-04
@@ -37,7 +37,7 @@ All notable changes, license alignments, and code hygiene updates to `phaseChang
 * **Three-Tier Verification & Validation Hierarchy**: Formalized ASME V&V 20 / Roache structure into Tier 1 (Verified exact analytic solutions), Tier 2 (Benchmarked numerical CFD literature), and Tier 3 (Physical experimental validation roadmap).
 * **ASME V&V 20 Framework**: Outlined roadmap for 3D pure gallium cavity validation against Gau & Viskanta (1986) with experimental uncertainty quantification and grid convergence index (GCI).
 * **de Vahl Davis Natural Convection Benchmark**: Multi-grid spatial convergence sequence ($40 \times 40$, $50 \times 50$, $80 \times 80$) demonstrating monotonic convergence of mean Nusselt and peak velocities.
-* **Master Automated Verification Gate**: Suite runner `verification/runAll.py` consolidating 13 suites and 60+ quantitative gates.
+* **Master Automated Verification Gate**: Suite runner `verification/runAll.py` consolidating 13 specialized verification suites.
 
 ## [0.1.1] - 2026-10-27
 
