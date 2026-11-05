@@ -323,8 +323,8 @@ The current coverage across ASME V&V 20 tiers is summarized below:
 | **Coupled Write-and-Restart Consistency** | $0 \to T$ vs $0 \to T/2 \to \text{restart} \to T$ across CHT interface | Temperature diff $< 10^{-9}$ K (to write precision) | **Verified** ($< 10^{-9}$ K diff) |
 | **Coupled EHC Energy Balance** | Discrete energy conservation on adiabatic coupled domain | Energy relative error $< 0.01\%$ | **Verified** ($5.6 \times 10^{-5}$) |
 | **EHC Thermal Hysteresis Path Logic** | Direction-dependent melting/freezing loop, subcooling state tracking | Complete cycle recovery, persistent liquid state during cooling | **Verified** (100% molten $\to$ subcooling delay $\to$ 100% solid) |
-| **Lee Model Conservation Audit** | Species mass $\sum Y_i = 1$, interspecies balance $|\Delta Y_l + \Delta Y_v| = 0$, rate increment agreement to $\sim 10^{-8}$ | Analytic mass & energy conservation | **Verified** (mass err $< 10^{-10}$, energy closure $< 0.01\%$) |
-| **Lee Model Tsat Relaxation** | Multi-component mixture relaxes to $T_{\text{sat}}(p)$ | Clausius-Clapeyron thermodynamic limit | **Verified** ($|T - T_{\text{sat}}| < 0.05$ K) |
+| **Lee Model Conservation Audit** | Species mass $\sum Y_i = 1$, interspecies balance $\lvert \Delta Y_l + \Delta Y_v \rvert < 10^{-12}$, rate increment agreement to $\sim 10^{-8}$ | Analytic mass & energy conservation | **Verified** (mass err $< 10^{-10}$, energy closure $< 0.01\%$) |
+| **Lee Model Tsat Relaxation** | Multi-component mixture relaxes to $T_{\text{sat}}(p)$ | Clausius-Clapeyron thermodynamic limit | **Verified** ($\lvert T - T_{\text{sat}} \rvert < 0.05$ K) |
 | **Pure Tin Conduction Limit** | Conduction regime melt front at $t = 100$ s | Similarity check ($s = 8.93$ mm) | **Consistency Check** ($f_L = 0.0881$ vs $0.0893$, $-1.23\%$) |
 | **Composite Wall Steady Conduction** | Interface energy coupling in `phaseChangeMultiRegionSimpleFoam` | Net wall heat flux error $< 0.1\%$ | Planned |
 | **Darcy Mushy Slab** (uniform $f_L$, imposed $\Delta P$) | Carman-Kozeny mushy-zone drag sink in isolation | Darcy velocity error $< 1\%$ | Planned |

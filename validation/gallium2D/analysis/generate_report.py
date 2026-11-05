@@ -593,7 +593,7 @@ Refinement ratios: $r_{{21}} = h_2 / h_1 = {gci['r21']:.3f}$, $r_{{32}} = h_3 / 
 ### 5.1 Grid Convergence & Sensitivity Table
 
 {grid_table_md}
-| **Richardson Extrapolated ($\\phi_{{\\text{{ext}}}}$)** | — | $\\infty$ | — | — | — | — | **${gci['extrapolated_front_mm']:.2f}\\text{{ mm}}$** | — |
+| **Richardson Extrapolated ($\\phi_{{\\text{{ext}}}}$)** | — | $\\infty$ | — | — | — | **${gci['extrapolated_front_mm']:.2f}\\text{{ mm}}$** | — |
 
 ### 5.2 Formal ASME / Roache Grid Convergence Analysis
 1. **Global Liquid Fraction $f_L(17\\text{{ min}})$**:

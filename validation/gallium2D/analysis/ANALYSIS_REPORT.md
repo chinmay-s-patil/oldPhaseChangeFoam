@@ -264,7 +264,7 @@ Refinement ratios: $r_{21} = h_2 / h_1 = 1.500$, $r_{32} = h_3 / h_2 = 1.3223$.
 | Coarse (Grid 3) | $32 \times 24$ | 768 | $0.3698$ | $0.5682$ | $29.18\text{ mm}$ | $56.01\text{ mm}$ | $66.75\text{ mm}$ |
 | Medium (Grid 2) | $42 \times 32$ | 1344 | $0.3747$ | $0.5736$ | $28.19\text{ mm}$ | $57.06\text{ mm}$ | $67.80\text{ mm}$ |
 | Fine (Grid 1) | $63 \times 48$ | 3024 | $0.3760$ | $0.5725$ | $27.58\text{ mm}$ | $57.68\text{ mm}$ | $66.87\text{ mm}$ |
-| **Richardson Extrapolated ($\phi_{\text{ext}}$)** | — | $\infty$ | — | — | — | — | **$57.99\text{ mm}$** | — |
+| **Richardson Extrapolated ($\phi_{\text{ext}}$)** | — | $\infty$ | — | — | — | **$57.99\text{ mm}$** | — |
 
 ### 5.2 Formal ASME / Roache Grid Convergence Analysis
 1. **Global Liquid Fraction $f_L(17\text{ min})$**:
