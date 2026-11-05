@@ -144,7 +144,7 @@ Melting of pure gallium in a rectangular enclosure ($W = 0.0889\text{ m}$, $H = 
 
 The simulated liquid fraction sits systematically above Brent et al.'s 1988 numerical prediction across all reporting intervals: $+18.2\%$ at 2 min ($0.1303$ vs $0.1102$), $+9.7\%$ at 6 min ($0.2573$ vs $0.2346$), $+8.1\%$ at 10 min ($0.3747$ vs $0.3465$), and $+7.5\%$ at 17 min ($0.5736$ vs $0.5334$).
 
-1. **Modern Numerical Predictions**: Finer-grid 2D numerical simulations with bounded high-resolution convective schemes predict higher liquid fractions in the range $f_L \approx 0.570\text{--}0.574$ (e.g. Ye & Arıcı 2023). Brent et al. (1988) employed a relatively coarse $42 \times 32$ grid with early first-order upwind discretization.
+1. **Offset Observed, Cause Not Isolated**: While our simulated values agree closely with later 2D numerical studies that report higher liquid fractions (e.g. Ye & Arıcı 2023 correlation: $0.5703$ vs our $0.5736$ at 17 min), a systematic positive offset relative to Brent et al. (1988) persists across all times. Because both our baseline run and the historical benchmark operate on a $42 \times 32$ grid, the exact numerical or algorithmic cause of the discrepancy against Brent's original 1988 solution has not been isolated.
 2. **Correlation Comparison**: Ye & Arıcı's numerical correlation fitted to their 2D fine-grid database (2023, Vol. 144, 106780, Eq. 6) yields $\phi_n = 0.5703$ at 17 min, which agrees with `phaseChangeFoam` within **0.33 percentage points (0.58% relative difference)**. This comparison benchmark is against a fitted numerical correlation, not physical experimental data.
 
 #### Regression Gates and Melt Front Deviation Framing
