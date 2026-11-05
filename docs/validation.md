@@ -276,12 +276,19 @@ In the physical experiments of Gau & Viskanta (1986), pure gallium melted in a r
 * **Results at $t = 120$ s (midplane $z = D/2$, $y = H/2$)**:
   * Computed midplane front position: $11.24$ mm
   * Theoretical 1D Stefan step-conduction limit: $\approx 11.3$ mm (instantaneous Dirichlet wall temperature)
-  * Gau & Viskanta (1986) experimental measurement: $8.50$ mm (traced from Fig. 5 pour-out midplane curve at $y/H = 0.5$)
+  * Gau & Viskanta (1986) experimental target: $8.50 \pm 1.0$ mm (traced value from Fig. 5 pour-out midplane curve at $y/H = 0.5$; digitization uncertainty $\pm 1.0$ mm)
   * **Absolute deviation**: $2.74$ mm
   * **Deviation relative to melted distance ($s = 8.50$ mm)**: **$32.2\%$**
   * **Deviation relative to cavity width ($W = 88.9$ mm)**: $3.09\% W$
   * Computed peak 3D velocity: $|U|_{\max} = 18.21$ mm/s
   * **Screening Status Note**: While the CI test script passes on broad cavity width ($2.74\text{ mm} \le 5\% W = 4.45\text{ mm}$) and liquid fraction bounds, the relative deviation on the local front itself is $32.2\%$. Passing the regression screen does not constitute physical validation; it confirms only that 3D sidewall braking is qualitatively active.
+* **Gau & Viskanta (1986) Fig. 5 Traced Midplane Targets ($y/H = 0.5$, digitization uncertainty $\pm 1.0$ mm)**:
+  * $t = 30\text{ s}$ ($0.5\text{ min}$): $s_{\text{traced}} = 5.5 \pm 1.0\text{ mm}$ (screening envelope $f_L \in [0.04, 0.08]$)
+  * $t = 60\text{ s}$ ($1\text{ min}$): $s_{\text{traced}} = 6.8 \pm 1.0\text{ mm}$ (screening envelope $f_L \in [0.06, 0.11]$)
+  * $t = 120\text{ s}$ ($2\text{ min}$): $s_{\text{traced}} = 8.5 \pm 1.0\text{ mm}$ (screening envelope $f_L \in [0.08, 0.16]$)
+  * $t = 360\text{ s}$ ($6\text{ min}$): $s_{\text{traced}} = 18.5 \pm 1.0\text{ mm}$ (screening envelope $f_L \in [0.20, 0.28]$)
+  * $t = 600\text{ s}$ ($10\text{ min}$): $s_{\text{traced}} = 31.0 \pm 1.0\text{ mm}$ (screening envelope $f_L \in [0.32, 0.42]$)
+  * $t = 1020\text{ s}$ ($17\text{ min}$): $s_{\text{traced}} = 48.0 \pm 1.0\text{ mm}$ (screening envelope $f_L \in [0.48, 0.60]$)
 * **Working Hypothesis on Early Front Discrepancy (Heater Transient)**:
   The computed front ($11.24$ mm) closely matches the theoretical 1D Stefan conduction limit for an instantaneous step wall temperature ($\approx 11.3$ mm for $\text{Ste} = 0.039, \alpha = 1.38 \times 10^{-5}\text{ m}^2/\text{s}$). In the physical experiment of Gau & Viskanta (1986), the hot vertical copper wall was maintained by circulating constant-temperature water from a constant-temperature bath ($T_h = 38.3^\circ\text{C} = 311.45\text{ K}$, whereas the numerical benchmark modeled $38.0^\circ\text{C} = 311.15\text{ K}$). The measured front at $120$ s ($8.50$ mm) physically lags the step-conduction solution. A leading working hypothesis is that the physical copper heat exchanger required a finite warm-up period to reach the setpoint temperature, reducing the early effective Stefan number.
   * *Verification Strategy to Test Hypothesis*:
@@ -335,7 +342,7 @@ The current coverage across ASME V&V 20 tiers is summarized below:
 
 | Test | Physical System | Validation Dataset | Key Validation Metrics | Status |
 | :--- | :--- | :--- | :--- | :---: |
-| **3D Pure Gallium Melting** | Rectangular cavity with no-slip windows | Gau & Viskanta (1986) (Fig. 5 midplane) | ASME V&V 20: $E \le u_{\text{val}}$, 3D sidewall braking, multi-time fronts | **Screening Run** (preliminary $32 \times 24 \times 16$ run: front dev $2.74$ mm = $32.2\%$ of $s$, width dev $3.09\% W$) |
+| **3D Pure Gallium Melting** | Rectangular cavity with no-slip windows | Gau & Viskanta (1986) (Fig. 5 midplane, traced values $\pm 1.0$ mm) | ASME V&V 20: $E \le u_{\text{val}}$, 3D sidewall braking, multi-time fronts | **Screening Run** (preliminary $32 \times 24 \times 16$ run: front dev $2.74$ mm = $32.2\%$ of $s$, width dev $3.09\% W$) |
 | **Paraffin Thermal Hysteresis** | Cyclic melting and freezing loop | Bony & Citherlet (2007) / DSC | Fit measured DSC curves; blind prediction of independent storage experiment | Planned (path logic verified in Tier 1) |
 | **PCM Cavity Melting** | Horizontal / vertical enclosure | Bertrand et al. (1999) | Comparison across n-octadecane benchmark exercise | Planned |
 

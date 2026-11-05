@@ -447,16 +447,19 @@ def run_gallium3d_validation(case_dir, nx=32, ny=24, nz=16, endTime=120):
 
     front_mid_height = float(x_front_mid[ny // 2]) * 1000.0 # mm
 
-    # Gau & Viskanta (1986) experimental data targets across times (traced from Fig. 5 pour-out midplane curves)
+    # Gau & Viskanta (1986) experimental data targets across times.
+    # Note: These values are manually traced from Fig. 5 pour-out midplane curves at y/H = 0.5.
+    # Tracing from the printed figure carries an estimated digitization uncertainty of ±1.0 mm.
+    DIGITIZATION_UNCERTAINTY_MM = 1.0
     gv_benchmarks = {
-        30: {"front_mid_mm": 5.5, "f_L_range": (0.04, 0.08)},
-        60: {"front_mid_mm": 6.8, "f_L_range": (0.06, 0.11)},
-        120: {"front_mid_mm": 8.5, "f_L_range": (0.08, 0.16)},
-        360: {"front_mid_mm": 18.5, "f_L_range": (0.20, 0.28)},
-        600: {"front_mid_mm": 31.0, "f_L_range": (0.32, 0.42)},
-        1020: {"front_mid_mm": 48.0, "f_L_range": (0.48, 0.60)},
+        30: {"front_mid_mm": 5.5, "digitization_uncertainty_mm": 1.0, "f_L_range": (0.04, 0.08)},
+        60: {"front_mid_mm": 6.8, "digitization_uncertainty_mm": 1.0, "f_L_range": (0.06, 0.11)},
+        120: {"front_mid_mm": 8.5, "digitization_uncertainty_mm": 1.0, "f_L_range": (0.08, 0.16)},
+        360: {"front_mid_mm": 18.5, "digitization_uncertainty_mm": 1.0, "f_L_range": (0.20, 0.28)},
+        600: {"front_mid_mm": 31.0, "digitization_uncertainty_mm": 1.0, "f_L_range": (0.32, 0.42)},
+        1020: {"front_mid_mm": 48.0, "digitization_uncertainty_mm": 1.0, "f_L_range": (0.48, 0.60)},
     }
-    target = gv_benchmarks.get(endTime, {"front_mid_mm": 8.5, "f_L_range": (0.04, 0.60)})
+    target = gv_benchmarks.get(endTime, {"front_mid_mm": 8.5, "digitization_uncertainty_mm": 1.0, "f_L_range": (0.04, 0.60)})
     gv_front_mm = target["front_mid_mm"]
     f_L_min, f_L_max = target["f_L_range"]
 
@@ -474,7 +477,7 @@ def run_gallium3d_validation(case_dir, nx=32, ny=24, nz=16, endTime=120):
     print(f"      Direct velocity validation requires a geometry matching Gau & Viskanta (1986).")
     print(f"  - Midplane Melt Front at y = H/2   : {front_mid_height:.2f} mm")
     print(f"  - Theoretical 1D Stefan Step Limit : ~11.3 mm (Instantaneous step Dirichlet limit)")
-    print(f"  - Gau & Viskanta (1986) Experiment : {gv_front_mm:.2f} mm (traced from Fig. 5 at y/H=0.5)")
+    print(f"  - Gau & Viskanta (1986) Traced Front: {gv_front_mm:.2f} ± {DIGITIZATION_UNCERTAINTY_MM:.1f} mm (traced value from Fig. 5 at y/H=0.5)")
     print(f"  - Experimental Deviation           : {dev_gv_mm:.2f} mm")
     print(f"    * As fraction of melted front (s): {dev_melt_pct:.1f}%")
     print(f"    * As fraction of cavity width (W): {dev_gv_pct:.2f}%")
