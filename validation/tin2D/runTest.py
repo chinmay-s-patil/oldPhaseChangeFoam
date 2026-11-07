@@ -379,7 +379,7 @@ def run_tin_benchmark(case_dir, endTime=100):
     # 1. Early-time conduction regime (t = 100 s):
     # In pure tin melting with Ste = 0.01, convection has not yet established significant circulation.
     # The interface advances according to the 1D Neumann-Stefan solution s(t) = 2*lambda*sqrt(alpha*t).
-    # For Ste = 0.01: lambda = 0.07054, alpha = 4.0e-5 m^2/s => s(100 s) = 8.92 mm => f_L = 0.0892.
+    # For Ste = 0.01: lambda = 0.07059, alpha = 4.0e-5 m^2/s => s(100 s) = 8.929 mm => f_L = 0.0893.
     # 2. Late-time convective regime (t = 2500 s):
     # Hannoun et al. (2003, Section 5.4, p. 266) report f_L ~ 0.60 for the 200x200 grid;
     # Gobin & Le Quere (2000) benchmark synthesis reports f_L in [0.54, 0.57].
@@ -389,7 +389,7 @@ def run_tin_benchmark(case_dir, endTime=100):
     print(f"  - Temperature Bounds               : [{T_min:.2f}, {T_max:.2f}] K (Expected: [505.0, 508.0] K)")
 
     if endTime <= 100:
-        stefan_target = 0.0892
+        stefan_target = 0.0893
         rel_err = abs(f_L - stefan_target) / stefan_target
         print(f"  - 1D Stefan Conduction Benchmark   : {stefan_target:.4f} (Rel. Difference: {rel_err*100:.2f}%)")
         print(f"  - Full Benchmark (t = 2500 s ref)  : f_L ~ 0.60 (Hannoun et al. 2003), 0.54 - 0.57 (Gobin & Le Quere 2000)")

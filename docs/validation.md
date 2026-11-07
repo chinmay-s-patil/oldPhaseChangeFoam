@@ -166,8 +166,8 @@ Melting of pure tin in a square cavity ($L = 0.10$ m) following the physical pro
   In Table 1's bottom dimensionless summary row (p. 258), the paper printed $\text{Pr} = 0.04$ and $\text{Ra} = 2.25 \times 10^5$, whereas the text on page 255 stated: *"The tin melting configuration with $Ar = 1, \text{Ra} = 2.5 \times 10^5, \text{St} = 0.01$, and $\text{Pr} = 0.04$ is very similar to the gallium melting problem"*. A factor-of-two difference in Prandtl number ($\text{Pr} = 0.020$ vs $0.040$) alters momentum boundary layer thickness and roll merging dynamics. The case modeled in `phaseChangeFoam` strictly enforces the dimensional properties ($\text{Pr} = 0.020, \text{Ra} = 2.50 \times 10^5$).
 
 #### Quantitative Assessment
-1. **Early-Time Conduction Consistency Check ($t = 100$ s)**: Prior to strong convective circulation, the planar melt front follows the 1D Neumann-Stefan similarity solution $s(t) = 2\lambda\sqrt{\alpha t}$. For $\text{Ste} = 0.01$, $\lambda = 0.07054 \implies s(100\text{ s}) = 8.92\text{ mm} \implies f_L = 0.0892$:
-   * **Computed Liquid Fraction ($f_L$)**: $0.0881$ (**Relative difference: $-1.23\%$** vs Stefan early-conduction limit $0.0892$; regression gate $\le 5\%$ passes). This is an early-conduction consistency check rather than full verification of multidimensional melting.
+1. **Early-Time Conduction Consistency Check ($t = 100$ s)**: Prior to strong convective circulation, the planar melt front follows the 1D Neumann-Stefan similarity solution $s(t) = 2\lambda\sqrt{\alpha t}$. For $\text{Ste} = 0.01$, $\lambda = 0.07059 \implies s(100\text{ s}) = 8.929\text{ mm} \implies f_L = 0.0893$:
+   * **Computed Liquid Fraction ($f_L$)**: $0.0881$ (**Relative difference: $-1.34\%$** vs Stefan early-conduction limit $0.0893$; regression gate $\le 5\%$ passes). This is an early-conduction consistency check rather than full verification of multidimensional melting.
    * **Cavity Mean Temperature**: $505.13$ K
    * **Temperature Bounds**: $[505.00, 507.63]$ K (strictly bounded, zero unphysical overshoot)
 2. **Late-Time Convection Benchmark ($t = 2500$ s, In Progress)**: In Section 5.4 (*Volume of Melt*, p. 266, lines 18–21), Hannoun et al. report:
@@ -362,7 +362,7 @@ The current coverage across ASME V&V 20 tiers is summarized below:
 | :--- | :--- | :--- | :---: |
 | **2D Natural Convection Cavity** | Steady laminar circulation (Ra = 10^5, Pr = 0.71) across $40 \times 40 \to 80 \times 80$ grid sequence | de Vahl Davis (1983) | **Benchmarked** (Nu diff $+0.64\%$, $v_{\max}^*$ diff $+0.33\%$, $u_{\max}^*$ diff $+1.09\%$ on $80 \times 80$) |
 | **2D Pure Gallium Melting** | Transient coupled phase change & convection | Brent et al. (1988), Ye & Arıcı (2023) correlation | **Benchmarked** ($f_L$ diff $+0.58\%$ vs Ye & Arıcı 2D numerical correlation, closure $-0.13\%$) |
-| **2D Pure Tin Melting** | Early-conduction limit at $t = 100$ s; multi-roll liquid metal melting at $t = 2500$ s (Ra = 2.50e5, Pr = 0.02) | Bertrand et al. (1999), Hannoun et al. (2003), Gobin & Le Quéré (2000) | **Early-Conduction Consistency Check** ($f_L = 0.0881$ vs $0.0892$, $-1.23\%$); convective benchmark in progress |
+| **2D Pure Tin Melting** | Early-conduction limit at $t = 100$ s; multi-roll liquid metal melting at $t = 2500$ s (Ra = 2.50e5, Pr = 0.02) | Bertrand et al. (1999), Hannoun et al. (2003), Gobin & Le Quéré (2000) | **Early-Conduction Consistency Check** ($f_L = 0.0881$ vs $0.0893$, $-1.34\%$); convective benchmark in progress |
 
 ### Tier 3: Physical Experimental Validation (In Progress)
 

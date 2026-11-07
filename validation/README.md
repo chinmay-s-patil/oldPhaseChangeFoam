@@ -66,7 +66,7 @@ Steady-state solver: phaseChangeMultiRegionSimpleFoam
 - **Directory**: [`tin2D/`](tin2D/)
 - **Solver**: `phaseChangeMultiRegionFoam`
 - **Physics**: Low-Prandtl liquid metal melting in a square cavity ($\text{Ra} = 2.50 \times 10^5, \text{Pr} = 0.02, \text{Ste} = 0.01$).
-- **Status**: **PASSED** (Early-time conduction regime at $t = 100\text{ s}$: simulated $f_L = 0.0881$ matches exact 1D Stefan limit $0.0892$ within $-1.23\%$).
+- **Status**: **PASSED** (Early-time conduction regime at $t = 100\text{ s}$: simulated $f_L = 0.0881$ matches exact 1D Stefan limit $0.0893$ within $-1.34\%$).
 - **Runtime**: $\approx 15\text{ s}$.
 
 ### Rung 4: Brent, Voller, Reid (1988) / Ye & Arıcı (2023) Gallium Melting Benchmark
