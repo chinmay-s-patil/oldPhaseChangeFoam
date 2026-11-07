@@ -67,7 +67,11 @@ jobs:
 
       - name: Install Python dependencies
         run: |
-          apt-get update && apt-get install -y --no-install-recommends python3-numpy python3-matplotlib python3-pil
+          rm -f /etc/apt/sources.list.d/*openfoam* 2>/dev/null || true
+          grep -l "openfoam.com" /etc/apt/sources.list.d/* 2>/dev/null | xargs -r rm -f || true
+          sed -i '/openfoam\.com/d' /etc/apt/sources.list 2>/dev/null || true
+          apt-get update || true
+          apt-get install -y --no-install-recommends python3-numpy python3-matplotlib python3-pil
         shell: bash
 
       - name: Build phaseChangeFoam solvers
