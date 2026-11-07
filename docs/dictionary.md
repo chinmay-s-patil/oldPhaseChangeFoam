@@ -16,6 +16,8 @@ where `<regionName>` matches the region declared in `constant/regionProperties` 
 
 ## Minimal Working Templates
 
+All phase change configurations require a top-level `phaseChange` subdictionary in `constant/<regionName>/phaseChangeDict`. The solver validates keys strictly using `checkAllowedKeys()`.
+
 ### 1. Solid-Liquid PCM with Effective Heat Capacity (`EHCDarcy`)
 
 Suitable for melting in fluid or solid domains. Incorporates path-integral latent heat and Carman-Kozeny velocity damping:
@@ -30,20 +32,25 @@ FoamFile
     object      phaseChangeDict;
 }
 
-active              true;
-meltingModel        EHCDarcy;
+active          true;
 
-forward
+phaseChange
 {
-    Tsolidus        302.68;     // Solidus temperature [K]
-    Tliquidus       303.18;     // Liquidus temperature [K]
-    latentHeat      80160;      // Latent heat of fusion [J/kg]
-}
+    active          true;
+    phaseChangeMode EHCDarcy;
 
-porosity
-{
-    Cu              1.6e6;      // Darcy morphology constant [kg/(m3 s)]
-    q               1e-3;       // Porosity denominator offset [-]
+    forward
+    {
+        T_lowerBound    302.68;     // Solidus temperature [K]
+        T_upperBound    303.18;     // Liquidus temperature [K]
+        latentHeat      80160;      // Latent heat of fusion [J/kg]
+    }
+
+    porosity
+    {
+        Cu              1.6e6;      // Darcy morphology constant [kg/(m3 s)]
+        q               1e-3;       // Porosity denominator offset [-]
+    }
 }
 ```
 
@@ -61,27 +68,33 @@ FoamFile
     object      phaseChangeDict;
 }
 
-active              true;
-meltingModel        EHC;
+active          true;
 
-forward
+phaseChange
 {
-    Tsolidus        309.65;     // Melting start [K]
-    Tliquidus       310.65;     // Melting complete [K]
-    latentHeat      210000;     // Latent heat [J/kg]
-}
+    active          true;
+    phaseChangeMode EHC;
+    direction       both;
 
-reverse
-{
-    Tsolidus        308.65;     // Freezing complete [K]
-    Tliquidus       309.65;     // Freezing start [K]
-    latentHeat      210000;     // Latent heat [J/kg]
-}
+    forward
+    {
+        T_lowerBound    309.65;     // Melting start [K]
+        T_upperBound    310.65;     // Melting complete [K]
+        latentHeat      210000;     // Latent heat of fusion [J/kg]
+    }
 
-hysteresis
-{
-    enabled         true;
-    subcoolingDelta 1.0;        // Temperature offset [K]
+    reverse
+    {
+        T_lowerBound    308.65;     // Freezing complete [K]
+        T_upperBound    309.65;     // Freezing start [K]
+        latentHeat      210000;     // Latent heat of freezing [J/kg]
+    }
+
+    hysteresis
+    {
+        active              true;   // Enable path-dependent thermal hysteresis
+        reversalTolerance   1e-3;   // Reversal detection temperature tolerance [K]
+    }
 }
 ```
 
@@ -99,25 +112,29 @@ FoamFile
     object      phaseChangeDict;
 }
 
-active              true;
-meltingModel        enthalpyPorosity;
+active          true;
 
-forward
+phaseChange
 {
-    Tsolidus        302.68;     // Solidus temperature [K]
-    Tliquidus       303.18;     // Liquidus temperature [K]
-    latentHeat      80160;      // Latent heat of fusion [J/kg]
-}
+    active          true;
+    phaseChangeMode enthalpyPorosity;
 
-porosity
-{
-    Cu              1.6e6;      // Darcy morphology constant [kg/(m3 s)]
-    q               1e-3;       // Porosity denominator offset [-]
-}
+    forward
+    {
+        T_lowerBound    302.68;     // Solidus temperature [K]
+        T_upperBound    303.18;     // Liquidus temperature [K]
+        latentHeat      80160;      // Latent heat of fusion [J/kg]
+    }
 
-// Newton projection relaxation factor (keep 1.0 for linear melting window)
-lambda              1.0;
-convergenceTol      1e-4;
+    porosity
+    {
+        Cu              1.6e6;      // Darcy morphology constant [kg/(m3 s)]
+        q               1e-3;       // Porosity denominator offset [-]
+    }
+
+    lambda          1.0;        // Under-relaxation factor in (0, 1]
+    convergenceTol  1e-4;       // Convergence tolerance on max|Delta f|
+}
 ```
 
 ### 4. Species Evaporation & Boiling (`Lee`)
@@ -134,20 +151,24 @@ FoamFile
     object      phaseChangeDict;
 }
 
-active              true;
-speciesModel        Lee;
+active          true;
 
-liquid              liquid;     // Liquid species name in thermophysicalProperties
-vapor               vapor;      // Vapor species name in thermophysicalProperties
+phaseChange
+{
+    active          true;
+    type            Lee;
 
-C_evap              0.1;        // Evaporation relaxation coefficient [1/s]
-C_cond              0.1;        // Condensation relaxation coefficient [1/s]
+    liquid          liquid;     // Liquid species name in thermophysicalProperties
+    vapor           vapor;      // Vapor species name in thermophysicalProperties
 
-latentHeat          2.26e6;     // Latent heat of vaporization [J/kg]
-Tsat                373.15;     // Saturation temperature at reference pressure [K]
+    C_evap          0.1;        // Evaporation relaxation coefficient [1/s]
+    C_cond          0.1;        // Condensation relaxation coefficient [1/s]
 
-enableTsatP         false;      // Set true to enable Clausius-Clapeyron Tsat(p)
-pRef                1e5;        // Reference pressure [Pa]
+    latentHeat      2.26e6;     // Latent heat of vaporization [J/kg]
+    Tsat            373.15;     // Saturation temperature at reference pressure [K]
+    pRef            101325;     // Reference pressure [Pa]
+    enableTsatP     false;      // Set true to enable Clausius-Clapeyron Tsat(p)
+}
 ```
 
 ### 5. Fixed Source Verification Baseline (`constantSource`)
@@ -162,40 +183,47 @@ FoamFile
     object      phaseChangeDict;
 }
 
-active              true;
-speciesModel        constantSource;
+active          true;
 
-massSource          0.01;       // Net mixture mass source rate [kg/(m3 s)]
-energySource        22600.0;    // Energy source rate [W/m3]
+phaseChange
+{
+    active          true;
+    type            constantSource;
+
+    speciesName     H2O;        // Name of species receiving mass source
+    massSource      0.01;       // Net mixture mass source rate [kg/(m3 s)]
+    energySource    22600.0;    // Energy source rate [W/m3]
+}
 ```
 
 ---
 
 ## Keyword Reference Tables
 
-### Top-Level Model Selection
-| Keyword | Type | Default | Options | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| `active` | bool | `true` | `true`, `false` | Enables or disables phase change for this region |
-| `meltingModel` | word | none | `EHCDarcy`, `EHC`, `enthalpyPorosity`, `none` | Solid/PCM phase change model |
-| `speciesModel` | word | none | `Lee`, `constantSource`, `none` | Fluid species phase change model |
+### Top-Level and `phaseChange` Model Selection
+| Keyword | Scope | Type | Default | Options | Description |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `active` | Root & `phaseChange` | bool | `true` | `true`, `false` | Enables or disables phase change for this region |
+| `phaseChangeMode` / `meltingModel` | `phaseChange` | word | none | `EHCDarcy`, `EHC`, `enthalpyPorosity`, `none` | Solid/PCM phase change model |
+| `type` / `speciesModel` | `phaseChange` | word | none | `Lee`, `constantSource`, `none` | Fluid species phase change model |
+| `direction` | `phaseChange` | word | `both` | `both`, `forward`, `reverse` | Transition directionality for solid PCM |
 
 ---
 
 ### PCM Transition Subdictionaries (`forward` and `reverse`)
 | Keyword | Type | Default | Unit | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| `Tsolidus` | scalar | mandatory | K | Solidus temperature (phase fraction $\alpha = 0$) |
-| `Tliquidus` | scalar | mandatory | K | Liquidus temperature (phase fraction $\alpha = 1$) |
-| `latentHeat` | scalar | mandatory | J/kg | Latent heat of fusion $L$ |
+| `T_lowerBound` | scalar | mandatory | K | Solidus / lower bound temperature (phase fraction $\alpha = 0$) |
+| `T_upperBound` | scalar | mandatory | K | Liquidus / upper bound temperature (phase fraction $\alpha = 1$) |
+| `latentHeat` | scalar | mandatory | J/kg | Latent heat of fusion / freezing $L$ |
 
 ---
 
 ### Hysteresis Subdictionary (`hysteresis`)
 | Keyword | Type | Default | Unit | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| `enabled` | bool | `false` | - | Enables stateful directional hysteresis tracking |
-| `subcoolingDelta` | scalar | `0.0` | K | Subcooling offset $T_{\text{melt}} - T_{\text{freeze}}$ |
+| `active` | bool | `false` | - | Enables stateful directional hysteresis tracking |
+| `reversalTolerance` | scalar | `1e-3` | K | Temperature reversal detection threshold |
 
 ---
 
@@ -203,8 +231,8 @@ energySource        22600.0;    // Energy source rate [W/m3]
 Active for `EHCDarcy` and `enthalpyPorosity` when operating in fluid regions:
 | Keyword | Type | Default | Unit | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| `Cu` | scalar | `1.6e6` | kg/(m3 s) | Carman-Kozeny morphology coefficient |
-| `q` | scalar | `1e-3` | - | Small offset preventing division by zero when $\alpha \to 0$ |
+| `Cu` (or `A_cu`) | scalar | `1.6e6` | kg/(m3 s) | Carman-Kozeny morphology coefficient / Darcy resistance constant |
+| `q` (or `eps`) | scalar | `1e-3` | - | Small offset preventing division by zero when $\alpha \to 0$ |
 
 ---
 
@@ -212,18 +240,29 @@ Active for `EHCDarcy` and `enthalpyPorosity` when operating in fluid regions:
 Used when distinct solid and liquid thermal conductivities or heat capacities are specified in solid regions:
 | Keyword | Type | Default | Unit | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| `thermoMode` | word | `"none"` | `"none"`, `"custom"` | Enables custom $C_p$ and $k$ properties |
-| `Cps` | scalar | none | J/(kg K) | Solid-phase specific heat capacity |
-| `Cpl` | scalar | none | J/(kg K) | Liquid-phase specific heat capacity |
-| `ks` | scalar | none | W/(m K) | Solid-phase thermal conductivity |
-| `kl` | scalar | none | W/(m K) | Liquid-phase thermal conductivity |
+| `mode` | word | `"thermo"` | `"thermo"`, `"custom"` | Enables custom $C_p$ and $k$ properties |
+| `CpSolid` (or `Cps`) | scalar | none | J/(kg K) | Solid-phase specific heat capacity |
+| `CpLiquid` (or `Cpl`) | scalar | none | J/(kg K) | Liquid-phase specific heat capacity |
+| `kSolid` (or `ks`) | scalar | none | W/(m K) | Solid-phase thermal conductivity |
+| `kLiquid` (or `kl`) | scalar | none | W/(m K) | Liquid-phase thermal conductivity |
+
+---
+
+### Optional Density Overrides (`density`)
+| Keyword | Type | Default | Unit | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `model` | word | `"thermo"` | `"thermo"`, `"linear"` | Density formulation (`thermo`: constant conservative density) |
+| `rhoRef` | scalar | `1000.0` | kg/m3 | Reference density |
+| `rhoSolid` | scalar | `rhoRef` | kg/m3 | Solid-phase density |
+| `rhoLiquid` | scalar | `rhoRef` | kg/m3 | Liquid-phase density |
+| `allowNonConservativeDensity` | bool | `false` | - | Required `true` if $\rho_{\text{solid}} \ne \rho_{\text{liquid}}$ in solid regions |
 
 ---
 
 ### Enthalpy-Porosity Specific Settings
 | Keyword | Type | Default | Unit | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| `lambda` | scalar | `1.0` | - | Newton projection relaxation factor |
+| `lambda` | scalar | `1.0` | - | Newton projection relaxation factor in range $(0, 1]$ |
 | `convergenceTol` | scalar | `1e-4` | - | Liquid fraction convergence tolerance |
 
 ---
@@ -238,7 +277,16 @@ Used when distinct solid and liquid thermal conductivities or heat capacities ar
 | `latentHeat` | scalar | mandatory | J/kg | Latent heat of vaporization |
 | `Tsat` | scalar | `373.15` | K | Reference saturation temperature |
 | `enableTsatP` | bool | `false` | - | Enables Clausius-Clapeyron pressure dependence |
-| `pRef` | scalar | `1e5` | Pa | Reference saturation pressure |
+| `pRef` | scalar | `101325` | Pa | Reference saturation pressure |
+
+---
+
+### Fluid Phase Change Settings (`constantSource`)
+| Keyword | Type | Default | Unit | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `speciesName` | word | `"H2O"` | - | Name of species receiving mass source |
+| `massSource` | scalar | `0.0` | kg/(m3 s) | Net mixture mass source rate (or `speciesSource`) |
+| `energySource` | scalar | `-1e6` | W/m3 | Energy source rate |
 
 ---
 
@@ -273,12 +321,15 @@ maxAlphaCo      0.2;     // Limits time step based on rate of phase fraction cha
 
 ## Automatic Dictionary Generation (`writePCDict`)
 
-The [`writePCDict`](../src/utilities/writePCDict/writePCDict.C) utility automatically writes formatted `phaseChangeDict` files:
+The [`writePCDict`](../src/utilities/writePCDict/writePCDict.C) utility automatically writes formatted `phaseChangeDict` files with all valid subdictionaries and defaults:
 
 ```bash
-# Generate interactive EHC dictionary for region 'pcm'
+# Generate default template in constant/phaseChange/phaseChangeDict
+writePCDict
+
+# Generate template for region 'pcm' in constant/pcm/phaseChangeDict
 writePCDict -region pcm
 
-# Generate non-interactive Lee model dictionary
-writePCDict -region fluid -model Lee -Tsat 373.15 -L 2.26e6 -C_evap 0.1 -C_cond 0.1
+# Generate template for fluid region 'fluid' in constant/fluid/phaseChangeDict
+writePCDict -region fluid
 ```
