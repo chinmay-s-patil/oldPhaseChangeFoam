@@ -272,8 +272,8 @@ Used when distinct solid and liquid thermal conductivities or heat capacities ar
 | :--- | :--- | :--- | :--- | :--- |
 | `liquid` | word | `"liquid"` | - | Name of liquid species in thermophysical database |
 | `vapor` | word | `"vapor"` | - | Name of vapor species in thermophysical database |
-| `C_evap` | scalar | mandatory | 1/s | Evaporation rate constant |
-| `C_cond` | scalar | mandatory | 1/s | Condensation rate constant |
+| `C_evap` | scalar | `0.1` | 1/s | Evaporation rate constant |
+| `C_cond` | scalar | `0.1` | 1/s | Condensation rate constant |
 | `latentHeat` | scalar | mandatory | J/kg | Latent heat of vaporization |
 | `Tsat` | scalar | `373.15` | K | Reference saturation temperature |
 | `enableTsatP` | bool | `false` | - | Enables Clausius-Clapeyron pressure dependence |
