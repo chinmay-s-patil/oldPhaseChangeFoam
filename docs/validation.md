@@ -13,7 +13,7 @@ Guided by ASME V&V 20 / Roache (1998) principles for computational fluid dynamic
 3. **Validated (Physical Experimental Validation)**: Solving the right equations — comparing model predictions against experimental physical measurements (e.g. Gau & Viskanta 1986, Bertrand et al. 1999).
 
 > [!NOTE]
-> **Status Assessment**: `phaseChangeFoam` is **formally verified against exact analytical solutions** (Carslaw & Jaeger 1D two-phase Stefan melting, two-slab contact temperature, discrete conservation physics, and EHC hysteresis path logic) and **benchmarked against established numerical CFD literature** (de Vahl Davis 1983 natural convection, Ye & Arıcı 2023 / Brent et al. 1988 gallium melting, Hannoun et al. 2003 / Bertrand et al. 1999 tin melting).
+> **Status Assessment**: `phaseChangeFoam` is **formally verified against exact analytical solutions** (Carslaw & Jaeger 1D two-phase Stefan melting, two-slab contact temperature, discrete conservation physics, and EHC hysteresis path logic) and **benchmarked against established numerical CFD literature** (de Vahl Davis 1983 natural convection, Ye & Arıcı 2023 / Brent et al. 1988 gallium melting, and Bertrand et al. 1999 / Hannoun et al. 2003 tin early-conduction consistency check).
 > 
 > **Physical experimental validation is in progress** (3D pure gallium cavity melting vs Gau & Viskanta 1986). It is **not yet claimed as fully validated** against physical experimental datasets until multi-time front profiles with uncertainty bounds and systematic 3D grid refinement studies are completed.
 
@@ -58,19 +58,33 @@ For Slab 1 (Solid PCM: $T_1 = 300\text{ K}$, $k_1 = 2.0\text{ W/(m K)}$, $\rho_1
 The benchmark suite tests coupled non-linear flow and phase change against published numerical CFD literature:
 
 ```
-[ Rung 3: 2D Pure Tin Melting ]
-Liquid metal melting benchmark (Ra = 2.50e5, Pr = 0.02, Ste = 0.01)
-Bertrand et al. (1999) / Hannoun, Alexiades & Mai (2003)
-[Conduction verified at 100 s; late convective benchmark in progress]
-Transient solver: phaseChangeMultiRegionFoam
+[ Rung 5: 3D Pure Gallium Cavity Melting ]
+Physical test cell with no-slip sidewall braking (Gau & Viskanta 1986)
+[Preliminary screening run; physical validation in progress]
+Transient 3D solver: phaseChangeMultiRegionFoam
                ▲
+               │  (Physical experimental validation)
                │
-[ Rung 2: 2D Gallium Melting ]
+[ Rung 4: 2D Gallium Melting Benchmark ]
 Coupled phase change, Darcy mushy drag, natural convection (Ra ≈ 6.06e5, Pr = 0.0216, Ste = 0.039)
-Benchmarked against Ye & Arıcı (2023), Brent et al. (1988)
+Benchmarked against Brent et al. (1988) and Ye & Arıcı (2023)
 Transient solver: phaseChangeMultiRegionFoam
                ▲
-               │  (Verifies coupled thermal & phase change mechanics)
+               │  (Coupled convection-diffusion phase change)
+               │
+[ Rung 3: 2D Pure Tin Melting ]
+Liquid metal early-conduction check (Ra = 2.50e5, Pr = 0.02, Ste = 0.01)
+Bertrand et al. (1999) / Hannoun, Alexiades & Mai (2003)
+Transient solver: phaseChangeMultiRegionFoam
+               ▲
+               │  (Low-Prandtl number liquid metal regime)
+               │
+[ Rung 2: EHC Cyclic Thermal Hysteresis ]
+Direction-dependent melting and freezing loop with 5 K hysteresis window
+State-variable subcooling tracking and discrete energy conservation
+Transient solver: phaseChangeMultiRegionFoam
+               ▲
+               │  (Hysteresis path state logic)
                │
 [ Rung 1: 2D Natural Convection Cavity ]
 Buoyancy-driven circulation in square cavity (Ra = 10^5, Pr = 0.71)
@@ -111,7 +125,58 @@ As the grid is refined from $40 \times 40$ to $80 \times 80$, the mean Nusselt e
 
 ---
 
-### Rung 2: Gallium Melting Benchmark
+### Rung 2: EHC Cyclic Thermal Hysteresis
+
+* **Directory**: [`validation/pcmHysteresis_experimental/`](../validation/pcmHysteresis_experimental/)
+* **Solver**: `phaseChangeMultiRegionFoam`
+* **Runner**: `python3 validation/pcmHysteresis_experimental/runTest.py`
+
+#### Setup & Objectives
+Evaluates state-variable path tracking (`phaseState`, `T_reversal`) and direction-dependent effective heat capacity under cyclic thermal loading across a 5 K hysteresis window ($T_{\text{melt}} \in [308, 312]\text{ K}$, $T_{\text{freeze}} \in [303, 307]\text{ K}$):
+* **Status**: **PASSED** (100% molten charging at peak heating, complete subcooling retention maintaining liquid state down to $310.9\text{ K}$ during cooling, complete crystallization at cycle end; cyclic energy closure $< 0.01\%$).
+* **Runtime**: $\approx 2\text{ s}$.
+
+---
+
+### Rung 3: Pure Tin Melting (Bertrand et al. 1999 / Hannoun et al. 2003) [Early-Conduction Consistency Check]
+
+* **Directory**: [`validation/tin2D/`](../validation/tin2D/)
+* **Solver**: `phaseChangeMultiRegionFoam` (transient PIMPLE)
+* **Runner**: `python3 validation/tin2D/runTest.py`
+* **Status**: **Early-Conduction Consistency Check** ($t = 100$ s); convective benchmarking ($t = 2500$ s) in progress.
+
+#### Setup & Physical Properties Analysis
+Melting of pure tin in a square cavity ($L = 0.10$ m) following the physical problem formulated by Bertrand et al. (1999) and investigated by Hannoun, Alexiades, and Mai (2003, *Numer. Heat Transfer B*, 44(3), pp. 253–276):
+* **Tabulated Physical Properties (Hannoun et al. 2003, Table 1, p. 258)**:
+  * Reference density $\rho_{\text{ref}} = 7.5 \times 10^3\text{ kg/m}^3$
+  * Specific heat $c_p = 200.\text{ J/(kg}\cdot\text{K)}$
+  * Dynamic viscosity $\mu = 6.0 \times 10^{-3}\text{ N}\cdot\text{s/m}^2$
+  * Thermal conductivity $k = 60.0\text{ W/(m}\cdot\text{K)}$
+  * Volumetric thermal expansion $\beta = 2.67 \times 10^{-4}\text{ K}^{-1}$
+  * Latent heat of fusion $L_f = 6.0 \times 10^4\text{ J/kg}$ ($\text{Ste} = c_p \Delta T / L_f = 0.010$)
+  * Boundary & initial conditions: $T_h = 508.0\text{ K}$, $T_c = T_m = 505.0\text{ K}$ ($\Delta T = 3.0\text{ K}$), $g = 10.0\text{ m/s}^2$, $H = W = 0.10\text{ m}$
+
+* **Dimensional Property Calculation**:
+  Evaluating the standard dimensionless groups directly from the tabulated physical properties yields:
+  $$\nu = \frac{\mu}{\rho_{\text{ref}}} = \frac{6.0 \times 10^{-3}}{7500} = 8.0 \times 10^{-7}\text{ m}^2/\text{s}, \quad \alpha = \frac{k}{\rho_{\text{ref}} c_p} = \frac{60.0}{7500 \times 200} = 4.0 \times 10^{-5}\text{ m}^2/\text{s}$$
+  $$\text{Pr} = \frac{\nu}{\alpha} = \frac{\mu c_p}{k} = \frac{6.0 \times 10^{-3} \times 200}{60.0} = \mathbf{0.020}$$
+  $$\text{Ra} = \frac{g \beta \Delta T H^3}{\nu \alpha} = \frac{10.0 \times 2.67 \times 10^{-4} \times 3.0 \times (0.1)^3}{8.0 \times 10^{-7} \times 4.0 \times 10^{-5}} = \mathbf{2.503 \times 10^5}$$
+
+* **Discrepancy in Literature Dimensionless Values**:
+  In Table 1's bottom dimensionless summary row (p. 258), the paper printed $\text{Pr} = 0.04$ and $\text{Ra} = 2.25 \times 10^5$, whereas the text on page 255 stated: *"The tin melting configuration with $Ar = 1, \text{Ra} = 2.5 \times 10^5, \text{St} = 0.01$, and $\text{Pr} = 0.04$ is very similar to the gallium melting problem"*. A factor-of-two difference in Prandtl number ($\text{Pr} = 0.020$ vs $0.040$) alters momentum boundary layer thickness and roll merging dynamics. The case modeled in `phaseChangeFoam` strictly enforces the dimensional properties ($\text{Pr} = 0.020, \text{Ra} = 2.50 \times 10^5$).
+
+#### Quantitative Assessment
+1. **Early-Time Conduction Consistency Check ($t = 100$ s)**: Prior to strong convective circulation, the planar melt front follows the 1D Neumann-Stefan similarity solution $s(t) = 2\lambda\sqrt{\alpha t}$. For $\text{Ste} = 0.01$, $\lambda = 0.07054 \implies s(100\text{ s}) = 8.92\text{ mm} \implies f_L = 0.0892$:
+   * **Computed Liquid Fraction ($f_L$)**: $0.0881$ (**Relative difference: $-1.23\%$** vs Stefan early-conduction limit $0.0892$; regression gate $\le 5\%$ passes). This is an early-conduction consistency check rather than full verification of multidimensional melting.
+   * **Cavity Mean Temperature**: $505.13$ K
+   * **Temperature Bounds**: $[505.00, 507.63]$ K (strictly bounded, zero unphysical overshoot)
+2. **Late-Time Convection Benchmark ($t = 2500$ s, In Progress)**: In Section 5.4 (*Volume of Melt*, p. 266, lines 18–21), Hannoun et al. report:
+   > *"The value of the total liquid fraction in the cavity at time 2,500 s obtained in the present study with the 200 × 200—centered simulation is about 0.6, a value 5% larger than the largest prediction from the tin-melting benchmark exercise contributors [36]."* (Gobin & Le Quéré 2000 multi-code synthesis reported $f_L \in [0.54, 0.57]$).
+   Because convective benchmark targets depend on the resolved Prandtl number, tin remains classified as an **early-conduction consistency check** until the 2500 s transient is completed.
+
+---
+
+### Rung 4: Gallium Melting Benchmark (Brent et al. 1988 / Ye & Arıcı 2023)
 
 * **Directory**: [`validation/gallium2D/`](../validation/gallium2D/)
 * **Solver**: `phaseChangeMultiRegionFoam` (transient PIMPLE)
@@ -216,44 +281,6 @@ Sweeping $C_u$ across four orders of magnitude at $t = 17$ min:
 
 ---
 
-### Rung 3: Pure Tin Melting (Bertrand et al. 1999 / Hannoun et al. 2003) [Early-Conduction Consistency Check]
-
-* **Directory**: [`validation/tin2D/`](../validation/tin2D/)
-* **Solver**: `phaseChangeMultiRegionFoam` (transient PIMPLE)
-* **Runner**: `python3 validation/tin2D/runTest.py`
-* **Status**: **Tier 1 Early-Conduction Consistency Check** ($t = 100$ s); convective benchmarking ($t = 2500$ s) in progress.
-
-#### Setup & Physical Properties Analysis
-Melting of pure tin in a square cavity ($L = 0.10$ m) following the physical problem formulated by Bertrand et al. (1999) and investigated by Hannoun, Alexiades, and Mai (2003, *Numer. Heat Transfer B*, 44(3), pp. 253–276):
-* **Tabulated Physical Properties (Hannoun et al. 2003, Table 1, p. 258)**:
-  * Reference density $\rho_{\text{ref}} = 7.5 \times 10^3\text{ kg/m}^3$
-  * Specific heat $c_p = 200.\text{ J/(kg}\cdot\text{K)}$
-  * Dynamic viscosity $\mu = 6.0 \times 10^{-3}\text{ N}\cdot\text{s/m}^2$
-  * Thermal conductivity $k = 60.0\text{ W/(m}\cdot\text{K)}$
-  * Volumetric thermal expansion $\beta = 2.67 \times 10^{-4}\text{ K}^{-1}$
-  * Latent heat of fusion $L_f = 6.0 \times 10^4\text{ J/kg}$ ($\text{Ste} = c_p \Delta T / L_f = 0.010$)
-  * Boundary & initial conditions: $T_h = 508.0\text{ K}$, $T_c = T_m = 505.0\text{ K}$ ($\Delta T = 3.0\text{ K}$), $g = 10.0\text{ m/s}^2$, $H = W = 0.10\text{ m}$
-
-* **Dimensional Property Calculation**:
-  Evaluating the standard dimensionless groups directly from the tabulated physical properties yields:
-  $$\nu = \frac{\mu}{\rho_{\text{ref}}} = \frac{6.0 \times 10^{-3}}{7500} = 8.0 \times 10^{-7}\text{ m}^2/\text{s}, \quad \alpha = \frac{k}{\rho_{\text{ref}} c_p} = \frac{60.0}{7500 \times 200} = 4.0 \times 10^{-5}\text{ m}^2/\text{s}$$
-  $$\text{Pr} = \frac{\nu}{\alpha} = \frac{\mu c_p}{k} = \frac{6.0 \times 10^{-3} \times 200}{60.0} = \mathbf{0.020}$$
-  $$\text{Ra} = \frac{g \beta \Delta T H^3}{\nu \alpha} = \frac{10.0 \times 2.67 \times 10^{-4} \times 3.0 \times (0.1)^3}{8.0 \times 10^{-7} \times 4.0 \times 10^{-5}} = \mathbf{2.503 \times 10^5}$$
-
-* **Discrepancy in Literature Dimensionless Values**:
-  In Table 1's bottom dimensionless summary row (p. 258), the paper printed $\text{Pr} = 0.04$ and $\text{Ra} = 2.25 \times 10^5$, whereas the text on page 255 stated: *"The tin melting configuration with $Ar = 1, \text{Ra} = 2.5 \times 10^5, \text{St} = 0.01$, and $\text{Pr} = 0.04$ is very similar to the gallium melting problem"*. A factor-of-two difference in Prandtl number ($\text{Pr} = 0.020$ vs $0.040$) alters momentum boundary layer thickness and roll merging dynamics. The case modeled in `phaseChangeFoam` strictly enforces the dimensional properties ($\text{Pr} = 0.020, \text{Ra} = 2.50 \times 10^5$).
-
-#### Quantitative Assessment
-1. **Early-Time Conduction Consistency Check ($t = 100$ s)**: Prior to strong convective circulation, the planar melt front follows the 1D Neumann-Stefan similarity solution $s(t) = 2\lambda\sqrt{\alpha t}$. For $\text{Ste} = 0.01$, $\lambda = 0.07059 \implies s(100\text{ s}) = 8.93\text{ mm} \implies f_L = 0.0893$ ($0.0892$ in test script):
-   * **Computed Liquid Fraction ($f_L$)**: $0.0881$ (**Relative difference: $-1.23\%$** vs Stefan conduction limit; regression gate $\le 5\%$ passes). This is an early-conduction consistency check rather than full verification of multidimensional melting.
-   * **Cavity Mean Temperature**: $505.13$ K
-   * **Temperature Bounds**: $[505.00, 507.63]$ K (strictly bounded, zero unphysical overshoot)
-2. **Late-Time Convection Benchmark ($t = 2500$ s, In Progress)**: In Section 5.4 (*Volume of Melt*, p. 266, lines 18–21), Hannoun et al. report:
-   > *"The value of the total liquid fraction in the cavity at time 2,500 s obtained in the present study with the 200 × 200—centered simulation is about 0.6, a value 5% larger than the largest prediction from the tin-melting benchmark exercise contributors [36]."* (Gobin & Le Quéré 2000 multi-code synthesis reported $f_L \in [0.54, 0.57]$).
-   Because convective benchmark targets depend on the resolved Prandtl number, tin remains classified as **conduction-verified only** until the 2500 s transient is completed.
-
----
-
 ## 3. Physical Experimental Validation (In Progress)
 
 > [!IMPORTANT]
@@ -262,7 +289,7 @@ Melting of pure tin in a square cavity ($L = 0.10$ m) following the physical pro
 
 ---
 
-### 3D Pure Gallium Cavity Melting (Gau & Viskanta 1986)
+### Rung 5: 3D Pure Gallium Cavity Melting (Gau & Viskanta 1986) [Preliminary Screening Run]
 
 * **Directory**: [`validation/gallium3D_experimental/`](../validation/gallium3D_experimental/)
 * **Solver**: `phaseChangeMultiRegionFoam` (transient 3D PIMPLE)
@@ -325,7 +352,6 @@ The current coverage across ASME V&V 20 tiers is summarized below:
 | **EHC Thermal Hysteresis Path Logic** | Direction-dependent melting/freezing loop, subcooling state tracking | Complete cycle recovery, persistent liquid state during cooling | **Verified** (100% molten $\to$ subcooling delay $\to$ 100% solid) |
 | **Lee Model Conservation Audit** | Interspecies balance $\lvert \Delta Y_l + \Delta Y_v \rvert < 10^{-12}$, analytical rate increment agreement to $\sim 10^{-8}$, mixture mass sum $\sum Y_i = 1$ | Analytic mass & energy conservation | **Verified** (mass err $< 10^{-10}$, energy closure $< 0.01\%$) |
 | **Lee Model Tsat Relaxation** | Multi-component mixture relaxes to $T_{\text{sat}}(p)$ | Clausius-Clapeyron thermodynamic limit | **Verified** ($\lvert T - T_{\text{sat}} \rvert < 0.05$ K) |
-| **Pure Tin Conduction Limit** | Conduction regime melt front at $t = 100$ s | Similarity check ($s = 8.93$ mm) | **Consistency Check** ($f_L = 0.0881$ vs $0.0893$, $-1.23\%$) |
 | **Composite Wall Steady Conduction** | Interface energy coupling in `phaseChangeMultiRegionSimpleFoam` | Net wall heat flux error $< 0.1\%$ | Planned |
 | **Darcy Mushy Slab** (uniform $f_L$, imposed $\Delta P$) | Carman-Kozeny mushy-zone drag sink in isolation | Darcy velocity error $< 1\%$ | Planned |
 | **MMS (Method of Manufactured Solutions)** | Formal order for energy equation with smooth $C_{p,\text{eff}}(T)$ ramp | Observed order within $\pm 0.1$ of nominal | Planned |
@@ -336,7 +362,7 @@ The current coverage across ASME V&V 20 tiers is summarized below:
 | :--- | :--- | :--- | :---: |
 | **2D Natural Convection Cavity** | Steady laminar circulation (Ra = 10^5, Pr = 0.71) across $40 \times 40 \to 80 \times 80$ grid sequence | de Vahl Davis (1983) | **Benchmarked** (Nu diff $+0.64\%$, $v_{\max}^*$ diff $+0.33\%$, $u_{\max}^*$ diff $+1.09\%$ on $80 \times 80$) |
 | **2D Pure Gallium Melting** | Transient coupled phase change & convection | Brent et al. (1988), Ye & Arıcı (2023) correlation | **Benchmarked** ($f_L$ diff $+0.58\%$ vs Ye & Arıcı 2D numerical correlation, closure $-0.13\%$) |
-| **2D Pure Tin Melting (Convective)** | Multi-roll liquid metal melting ($t = 2500$ s, Ra = 2.50e5, Pr = 0.02) | Bertrand et al. (1999), Hannoun et al. (2003) | **Benchmark in Progress** (conduction verified in Tier 1; 2500 s convective run underway) |
+| **2D Pure Tin Melting** | Early-conduction limit at $t = 100$ s; multi-roll liquid metal melting at $t = 2500$ s (Ra = 2.50e5, Pr = 0.02) | Bertrand et al. (1999), Hannoun et al. (2003), Gobin & Le Quéré (2000) | **Early-Conduction Consistency Check** ($f_L = 0.0881$ vs $0.0892$, $-1.23\%$); convective benchmark in progress |
 
 ### Tier 3: Physical Experimental Validation (In Progress)
 
@@ -383,3 +409,28 @@ python3 validation/gallium2D/runTest.py
 # Rung 5: Gau & Viskanta 3D gallium melting preliminary screening run
 python3 validation/gallium3D_experimental/runTest.py
 ```
+
+---
+
+## References
+
+### Physical & Numerical Model References
+* Alexiades, V., and Solomon, A. D. (1993). *Mathematical Modeling of Melting and Freezing Processes*, Hemisphere Publishing, Washington, DC.
+* Bonacina, C., Comini, G., Fasano, A., and Primicerio, M. (1973). "Numerical solution of phase-change problems", *Int. J. Heat Mass Transfer*, 16(10), pp. 1825–1832. [DOI: 10.1016/0017-9310(73)90202-0](https://doi.org/10.1016/0017-9310(73)90202-0).
+* Carslaw, H. S., and Jaeger, J. C. (1959). *Conduction of Heat in Solids*, 2nd ed., Oxford University Press, Oxford.
+* Lee, W. H. (1980). "A Pressure Iteration Scheme for Two-Phase Flow Modeling", *Multiphase Transport: Fundamentals, Reactor Safety, Applications*, 1, pp. 407–432.
+* Roache, P. J. (1998). *Verification and Validation in Computational Science and Engineering*, Hermosa Publishers, Albuquerque, NM.
+* Voller, V. R., and Prakash, C. (1987). "A fixed grid numerical modelling methodology for convection-diffusion mushy region phase-change problems", *Int. J. Heat Mass Transfer*, 30(8), pp. 1709–1719. [DOI: 10.1016/0017-9310(87)90317-6](https://doi.org/10.1016/0017-9310(87)90317-6).
+
+### Benchmark & Validation References
+* Ben-David, O., Levy, A., and Mikic, B. (2013). "3D numerical and experimental study of gallium melting in a rectangular cavity", *Int. J. Heat Mass Transfer*, 67, pp. 260–271.
+* Bertrand, O., Binet, B., Combeau, H., Couturier, S., Delannoy, Y., Gobin, D., Lacroix, M., Le Quéré, P., Médale, M., Mencinger, J., Sadat, H., and Vieira, G. (1999). "Melting driven by natural convection: A comparison exercise. First results", *Int. J. Thermal Sci.*, 38(1), pp. 5–26. [DOI: 10.1016/S1290-0729(99)80018-8](https://doi.org/10.1016/S1290-0729(99)80018-8).
+* Bony, J., and Citherlet, S. (2007). "Numerical model and experimental validation of heat storage with phase change materials", *Energy and Buildings*, 39(10), pp. 1065–1072. [DOI: 10.1016/j.enbuild.2006.10.017](https://doi.org/10.1016/j.enbuild.2006.10.017).
+* Brent, A. D., Voller, V. R., and Reid, K. J. (1988). "Enthalpy-Porosity Technique for Modeling Convection-Diffusion Phase Change: Application to the Melting of a Pure Metal", *Numerical Heat Transfer*, 13(3), pp. 297–318. [DOI: 10.1080/10407788808913615](https://doi.org/10.1080/10407788808913615).
+* de Vahl Davis, G. (1983). "Natural convection of air in a square cavity: a bench mark numerical solution", *Int. J. Numer. Meth. Fluids*, 3(3), pp. 249–264. [DOI: 10.1002/fld.1650030305](https://doi.org/10.1002/fld.1650030305).
+* Gau, C., and Viskanta, R. (1986). "Melting and solidification of a pure metal on a vertical wall", *J. Heat Transfer*, 108(1), pp. 174–181. [DOI: 10.1115/1.3246884](https://doi.org/10.1115/1.3246884).
+* Gobin, D., and Le Quéré, P. (2000). "Melting from an Isothermal Vertical Wall: Synthesis of a Numerical Comparison Exercise", *Comput. Assist. Mech. Eng. Sci.*, 7(3), pp. 289–306.
+* Hannoun, N., Alexiades, V., and Mai, T. Z. (2003). "Resolving the Controversy over Tin and Gallium Melting in a Rectangular Cavity Heated from the Side", *Numerical Heat Transfer, Part B: Fundamentals*, 44(3), pp. 253–276. [DOI: 10.1080/10407790390226974](https://doi.org/10.1080/10407790390226974).
+* Ye, W.-B., and Arıcı, M. (2023a). "3D validation, 2D feasibility, corrected and developed correlations for pure solid-gallium phase change modeling by enthalpy-porosity methodology", *Int. Commun. Heat Mass Transfer*, 144, 106780. [DOI: 10.1016/j.icheatmasstransfer.2023.106780](https://doi.org/10.1016/j.icheatmasstransfer.2023.106780).
+* Ye, W.-B., and Arıcı, M. (2023b). "Redefined interface error, 2D verification and validation for pure solid-gallium phase change modeling by enthalpy-porosity methodology", *Int. Commun. Heat Mass Transfer*, 147, 106952. [DOI: 10.1016/j.icheatmasstransfer.2023.106952](https://doi.org/10.1016/j.icheatmasstransfer.2023.106952).
+

@@ -9,7 +9,7 @@
 
 `phaseChangeFoam` is a multi-region conjugate heat transfer (CHT) solver suite for OpenFOAM with integrated phase change physics. It provides solid-liquid phase change materials (PCM) with thermal hysteresis and Darcy mushy-zone drag, as well as species evaporation and boiling kinetics across coupled solid and fluid domains.
 
-> **Status**: Research code tested on OpenFOAM-v2412. Release v0.1.0; interfaces and keyword specifications are subject to refinement.
+> **Status**: Research code tested on OpenFOAM-v2412. Release v0.2.1; interfaces and keyword specifications are subject to refinement.
 
 ---
 
@@ -37,7 +37,7 @@
 `phaseChangeFoam` is derived from OpenFOAM's `chtMultiRegionFoam` (OpenCFD / ESI-OpenCFD), inheriting its multi-region conjugate heat transfer structure and monolithic coupled energy framework (`coupledEnergyField`, `useImplicit`). The primary additions are:
 
 * **Thermal hysteresis in solid-liquid PCM**: Stateful direction-dependent melting and freezing paths with subcooling tracking (`phaseState`, `T_reversal`).
-* **Effective Heat Capacity formulation (`EHCDarcy`, `EHC`)**: Directly incorporates latent heat into cell capacity $C_{p,\text{eff}}$, providing robust energy closure at low outer correctors ($n_{\text{outer}} = 3\text{--}4$) without requiring the extensive outer corrector passes ($n_{\text{outer}} \ge 8$) needed by Enthalpy-Porosity to converge source-term updates.
+* **Effective Heat Capacity formulation (`EHCDarcy`, `EHC`)**: Directly incorporates latent heat into cell capacity $C_{p,\text{eff}}$, meeting the $\le 2.0\%$ energy closure gate at low outer correctors ($n_{\text{outer}} = 3$) in 15.6 s (2-min benchmark), enabling fast runtime without relying on extensive outer corrector passes.
 * **Adaptive time-step limiting (`maxAlphaCo`)**: Constrains $\Delta t$ based on maximum cell-wise rate of phase fraction change, preventing the interface from stepping over cells without resolving the transition.
 * **Volumetric species phase change (`Lee`)**: Implements volumetric evaporation and boiling coupled with multi-component species transport across solid-fluid conjugate boundaries (in contrast to free-surface VOF solvers such as `interCondensatingEvaporatingFoam` which resolve sharp liquid-gas interfaces).
 
@@ -52,13 +52,12 @@ Guided by ASME V&V 20 / Roache (1998) principles for computational fluid dynamic
 * **Two-Slab Contact Temperature (Carslaw & Jaeger 1959)**: Semi-infinite conjugate interface contact temperature $T_i = (e_1 T_1 + e_2 T_2)/(e_1 + e_2)$ across solid-PCM boundary. Computed $T_i = 366.75$ K matches analytical $366.67$ K with **0.024% relative error** ($\Delta T = 0.088$ K, gate: $\le 0.1\%$).
 * **Lee Model Conservation Audit & Tsat Relaxation**: Thermodynamic verification: interspecies mass closure ($\lvert \Delta Y_l + \Delta Y_v \rvert < 10^{-12}$), analytical rate increment agreement to $\sim 10^{-8}$, total mixture mass sum ($\sum Y_i = 1$), discrete energy closure $< 0.01\%$, and interface temperature relaxation to Clausius-Clapeyron $T_{\text{sat}}(p)$ within $0.05$ K (committed artifact in `verification/leeModel/`).
 * **EHC Thermal Hysteresis Path Logic**: Verifies state-variable tracking (`phaseState`, `T_reversal`) and direction-dependent capacity paths under cyclic thermal loading (100% molten charging $\to$ subcooling retention at $310.9$ K $\to$ 100% crystallized discharge).
-* **Pure Tin Early-Conduction Check (Bertrand et al. 1999 / Hannoun et al. 2003)**: Modeled with case dimensional properties yielding $\text{Ra} = 2.50 \times 10^5, \text{Pr} = 0.020, \text{Ste} = 0.010$. At $t = 100$ s, computed $f_L = 0.0881$ matches the 1D Stefan similarity check ($0.0893$, $-1.23\%$).
 * **Conservation Laws & Write Precision**: Discrete mass conservation error $< 10^{-10}$, energy closure $< 0.01\%$, and restart-consistent to write precision ($< 10^{-9}$ K difference).
 
 ### Tier 2: Benchmarked (Numerical CFD Literature)
 * **Steady Natural Convection Cavity (de Vahl Davis 1983)**: Ra = $10^5$, Pr = $0.71$. Evaluated across a grid convergence sequence ($40 \times 40 \to 50 \times 50 \to 80 \times 80$). Mean Nusselt converges monotonically to $\overline{\text{Nu}} = 4.5478$ (+0.64% vs 4.519 benchmark on $80 \times 80$), while peak velocities match within 1–2% ($v_{\max}^* = 68.82$, +0.33%; $u_{\max}^* = 35.11$, +1.09%).
 * **2D Pure Gallium Melting (Brent et al. 1988, Ye & Arıcı 2023)**: Ra ≈ $6.06 \times 10^5$, Pr = $0.0216$, Ste = $0.0391$. Simulated $f_L(17\text{ min}) = 0.5736$ agrees within **+0.58%** with the 2D grid-converged numerical correlation of Ye & Arıcı (2023, Vol. 144, 106780, Eq. 6: $0.5703$). Discrete energy closure is **-0.13%** evaluated via right-endpoint Riemann flux summation. A systematic positive offset relative to Brent et al. (1988: $0.5334$) is observed across all times; later literature reports higher values ($f_L \approx 0.570\text{--}0.574$), but the root cause of the offset against Brent's 1988 result has not been isolated.
-* **2D Pure Tin Convective Melting (In Progress)**: Late-time multi-roll convective benchmark ($t = 2500$ s, target $f_L \approx 0.60$ Hannoun 2003 / $[0.54, 0.57]$ Gobin & Le Quéré 2000) is underway; early conduction regime is verified in Tier 1.
+* **2D Pure Tin Melting (Early-Conduction Consistency Check; Convection in Progress)** (Bertrand et al. 1999 / Hannoun et al. 2003): Modeled with case dimensional properties yielding $\text{Ra} = 2.50 \times 10^5, \text{Pr} = 0.020, \text{Ste} = 0.010$. At $t = 100$ s, computed $f_L = 0.0881$ matches the 1D Stefan similarity limit ($0.0892$, $-1.23\%$) as an early-conduction consistency check. Late-time multi-roll convective benchmark ($t = 2500$ s, target $f_L \approx 0.60$ Hannoun et al. 2003 / $[0.54, 0.57]$ Gobin & Le Quéré 2000) is in progress.
 
 ![Gallium 2D Melting Animation](docs/images/gallium_melting_brent_comparison.gif)
 
@@ -168,9 +167,11 @@ To cite the `phaseChangeFoam` software, see [`CITATION.cff`](CITATION.cff).
 ### Benchmark and Experimental Validation References
 
 * Ben-David, O., Levy, A., and Mikic, B. (2013). "3D numerical and experimental study of gallium melting in a rectangular cavity", *Int. J. Heat Mass Transfer*, 67, pp. 260–271.
+* Bertrand, O., Binet, B., Combeau, H., Couturier, S., Delannoy, Y., Gobin, D., Lacroix, M., Le Quéré, P., Médale, M., Mencinger, J., Sadat, H., and Vieira, G. (1999). "Melting driven by natural convection: A comparison exercise. First results", *Int. J. Thermal Sci.*, 38(1), pp. 5–26. [DOI: 10.1016/S1290-0729(99)80018-8](https://doi.org/10.1016/S1290-0729(99)80018-8).
 * Bony, J., and Citherlet, S. (2007). "Numerical model and experimental validation of heat storage with phase change materials", *Energy and Buildings*, 39(10), pp. 1065–1072. [DOI: 10.1016/j.enbuild.2006.10.017](https://doi.org/10.1016/j.enbuild.2006.10.017).
 * de Vahl Davis, G. (1983). "Natural convection of air in a square cavity: a bench mark numerical solution", *Int. J. Numer. Meth. Fluids*, 3(3), pp. 249–264. [DOI: 10.1002/fld.1650030305](https://doi.org/10.1002/fld.1650030305).
 * Gau, C., and Viskanta, R. (1986). "Melting and solidification of a pure metal on a vertical wall", *J. Heat Transfer*, 108(1), pp. 174–181. [DOI: 10.1115/1.3246884](https://doi.org/10.1115/1.3246884).
+* Gobin, D., and Le Quéré, P. (2000). "Melting from an Isothermal Vertical Wall: Synthesis of a Numerical Comparison Exercise", *Comput. Assist. Mech. Eng. Sci.*, 7(3), pp. 289–306.
 * Hannoun, N., Alexiades, V., and Mai, T. Z. (2003). "Resolving the Controversy over Tin and Gallium Melting in a Rectangular Cavity Heated from the Side", *Numerical Heat Transfer, Part B: Fundamentals*, 44(3), pp. 253–276. [DOI: 10.1080/10407790390226974](https://doi.org/10.1080/10407790390226974).
 * Roache, P. J. (1998). *Verification and Validation in Computational Science and Engineering*, Hermosa Publishers, Albuquerque, NM.
 * Ye, W.-B., and Arıcı, M. (2023a). "3D validation, 2D feasibility, corrected and developed correlations for pure solid-gallium phase change modeling by enthalpy-porosity methodology", *Int. Commun. Heat Mass Transfer*, 144, 106780. [DOI: 10.1016/j.icheatmasstransfer.2023.106780](https://doi.org/10.1016/j.icheatmasstransfer.2023.106780).
