@@ -263,7 +263,7 @@ Used when distinct solid and liquid thermal conductivities or heat capacities ar
 | Keyword | Type | Default | Unit | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | `lambda` | scalar | `1.0` | - | Newton projection relaxation factor in range $(0, 1]$ |
-| `convergenceTol` | scalar | `1e-4` | - | Liquid fraction convergence tolerance |
+| `convergenceTol` | scalar | `0.01` | - | Liquid fraction convergence tolerance |
 
 ---
 
