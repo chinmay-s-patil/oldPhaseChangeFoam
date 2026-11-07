@@ -197,13 +197,13 @@ phaseChange
 {
     active              true;
     phaseChangeMode     EHC;
-    melting
+    forward
     {
         T_lowerBound    308.0;
         T_upperBound    312.0;
         latentHeat      160000.0;
     }
-    freezing
+    reverse
     {
         T_lowerBound    303.0;
         T_upperBound    307.0;

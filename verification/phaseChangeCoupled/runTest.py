@@ -125,8 +125,8 @@ active true;
 phaseChange
 {
     active true; phaseChangeMode EHC;
-    melting { T_lowerBound 300.0; T_upperBound 310.0; latentHeat 100000.0; }
-    freezing { T_lowerBound 300.0; T_upperBound 310.0; latentHeat 100000.0; }
+    forward { T_lowerBound 300.0; T_upperBound 310.0; latentHeat 100000.0; }
+    reverse { T_lowerBound 300.0; T_upperBound 310.0; latentHeat 100000.0; }
     hysteresis { active true; }
     density { model constant; rhoRef 1000.0; }
     thermophysical { mode custom; CpSolid 2000.0; CpLiquid 2000.0; kSolid 2.0; kLiquid 0.50; }
@@ -242,8 +242,8 @@ active true;
 phaseChange
 {
     active true; phaseChangeMode EHC;
-    melting { T_lowerBound 300.0; T_upperBound 310.0; latentHeat 100000.0; }
-    freezing { T_lowerBound 300.0; T_upperBound 310.0; latentHeat 100000.0; }
+    forward { T_lowerBound 300.0; T_upperBound 310.0; latentHeat 100000.0; }
+    reverse { T_lowerBound 300.0; T_upperBound 310.0; latentHeat 100000.0; }
     hysteresis { active true; }
     density { model constant; rhoRef 1000.0; }
     thermophysical { mode custom; CpSolid 2000.0; CpLiquid 2000.0; kSolid 2.0; kLiquid 0.50; }

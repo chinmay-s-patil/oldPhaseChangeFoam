@@ -306,7 +306,7 @@ phaseChange {
     active true;
     phaseChangeMode EHC;
     convection { suppress false; }
-    melting { T_lowerBound 300.0; T_upperBound 310.0; latentHeat 163000.0; }
+    forward { T_lowerBound 300.0; T_upperBound 310.0; latentHeat 163000.0; }
 }
 """)
     res1 = run_cmd(f"cd {c1_dir} && bash -c '{of_env}; {solver_bin}'", allow_failure=True)
@@ -326,7 +326,7 @@ phaseChange {
     active true;
     phaseChangeMode EHC;
     hysteresis { active true; }
-    melting { T_lowerBound 300.0; T_upperBound 310.0; latentHeat 163000.0; }
+    forward { T_lowerBound 300.0; T_upperBound 310.0; latentHeat 163000.0; }
 }
 """)
     # Write legacy liquidFraction file in 0/pcm (0.5 everywhere)
@@ -353,7 +353,7 @@ phaseChange {
     active true;
     phaseChangeMode EHC;
     hysteresis { active false; }
-    melting { T_lowerBound 300.0; T_upperBound 310.0; latentHeat 163000.0; }
+    forward { T_lowerBound 300.0; T_upperBound 310.0; latentHeat 163000.0; }
 }
 """)
     res3 = run_cmd(f"cd {c3_dir} && bash -c '{of_env}; {solver_bin}'")
