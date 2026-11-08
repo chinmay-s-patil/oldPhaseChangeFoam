@@ -53,9 +53,9 @@ For Slab 1 (Solid PCM: $T_1 = 300\text{ K}$, $k_1 = 2.0\text{ W/(m K)}$, $\rho_1
 
 ---
 
-## 2. Benchmarked: Code-to-Code Numerical Benchmarks
+## 2. Validation Ladder: Numerical Benchmarks and Model-Logic Tests
 
-The benchmark suite tests coupled non-linear flow and phase change against published numerical CFD literature:
+The validation ladder tests coupled non-linear flow and phase change against published numerical CFD literature and model-logic verification cases:
 
 ```
 [ Rung 5: 3D Pure Gallium Cavity Melting ]
@@ -219,63 +219,22 @@ $$1.67\text{ mm (1.88% } W) \to 1.87\text{ mm (2.10% } W) \to 2.35\text{ mm (2.6
 * These deviations are on the order of the front's diffuse numerical interface thickness ($\Delta x = W/42 = 2.12$ mm, $\Delta T_m = 0.5$ K).
 * The simulation passes the user-defined CI regression gates ($\Delta f_L \le 0.05$ and $\Delta x_{\text{front}} \le 5.0\% W = 4.45\text{ mm}$). However, the late-time simulated liquid fraction ($0.5736$) sits with a narrow margin of $0.0402$ inside the $0.05$ liquid-fraction window relative to Brent ($0.5334$), and the late-time front deviation ($3.46$ mm) approaches the $4.45$ mm threshold.
 
-#### Discrete Energy Balance Formulation
+#### Discrete Energy Balance & Formulation Summary
 
-In OpenFOAM's finite-volume formulation with implicit backward-Euler time discretization (`Euler ddtScheme`), discrete energy storage over time step $\Delta t_n$ is evaluated at time level $t^n$:
-$$\Delta E_{\text{stored}}^n = \dot{Q}_{\text{net}}(t^n)\,\Delta t_n$$
-Discrete boundary energy input is evaluated as the right-endpoint Riemann sum:
-$$E_{\text{net, in}}(t_N) = \sum_{n=1}^N \dot{Q}_{\text{net}}(t_n)\,\Delta t_n = \sum_{n=1}^N \left[\dot{Q}_{\text{hot}}(t_n) - \dot{Q}_{\text{cold, out}}(t_n)\right]\,\Delta t_n$$
-Using composite trapezoidal quadrature introduces an artificial non-physical offset ($+3.63$ J at 2 min) because the intense initial conduction surge ($\dot{Q}(0.1\text{ s}) \approx 81$ W) decays rapidly. Evaluating the energy audit using right-endpoint summation ensures mathematical consistency with backward-Euler discrete equations.
+In OpenFOAM's finite-volume formulation with implicit backward-Euler time discretization (`Euler ddtScheme`), discrete energy storage over time step $\Delta t_n$ is evaluated at time level $t^n$. Evaluating boundary energy input using the conjugate **right-endpoint Riemann sum** ($E_{\text{net, in}} = \sum \dot{Q}_{\text{net}}(t_n)\Delta t_n$) achieves exact discrete mathematical consistency with the backward-Euler equations, eliminating the artificial $+3.63\text{ J}$ offset introduced by composite trapezoidal quadrature on the initial conduction surge.
 
----
+- **EHCDarcy Efficiency**: Achieves strictly bounded energy closure ($|\epsilon_{\text{energy}}| \le 0.38\%$) with only $n_{\text{outer}} = 3$ passes ($15.6\text{ s}$ CPU), whereas explicit Enthalpy-Porosity requires $n_{\text{outer}} \ge 10\text{--}12$ passes ($56.6\text{ s}$ CPU) to damp Newton oscillations below $0.5\%$.
+- **Startup Transient**: Halving $\Delta t$ ($0.10 \to 0.05\text{ s}$) reduces the small remaining 2-minute deficit by $76.7\%$, confirming it as a temporal startup artifact rather than a formulation defect.
 
-### Spatial Grid Convergence & GCI (EHCDarcy)
+#### Summary of Spatial Sensitivity & Parametric Sweeps
 
-Three structured meshes were evaluated to $t = 17$ min:
-* Grid 3 (Coarse): $32 \times 24$ (768 cells, cell area metric $h_3 = 2.71$ mm)
-* Grid 2 (Medium): $42 \times 32$ (1344 cells, $\Delta x = 2.12$ mm, $\Delta y = 1.98$ mm, cell area metric $h_2 = 2.05$ mm, $r_{32} = 1.322$)
-* Grid 1 (Fine): $63 \times 48$ (3024 cells, $\Delta x = 1.41$ mm, $\Delta y = 1.32$ mm, cell area metric $h_1 = 1.37$ mm, $r_{21} = 1.500$)
+- **Spatial Grid Convergence**: Three structured grids ($32 \times 24$, $42 \times 32$, $63 \times 48$) yield an apparent mid-height front order of $p = 2.70$, with fine-grid $\text{GCI}_{\text{fine}} = 0.67\%$ and medium-grid $\text{GCI}_{\text{med}} = 2.04\%$. Global liquid fraction varies by only $0.0054$ ($0.94\%$) across all grids. Because global $f_L$ exhibits slight non-monotonicity ($0.5682 \to 0.5736 \to 0.5725$), formal asymptotic Richardson extrapolation is restricted to local front coordinates.
+- **Darcy Constant ($C_u \in [10^4, 10^8]\text{ kg/(m}^3\text{ s)}$)**: Increasing damping slightly retards circulation and reduces front tilt ($x_{0.8}/x_{0.2} = 2.74 \to 2.30$), with the baseline literature value $1.6 \times 10^6$ providing stable convection.
+- **Melting Window ($\Delta T_{\text{melt}} \in [0.1, 0.5]\text{ K}$)**: Narrowing the window shifts late-time $f_L$ by only $0.0009$ ($0.16\%$), confirming numerical insensitivity.
 
-#### Mid-Height Phase Front ($y/H = 0.5$ at $17$ min)
-* Computed positions: $x_{\text{front}} = 56.01$ mm (coarse) $\to 57.06$ mm (medium) $\to 57.68$ mm (fine).
-* **Apparent spatial order**: $p = 2.70$ (evaluated from three structured meshes). Because $p$ exceeds the formal second-order spatial discretization and the three grids are relatively coarse, true asymptotic range cannot be claimed; this elevated apparent order reflects local interface sharpness and non-linear phase transitions across the discrete mesh.
-* **Richardson Extrapolated Front**: $\phi_{\text{ext}} = 57.99$ mm.
-* **Grid Convergence Index (GCI)**:
-  * Medium grid: $\text{GCI}_{\text{med}}^{32} = 2.04\%$
-  * Fine grid: $\text{GCI}_{\text{fine}}^{21} = 0.67\%$
-  * These GCI values are reported as apparent mesh-sensitivity indices under the ASME V&V 20 procedure rather than strict asymptotic discretization error bounds, particularly given the non-monotonic behavior of the integrated liquid fraction.
-
-> [!WARNING]
-> **Non-Monotonicity of Global Liquid Fraction and Asymptotic Range**: While the mid-height front position converges monotonically across these three grids, global liquid fraction $f_L(17\text{ min})$ exhibits slight non-monotonicity across grids: $0.5682 \to 0.5736 \to 0.5725$. Total spread across all grids is $0.0054$ ($0.94\%$), confirming spatial insensitivity beyond $42 \times 32$, but formal asymptotic range and Richardson extrapolation cannot be strictly claimed for global $f_L$.
-
----
-
-### Parametric Sensitivity Studies (EHCDarcy)
-
-Comprehensive sweeps from the extended analysis report ([`ANALYSIS_REPORT.md`](../validation/gallium2D/analysis/ANALYSIS_REPORT.md)) establish parameter sensitivities:
-
-#### 1. Temporal Discretization ($\Delta t$ Halving)
-* $\Delta t = 0.10$ s (1,200 steps): $f_L(2\text{m}) = 0.1303$, 2-min energy deficit = $-6.43$ J ($-0.341\%$).
-* $\Delta t = 0.05$ s (2,400 steps): $f_L(2\text{m}) = 0.1305$, 2-min energy deficit = $-1.50$ J ($-0.080\%$).
-* $\Delta t = 0.025$ s (4,800 steps): $f_L(2\text{m}) = 0.1306$, mid-height front shifts by only $0.03$ mm.
-* Halving $\Delta t$ cuts the startup conservation deficit by **76.7%**, confirming that remaining energy discrepancy is a temporal startup discretization artifact rather than a formulation defect.
-
-#### 2. Darcy Porosity Damping Constant ($C_u \in [10^4, 10^8]\text{ kg/(m}^3\text{ s)}$)
-Sweeping $C_u$ across four orders of magnitude at $t = 17$ min:
-
-| Darcy Constant $C_u$ | $f_L(10\text{ min})$ | $f_L(17\text{ min})$ | $\overline{\text{Nu}}_{\text{hot}}(17\text{ min})$ | Front Tilt ($x_{0.8}/x_{0.2}$) |
-| :--- | :---: | :---: | :---: | :---: |
-| $1.0 \times 10^4$ (weak damping) | $0.3906$ | $0.5987$ | $4.74$ | $2.74$ |
-| $1.0 \times 10^5$ | $0.3817$ | $0.5848$ | $4.62$ | $2.55$ |
-| **$1.6 \times 10^6$ (baseline)** | **$0.3747$** | **$0.5736$** | **$4.50$** | **$2.41$** |
-| $1.0 \times 10^7$ | $0.3720$ | $0.5694$ | $4.47$ | $2.35$ |
-| $1.0 \times 10^8$ (severe damping) | $0.3703$ | $0.5667$ | $4.44$ | $2.30$ |
-
-#### 3. Numerical Melting Window ($\Delta T_{\text{melt}} \in [0.1, 0.5]\text{ K}$)
-* $\Delta T_{\text{melt}} = 0.1$ K ($302.93 \pm 0.05$ K): $f_L(17\text{ min}) = 0.5727$
-* $\Delta T_{\text{melt}} = 0.2$ K ($302.93 \pm 0.10$ K): $f_L(17\text{ min}) = 0.5728$
-* $\Delta T_{\text{melt}} = 0.5$ K ($302.93 \pm 0.25$ K, baseline): $f_L(17\text{ min}) = 0.5736$
-* Varying $\Delta T_{\text{melt}}$ from $0.5$ K down to $0.1$ K shifts $f_L(17\text{ min})$ by only $0.0009$ ($0.16\%$).
+> [!NOTE]
+> **Authoritative Gallium Verification Report**:  
+> For complete step-resolved energy audit histories, algebraic derivations of post-processing quadrature artifacts, full ASME V&V 20 GCI convergence tables, and exhaustive parametric sweeps, see the standalone [`ANALYSIS_REPORT.md`](../validation/gallium2D/analysis/ANALYSIS_REPORT.md).
 
 ---
 
@@ -389,7 +348,7 @@ python3 verification/runAll.py
 python3 validation/runAll.py --fast
 ```
 
-### Full Validation Ladder (All 5 benchmark and screening rungs, ~3.5 min)
+### Full Validation Ladder (All five validation rungs, ~3.5 min)
 ```bash
 python3 validation/runAll.py
 ```

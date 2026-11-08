@@ -9,7 +9,7 @@
 
 `phaseChangeFoam` is a multi-region conjugate heat transfer (CHT) solver suite for OpenFOAM with integrated phase change physics. It provides solid-liquid phase change materials (PCM) with thermal hysteresis and Darcy mushy-zone drag, as well as species evaporation and boiling kinetics across coupled solid and fluid domains.
 
-> **Status**: Research code tested on OpenFOAM-v2412. Release v0.2.1; interfaces and keyword specifications are subject to refinement.
+> **Status**: Research code tested on OpenFOAM-v2412. Release v0.1.0; interfaces and keyword specifications are subject to refinement.
 
 ---
 
@@ -67,9 +67,9 @@ Compiled binaries (`phaseChangeMultiRegionFoam`, `phaseChangeMultiRegionSimpleFo
 A container image pre-equipped with OpenFOAM-v2412 and compiled `phaseChangeFoam` binaries is available via GitHub Container Registry:
 
 ```bash
-# Pull and start an interactive simulation shell mounting current directory (pinned release v0.2.1)
+# Pull and start an interactive simulation shell mounting current directory (pinned release v0.1.0)
 docker run --rm -it -v "$PWD":/home/openfoam/run -w /home/openfoam/run \
-    ghcr.io/chinmay-s-patil/phasechangefoam:v0.2.1
+    ghcr.io/chinmay-s-patil/phasechangefoam:v0.1.0
 ```
 
 ---
@@ -90,9 +90,11 @@ python3 verification/runAll.py
 # 2. Validation ladder fast gate (Rung 1 natural convection & cyclic hysteresis path-logic, ~5 s)
 python3 validation/runAll.py --fast
 
-# 3. Full validation ladder (All 5 benchmark and experimental rungs, ~3.5 min)
+# 3. Full validation ladder (All five validation rungs, ~3.5 min)
 python3 validation/runAll.py
 ```
+
+For an overview of the validation benchmarks, their individual test cases, and reference data, see [`validation/README.md`](validation/README.md).
 
 ---
 
@@ -104,7 +106,6 @@ Detailed reference documentation is versioned in the [`docs/`](docs/) directory:
 | :--- | :--- |
 | [`docs/models.md`](docs/models.md) | Governing equations, thermodynamic consistency, species evaporation, and PCM formulations |
 | [`docs/dictionary.md`](docs/dictionary.md) | Keyword reference tables, minimal templates per model, and solver controls |
-| [`docs/case-setup.md`](docs/case-setup.md) | Case setup guide and reference case navigation |
 | [`docs/validation.md`](docs/validation.md) | Verification and validation guide: analytic suites, benchmark ladder, sensitivity studies, and experimental roadmap |
 | [`docs/development.md`](docs/development.md) | Code architecture, PIMPLE execution sequence, Picard loop, and adding new models |
 
@@ -188,7 +189,7 @@ If you use `phaseChangeFoam` in your research or publications, please cite it as
 @software{patil2026phasechangefoam,
   author       = {Patil, Chinmay S.},
   title        = {{phaseChangeFoam}: Multi-Region Phase Change and Conjugate Heat Transfer Suite for {OpenFOAM}},
-  version      = {0.2.1},
+  version      = {0.1.0},
   year         = {2026},
   url          = {https://github.com/chinmay-s-patil/phaseChangeFoam}
 }

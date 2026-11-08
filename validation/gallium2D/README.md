@@ -15,55 +15,19 @@ Solvers: `phaseChangeMultiRegionFoam` (OpenFOAM-v2412).
 
 ---
 
-## 2. Modeling Recommendations & Formulations
+## 2. Numerical Configuration
 
-### Recommended Default: `EHCDarcy`
+The baseline benchmark uses the `EHCDarcy` formulation with a $42 \times 32$ structured mesh and a time step of $\Delta t = 0.1\text{ s}$.
 
-For fluid-region liquid metal melting with natural convection, **`EHCDarcy` is the documented default formulation**:
+For this benchmark configuration, `EHCDarcy` accounts for sensible heat-capacity variation through the path-based effective heat capacity with linearised latent heat sources, achieving discrete energy closure ($|\epsilon_{\text{energy}}| \le 0.38\%$) within the specified regression tolerance using three outer correctors ($n_{\text{outer}} = 3$).
 
-- **Formulation**: Path-integral effective heat capacity $C_p^{\text{eff}}(T)$ with Carman-Kozeny Darcy porosity damping.
-- **Energy Conservation**: Directly incorporates latent heat into the left-hand matrix capacity, achieving discrete energy conservation ($|\epsilon_{\text{energy}}| \le 0.38\%$) with only $n_{\text{outer}} = 3$ ($15.6\text{ s}$ CPU time for 1,200 time steps), and $-0.13\%$ over the full 17-minute transient.
-- **Monotonic Convergence**: Energy closure is strictly monotonic and bounded within $[-0.38\%, -0.34\%]$ for all $n_{\text{outer}} \ge 3$.
-- **Efficiency**: $3.6\times$ cheaper in CPU execution time and requires $75\%$ fewer outer corrector passes than Enthalpy-Porosity to achieve comparable discrete conservation.
+The alternative `enthalpyPorosity` formulation (Brent et al. 1988) updates liquid fraction via Newton projection. For this benchmark problem, under-relaxation with $\lambda = 0.2$ leads to incomplete latent heat addition per time step unless compensated by additional outer correctors, whereas the full Newton step ($\lambda = 1.0$) requires higher corrector counts ($n_{\text{outer}} \ge 10\text{--}12$) to achieve comparable energy conservation.
 
-### Alternative: `enthalpyPorosity` (Brent et al. 1988)
-
-Enthalpy-Porosity updates the liquid fraction explicitly after the sensible enthalpy solve via Newton projection:
-
-$$
-f_{\text{new}} = \min\left(\max\left(f + \lambda \frac{T - T_f}{L/C_p + \Delta T_{\text{window}}}, 0\right), 1\right)
-$$
-
-#### Practical Numerical Guidance:
-
-1. **Newton Relaxation Factor ($\lambda$)**:
-   - Always maintain code-default **`lambda 1.0`** (the exact Newton step for a linear melting window).
-   - **Never use under-relaxation $\lambda = 0.2$** in standard production runs. Under $\lambda = 0.2$, each outer pass corrects only $20\%$ of the Newton increment, causing incomplete latent heat addition and massive non-conservation ($+7.35\%$ energy surplus at 2 min, $+7.49\%$ at 17 min with $n_{\text{outer}}=8$; and $+2.86\%$ even at $n_{\text{outer}}=12$).
-2. **PIMPLE Outer Correctors ($n_{\text{outer}}$)**:
-   - Under $\lambda = 1.0$, explicit latent heat updates exhibit damped, under-relaxed Newton oscillations: $+56.8\%$ surplus at $n=2$, $+11.3\%$ at $n=3$, overshooting to $-7.3\%$ deficit at $n=5$, crossing zero near $n=7\text{--}8$ ($-0.06\%$).
-   - To reliably settle within $\le 0.3\text{--}0.5\%$ closure across all conditions, `enthalpyPorosity` requires **$n_{\text{outer}} \ge 10\text{--}12$** ($56.6\text{ s}$ CPU time for 14,400 outer passes).
+Detailed comparisons between `EHCDarcy` and `enthalpyPorosity`, including relaxation-factor sensitivity, backward-Euler energy quadrature, and computational cost, are documented in [ANALYSIS_REPORT.md](analysis/ANALYSIS_REPORT.md).
 
 ---
 
-## 3. Discrete Energy Conservation Audit & Quadrature
-
-In OpenFOAM's finite-volume formulation with implicit backward-Euler time discretization (`Euler ddtScheme`), the discrete storage change satisfies:
-
-$$
-\Delta E_{\text{stored}}^n = \dot{Q}_{\text{net}}(t^n)\,\Delta t_n
-$$
-
-The exact discrete boundary-flux conjugate is the **right-endpoint Riemann sum**:
-
-$$
-E_{\text{net, in}}(t_N) = \sum_{n=1}^N \dot{Q}_{\text{net}}(t_n)\,\Delta t_n
-$$
-
-Using composite trapezoidal quadrature adds an artificial offset $+\frac{\dot{Q}_1 - \dot{Q}_N}{2}\Delta t \approx +3.6\text{ J}$ due to the intense early conduction spike ($\approx 81\text{ W}$ at $0.1\text{ s}$). Right-endpoint quadrature eliminates this artifact, matching OpenFOAM's discrete matrix equations exactly.
-
----
-
-## 4. Benchmark Execution
+## 3. Benchmark Execution
 
 ### Quick Verification Run (2 Minutes, Baseline Grid $42 \times 32$)
 

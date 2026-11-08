@@ -48,7 +48,7 @@ phaseChange
 
     porosity
     {
-        Cu              1.6e6;      // Darcy morphology constant [kg/(m3 s)]
+        Cu              1.6e6;      // Benchmark value (default: 1e5) [kg/(m3 s)]
         q               1e-3;       // Porosity denominator offset [-]
     }
 }
@@ -128,7 +128,7 @@ phaseChange
 
     porosity
     {
-        Cu              1.6e6;      // Darcy morphology constant [kg/(m3 s)]
+        Cu              1.6e6;      // Benchmark value (default: 1e5) [kg/(m3 s)]
         q               1e-3;       // Porosity denominator offset [-]
     }
 

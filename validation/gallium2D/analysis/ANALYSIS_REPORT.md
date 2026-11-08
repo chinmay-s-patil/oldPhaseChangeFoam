@@ -189,7 +189,7 @@ To decouple physical modeling capabilities from under-relaxation artifacts and r
    $$\epsilon_{\text{energy}}(2\text{ min}): \quad +56.8% (n=2), +11.3% (n=3), -2.8% (n=4), -7.3% (n=5), -6.9% (n=6), -3.6% (n=7), -0.1% (n=8), +1.8% (n=10), +0.4% (n=12), +0.1% (n=16)$$
    At low corrector counts ($n \le 3$), enthalpy-porosity exhibits large positive surpluses (+56.8% at $n=2$, +11.3% at $n=3$) because the explicit latent heat update lags the rapid early conduction surge. As $n$ increases, the scheme overcorrects into a negative deficit (-7.3% at $n=5$), crosses zero near $n=7\text{--}8$ (-0.06% at $n=8$), and asymptotically stabilizes below $0.5\%$ for $n \ge 12$ (+0.45% at $n=12$, +0.13% at $n=16$).
 2. **EHCDarcy Monotonicity and Rapid Convergence (from $n_{\text{outer}} \ge 3$)**:  
-   In contrast, `EHCDarcy` incorporates latent heat directly into the left-hand matrix capacity via a path-integral effective heat capacity $C_p^{\text{eff}}(T)$. As a result:
+   In contrast, `EHCDarcy` accounts for sensible heat-capacity variation through the path-based effective heat capacity, with latent heat handled separately through explicit source and implicit linearisation terms. As a result:
    $$\epsilon_{\text{energy}}(2\text{ min}): \quad +9.32% (n=2), -0.38% (n=3), -0.36% (n=4), -0.35% (n=5), -0.34% (n=8)$$
    While EHCDarcy exhibits an initial sign transition from +9.32% at $n=2$ (10.98 s CPU) to -0.38% at $n_{\text{outer}} = 3$ (15.57 s CPU), it is **strictly monotonic and bounded within $[-0.38\%, -0.34\%]$ for all $n_{\text{outer}} \ge 3$** (-0.36% at $n=4$, -0.35% at $n=5$, -0.34% at $n=8$), completely avoiding the large under-damped sign oscillations seen in EP.
 3. **Computational Efficiency & Outer Corrector Cost**:  

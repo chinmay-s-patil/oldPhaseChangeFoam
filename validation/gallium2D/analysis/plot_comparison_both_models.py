@@ -178,12 +178,14 @@ def main():
         ehc_str = f"{f_ehc:.4f}" if f_ehc is not None else "-"
         delta_str = f"{(f_ehc - f_ep):+.4f}" if (f_ep is not None and f_ehc is not None) else "-"
 
-        if f_brent is not None and f_ep is not None and f_ehc is not None:
+        if f_brent is not None and f_ep is not None:
             abs_err_ep = abs(f_ep - f_brent)
-            abs_err_ehc = abs(f_ehc - f_brent)
             abs_err_ep_list.append(abs_err_ep)
-            abs_err_ehc_list.append(abs_err_ehc)
             rel_err_ep_list.append(abs_err_ep / f_brent)
+
+        if f_brent is not None and f_ehc is not None:
+            abs_err_ehc = abs(f_ehc - f_brent)
+            abs_err_ehc_list.append(abs_err_ehc)
             rel_err_ehc_list.append(abs_err_ehc / f_brent)
 
         if t in t_eval or (t % 120 == 0):
@@ -191,14 +193,16 @@ def main():
         table_rows.append((t, t/60.0, brent_str, ep_str, ehc_str, delta_str))
 
     print("-" * 88)
-    print("SUMMARY STATISTICAL ACCURACY:")
+    print("SUMMARY STATISTICAL ACCURACY vs BRENT (1988):")
     if abs_err_ep_list:
-        print(f"  Enthalpy-Porosity Mean Abs Error:  {np.mean(abs_err_ep_list):.4f} ({np.mean(abs_err_ep_list)*100:.2f} percentage points)")
-        print(f"  EHCDarcy Mean Abs Error:           {np.mean(abs_err_ehc_list):.4f} ({np.mean(abs_err_ehc_list)*100:.2f} percentage points)")
-        print(f"  Enthalpy-Porosity Mean Rel Error: {np.mean(rel_err_ep_list)*100:.2f}%")
-        print(f"  EHCDarcy Mean Rel Error:          {np.mean(rel_err_ehc_list)*100:.2f}%")
+        print(f"  Enthalpy-Porosity ({len(abs_err_ep_list)} pts) Mean Abs Error:  {np.mean(abs_err_ep_list):.4f} ({np.mean(abs_err_ep_list)*100:.2f} percentage points)")
+        print(f"  Enthalpy-Porosity ({len(rel_err_ep_list)} pts) Mean Rel Error:  {np.mean(rel_err_ep_list)*100:.2f}%")
+    if abs_err_ehc_list:
+        print(f"  EHCDarcy ({len(abs_err_ehc_list)} pts) Mean Abs Error:           {np.mean(abs_err_ehc_list):.4f} ({np.mean(abs_err_ehc_list)*100:.2f} percentage points)")
+        print(f"  EHCDarcy ({len(rel_err_ehc_list)} pts) Mean Rel Error:           {np.mean(rel_err_ehc_list)*100:.2f}%")
+    if len(abs_err_ep_list) == len(abs_err_ehc_list) and len(abs_err_ep_list) > 0:
         improvement = (np.mean(abs_err_ep_list) - np.mean(abs_err_ehc_list)) / np.mean(abs_err_ep_list) * 100.0
-        print(f"  Error Reduction by EHCDarcy:       {improvement:.1f}% closer to benchmark!")
+        print(f"  Error Reduction by EHCDarcy:                         {improvement:.1f}%")
     print("=" * 88)
 
     # Front profile comparison metrics
@@ -261,14 +265,17 @@ def main():
     ax1.legend(loc='upper left', fontsize=10, framealpha=0.92)
 
     # Add text box with metrics
-    if abs_err_ep_list and abs_err_ehc_list:
-        summary_text = (
-            f"Mean Absolute Error:\n"
-            f"• Enthalpy-Porosity: {np.mean(abs_err_ep_list)*100:.2f} percentage pts\n"
-            f"• EHCDarcy:          {np.mean(abs_err_ehc_list)*100:.2f} percentage pts\n"
-            f"• Error Reduction:   {improvement:.1f}% by EHCDarcy\n"
-            rf"$\Delta t = 0.1$ s, Mesh $42\times 32$"
-        )
+    if abs_err_ep_list or abs_err_ehc_list:
+        summary_lines = ["Mean Absolute Error:"]
+        if abs_err_ep_list:
+            summary_lines.append(f"• Enthalpy-Porosity: {np.mean(abs_err_ep_list)*100:.2f}% ({len(abs_err_ep_list)} pt{'s' if len(abs_err_ep_list)>1 else ''})")
+        if abs_err_ehc_list:
+            summary_lines.append(f"• EHCDarcy:          {np.mean(abs_err_ehc_list)*100:.2f}% ({len(abs_err_ehc_list)} pts)")
+        if len(abs_err_ep_list) == len(abs_err_ehc_list) and len(abs_err_ep_list) > 0:
+            improvement = (np.mean(abs_err_ep_list) - np.mean(abs_err_ehc_list)) / np.mean(abs_err_ep_list) * 100.0
+            summary_lines.append(f"• Error Reduction:   {improvement:.1f}% by EHCDarcy")
+        summary_lines.append(rf"$\Delta t = 0.1$ s, Mesh $42\times 32$")
+        summary_text = "\n".join(summary_lines)
         ax1.text(0.48, 0.05, summary_text, transform=ax1.transAxes,
                  fontsize=9.5, verticalalignment='bottom',
                  bbox=dict(boxstyle='round,pad=0.5', facecolor='#f8f9fa', edgecolor='#ced4da', alpha=0.95))
@@ -358,13 +365,18 @@ def main():
         for row in table_rows:
             f.write(f"{row[0]:<10.1f} {row[1]:<12.2f} {row[2]:<15} {row[3]:<16} {row[4]:<16} {row[5]:<15}\n")
         f.write("-" * 88 + "\n")
-        if abs_err_ep_list:
+        if abs_err_ep_list or abs_err_ehc_list:
             f.write("ACCURACY METRICS vs BRENT ET AL. (1988):\n")
-            f.write(f"  Enthalpy-Porosity Mean Relative Error:      {np.mean(rel_err_ep_list)*100:.2f}%\n")
-            f.write(f"  EHCDarcy Mean Relative Error:               {np.mean(rel_err_ehc_list)*100:.2f}%\n")
-            f.write(f"  Enthalpy-Porosity Mean Absolute Error:      {np.mean(abs_err_ep_list):.4f} ({np.mean(abs_err_ep_list)*100:.2f} percentage points)\n")
-            f.write(f"  EHCDarcy Mean Absolute Error:               {np.mean(abs_err_ehc_list):.4f} ({np.mean(abs_err_ehc_list)*100:.2f} percentage points)\n")
-            f.write(f"  Relative Improvement by EHCDarcy:           {improvement:.1f}% reduction in discrepancy\n\n")
+            if abs_err_ep_list:
+                f.write(f"  Enthalpy-Porosity Mean Relative Error ({len(abs_err_ep_list)} pts): {np.mean(rel_err_ep_list)*100:.2f}%\n")
+                f.write(f"  Enthalpy-Porosity Mean Absolute Error ({len(abs_err_ep_list)} pts): {np.mean(abs_err_ep_list):.4f} ({np.mean(abs_err_ep_list)*100:.2f} percentage points)\n")
+            if abs_err_ehc_list:
+                f.write(f"  EHCDarcy Mean Relative Error ({len(abs_err_ehc_list)} pts):          {np.mean(rel_err_ehc_list)*100:.2f}%\n")
+                f.write(f"  EHCDarcy Mean Absolute Error ({len(abs_err_ehc_list)} pts):          {np.mean(abs_err_ehc_list):.4f} ({np.mean(abs_err_ehc_list)*100:.2f} percentage points)\n")
+            if len(abs_err_ep_list) == len(abs_err_ehc_list) and len(abs_err_ep_list) > 0:
+                improvement = (np.mean(abs_err_ep_list) - np.mean(abs_err_ehc_list)) / np.mean(abs_err_ep_list) * 100.0
+                f.write(f"  Relative Improvement by EHCDarcy:                         {improvement:.1f}% reduction in discrepancy\n")
+            f.write("\n")
 
         if front_metric_summary:
             f.write("MELT FRONT PROFILE DEVIATIONS vs BRENT ET AL. (1988):\n")
