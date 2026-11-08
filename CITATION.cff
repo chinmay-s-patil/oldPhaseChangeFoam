@@ -10,7 +10,7 @@ repository-code: "https://github.com/chinmay-s-patil/phaseChangeFoam"
 url: "https://github.com/chinmay-s-patil/phaseChangeFoam"
 license: "GPL-3.0-or-later"
 version: "0.1.0"
-date-released: "2026-11-05"
+date-released: "2026-11-08"
 keywords:
   - openfoam
   - cfd

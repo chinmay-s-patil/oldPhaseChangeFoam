@@ -112,4 +112,8 @@ python3 validation/pcmHysteresis_experimental/runTest.py
 python3 validation/tin2D/runTest.py
 python3 validation/gallium2D/runTest.py --endTime 120 --plot
 python3 validation/gallium3D_experimental/runTest.py
+
+# Clean all generated cases and simulation runs:
+./validation/Allclean
 ```
+
