@@ -94,6 +94,21 @@ python3 validation/runAll.py --fast
 python3 validation/runAll.py
 ```
 
+### Cleaning Test Artifacts
+
+To remove generated simulation time directories, meshes, logs, and temporary caches:
+
+```bash
+# Clean verification suites only:
+./verification/Allclean
+
+# Clean validation suites only:
+./validation/Allclean
+
+# Clean everything (build objects, verification, and validation):
+./Allclean
+```
+
 For an overview of the validation benchmarks, their individual test cases, and reference data, see [`validation/README.md`](validation/README.md).
 
 ---

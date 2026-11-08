@@ -25,8 +25,9 @@ Initial public release of the `phaseChangeFoam` multi-region conjugate heat tran
   * `Lee`: Volumetric species evaporation and condensation kinetics with constant or Clausius-Clapeyron pressure-dependent saturation temperature $T_{\text{sat}}(p)$.
   * `constantSource`: Fixed-rate mass/energy source model for verification baselines.
 
-* **Utilities**:
+* **Utilities & Scripts**:
   * `writePCDict`: Utility to generate region-specific `constant/<region>/phaseChangeDict` dictionary templates with solver defaults and comments.
+  * Clean scripts: `Allclean`, `verification/Allclean`, and `validation/Allclean` to purge generated simulation run cases, time steps, logs, and caches across the repository.
 
 ### Verification & Validation
 

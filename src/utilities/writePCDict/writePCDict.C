@@ -8,21 +8,21 @@
     Copyright (C) 2026 Chinmay S Patil
 -------------------------------------------------------------------------------
 License
-    This file is part of OpenFOAM, with modifications for phaseChangeFoam.
+    This file is part of phaseChangeFoam.
     SPDX-License-Identifier: GPL-3.0-or-later
 
-    OpenFOAM is free software: you can redistribute it and/or modify it
+    phaseChangeFoam is free software: you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    phaseChangeFoam is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+    or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+    along with phaseChangeFoam.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
     writePCDict

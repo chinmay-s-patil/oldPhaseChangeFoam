@@ -11,6 +11,7 @@
 License
     This file is part of OpenFOAM, with modifications for phaseChangeFoam.
     SPDX-License-Identifier: GPL-3.0-or-later
+    Modified 2026-10 by Chinmay S Patil: Replaced local field extrema with parallel global reductions (gMax, gAverage).
 
     OpenFOAM is free software: you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by
