@@ -20,7 +20,7 @@ All phase change configurations require a top-level `phaseChange` subdictionary 
 
 ### 1. Solid-Liquid PCM with Effective Heat Capacity (`EHCDarcy`)
 
-Suitable for melting in fluid or solid domains. Incorporates path-integral latent heat and Carman-Kozeny velocity damping:
+Suitable for melting in fluid or solid domains. Incorporates path-based sensible heat capacity, linearised latent heat sources, and Carman-Kozeny velocity damping:
 
 ```foam
 FoamFile
@@ -56,7 +56,7 @@ phaseChange
 
 ### 2. Solid-Liquid PCM with Thermal Hysteresis (`EHC`)
 
-Suitable for solid PCM regions exhibiting supercooling (e.g., salt hydrates or organic waxes):
+Suitable for solid PCM regions or pure-conduction domains exhibiting supercooling (e.g., salt hydrates or organic waxes). Does not include Darcy momentum drag; for fluid regions with convection, use `EHCDarcy`:
 
 ```foam
 FoamFile
@@ -100,7 +100,7 @@ phaseChange
 
 ### 3. Solid-Liquid PCM with Enthalpy-Porosity (`enthalpyPorosity`)
 
-Source-based enthalpy-porosity implementation following Voller & Prakash (1987):
+Source-based enthalpy-porosity implementation following Voller & Prakash (1987). Supports a single phase-transition interval (`forward` melting window) and does not support separate melting/freezing curves, reverse transitions, or stateful thermal hysteresis (configuring `reverse` or `hysteresis` subdictionaries, or setting `direction` other than `both`, triggers a runtime fatal error):
 
 ```foam
 FoamFile
@@ -206,11 +206,12 @@ phaseChange
 | `active` | Root & `phaseChange` | bool | `true` | `true`, `false` | Enables or disables phase change for this region |
 | `phaseChangeMode` / `meltingModel` | `phaseChange` | word | none | `EHCDarcy`, `EHC`, `enthalpyPorosity`, `none` | Solid/PCM phase change model |
 | `type` / `speciesModel` | `phaseChange` | word | none | `Lee`, `constantSource`, `none` | Fluid species phase change model |
-| `direction` | `phaseChange` | word | `both` | `both`, `forward`, `reverse` | Transition directionality for solid PCM |
+| `direction` | `phaseChange` | word | `both` | `both`, `forward`, `reverse` | Transition directionality for solid PCM (`enthalpyPorosity` supports only `both`) |
 
 ---
 
 ### PCM Transition Subdictionaries (`forward` and `reverse`)
+The `forward` block specifies the primary phase change window (melting). The `reverse` block is optional and supported by `EHC`/`EHCDarcy` for separate freezing paths (`enthalpyPorosity` supports only `forward`).
 | Keyword | Type | Default | Unit | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | `T_lowerBound` | scalar | mandatory | K | Solidus / lower bound temperature (phase fraction $\alpha = 0$) |
@@ -220,6 +221,7 @@ phaseChange
 ---
 
 ### Hysteresis Subdictionary (`hysteresis`)
+Supported by `EHC` and `EHCDarcy` (rejected by `enthalpyPorosity`):
 | Keyword | Type | Default | Unit | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | `active` | bool | `false` | - | Enables stateful directional hysteresis tracking |
@@ -231,7 +233,7 @@ phaseChange
 Active for `EHCDarcy` and `enthalpyPorosity` when operating in fluid regions:
 | Keyword | Type | Default | Unit | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| `Cu` (or `A_cu`) | scalar | `1.6e6` | kg/(m3 s) | Carman-Kozeny morphology coefficient / Darcy resistance constant |
+| `Cu` (or `A_cu`) | scalar | `1e5` | kg/(m3 s) | Carman-Kozeny morphology coefficient / Darcy resistance constant (e.g. `1.6e6` in benchmark configurations) |
 | `q` (or `eps`) | scalar | `1e-3` | - | Small offset preventing division by zero when $\alpha \to 0$ |
 
 ---
@@ -333,3 +335,6 @@ writePCDict -region pcm
 # Generate template for fluid region 'fluid' in constant/fluid/phaseChangeDict
 writePCDict -region fluid
 ```
+
+> [!NOTE]
+> `writePCDict` outputs a template populated with baseline defaults across solid and fluid models. Generated dictionaries must be reviewed and populated with the appropriate material properties, operating temperatures, and domain-specific models for your simulation case.

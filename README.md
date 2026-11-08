@@ -13,88 +13,47 @@
 
 ---
 
-## Solvers and Models
+## Features and Available Models
+
+`phaseChangeFoam` extends OpenFOAM's standard `chtMultiRegionFoam` (OpenCFD / ESI-OpenCFD) conjugate heat transfer architecture and monolithic coupled energy framework (`coupledEnergyField`, `useImplicit`) with dedicated phase change capabilities:
+
+* **Thermal hysteresis in solid-liquid PCM**: Stateful direction-dependent melting and freezing paths with subcooling tracking (`phaseState`, `T_reversal`).
+* **Effective heat capacity (`EHC`, `EHCDarcy`)**: Uses a path-based sensible heat capacity to account for temperature-dependent solid and liquid properties. Latent heat is handled separately through source and linearisation terms. `EHC` is designed for solid regions or conduction-only domains (lacking momentum damping; convection is explicitly guarded against in fluid regions), while `EHCDarcy` adds implicit Darcy momentum damping when fluid motion is modeled.
+* **Adaptive time-step limiting (`maxAlphaCo`)**: Constrains $\Delta t$ based on the maximum cell-wise rate of phase fraction change, preventing the interface from skipping cells without resolving the phase transition.
+* **Volumetric species phase change (`Lee`)**: Implements volumetric evaporation and boiling within fluid regions, with thermal energy coupled across solid-fluid conjugate boundaries via CHT interfaces (species mass transfer is confined within fluid domains).
 
 ### Solvers
+
 | Solver | Description | Time Formulation |
 | :--- | :--- | :--- |
 | `phaseChangeMultiRegionFoam` | Multi-region transient CHT with species phase change and solid-liquid PCM | PIMPLE |
 | `phaseChangeMultiRegionSimpleFoam` | Multi-region steady-state CHT with natural convection and thermal phase change | SIMPLE |
 
 ### Phase Change Models
+
 | Model | Domain | Formulation | Primary Mechanisms |
 | :--- | :--- | :--- | :--- |
-| `EHCDarcy` | Solid / Fluid | Effective Heat Capacity + Darcy drag | Matrix-implicit capacity, Carman-Kozeny velocity damping |
-| `EHC` | Solid / Fluid | Effective Heat Capacity | Path-integral capacity, subcooling hysteresis (no velocity damping) |
+| `EHCDarcy` | Solid / Fluid | Effective Heat Capacity + Darcy drag | Path-based sensible capacity, linearised latent heat sources, Carman-Kozeny Darcy damping |
+| `EHC` | Solid / Fluid (conduction only) | Effective Heat Capacity | Path-based sensible capacity, linearised latent heat sources, subcooling hysteresis (no Darcy drag; convection must be suppressed in fluids) |
 | `enthalpyPorosity` | Solid / Fluid | Enthalpy-porosity (Voller and Prakash) | Newton projection on liquid fraction, mushy-zone Darcy drag |
-| `Lee` | Fluid | Volumetric species mass/energy transfer | Evaporation and condensation, optional Clausius-Clapeyron Tsat(p) |
+| `Lee` | Fluid | Volumetric species mass/energy transfer | Evaporation and condensation, optional Clausius-Clapeyron $T_{\text{sat}}(p)$ |
 | `constantSource` | Fluid | Fixed-rate mass/energy source | Verification and testing baseline |
 
 ---
 
-## Differences from chtMultiRegionFoam
-
-`phaseChangeFoam` is derived from OpenFOAM's `chtMultiRegionFoam` (OpenCFD / ESI-OpenCFD), inheriting its multi-region conjugate heat transfer structure and monolithic coupled energy framework (`coupledEnergyField`, `useImplicit`). The primary additions are:
-
-* **Thermal hysteresis in solid-liquid PCM**: Stateful direction-dependent melting and freezing paths with subcooling tracking (`phaseState`, `T_reversal`).
-* **Effective Heat Capacity formulation (`EHCDarcy`, `EHC`)**: Directly incorporates latent heat into cell capacity $C_{p,\text{eff}}$, meeting the $\le 2.0\%$ energy closure gate at low outer correctors ($n_{\text{outer}} = 3$) in 15.6 s (2-min benchmark), enabling fast runtime without relying on extensive outer corrector passes.
-* **Adaptive time-step limiting (`maxAlphaCo`)**: Constrains $\Delta t$ based on maximum cell-wise rate of phase fraction change, preventing the interface from stepping over cells without resolving the transition.
-* **Volumetric species phase change (`Lee`)**: Implements volumetric evaporation and boiling coupled with multi-component species transport across solid-fluid conjugate boundaries (in contrast to free-surface VOF solvers such as `interCondensatingEvaporatingFoam` which resolve sharp liquid-gas interfaces).
-
----
-
-## Verification and Validation
-
-Guided by ASME V&V 20 / Roache (1998) principles for computational fluid dynamics and heat transfer, `phaseChangeFoam` is evaluated across three assessment tiers:
-
-### Tier 1: Verified (Exact Analytical Solutions & Discrete Physics)
-* **Two-Phase Stefan Melting (Carslaw & Jaeger 1959 / Alexiades & Solomon 1993)**: Exact moving boundary problem $s(t) = 2\lambda\sqrt{\alpha_l t}$ evaluated across timestep sweep $\Delta t \in [1, 500]$ s. Achieves **0.433% front position error** at $2000$ s ($s_{\text{sim}} = 28.06$ mm vs $s_{\text{exact}} = 28.18$ mm, well below the 1.0% gate) with 1st-order temporal self-convergence ($p = 0.96$ relative to $\Delta t = 1$ s numerical baseline on a fixed 1 mm mesh).
-* **Two-Slab Contact Temperature (Carslaw & Jaeger 1959)**: Semi-infinite conjugate interface contact temperature $T_i = (e_1 T_1 + e_2 T_2)/(e_1 + e_2)$ across solid-PCM boundary. Computed $T_i = 366.75$ K matches analytical $366.67$ K with **0.024% relative error** ($\Delta T = 0.088$ K, gate: $\le 0.1\%$).
-* **Lee Model Conservation Audit & Tsat Relaxation**: Thermodynamic verification: interspecies mass closure ($\lvert \Delta Y_l + \Delta Y_v \rvert < 10^{-12}$), analytical rate increment agreement $< 10^{-7}$, total mixture mass sum ($\sum Y_i = 1$), discrete energy closure $< 0.01\%$, and interface temperature relaxation to Clausius-Clapeyron $T_{\text{sat}}(p)$ within $0.05$ K (committed artifact in `verification/leeModel/`).
-* **EHC Thermal Hysteresis Path Logic**: Verifies state-variable tracking (`phaseState`, `T_reversal`) and direction-dependent capacity paths under cyclic thermal loading (100% molten charging $\to$ subcooling retention at $310.9$ K $\to$ 100% crystallized discharge).
-* **Conservation Laws & Write Precision**: Discrete mass conservation error $< 10^{-10}$, energy closure $< 0.01\%$, and restart-consistent to write precision ($< 10^{-9}$ K difference).
-
-### Tier 2: Benchmarked (Numerical CFD Literature)
-* **Steady Natural Convection Cavity (de Vahl Davis 1983)**: Ra = $10^5$, Pr = $0.71$. Evaluated across a grid convergence sequence ($40 \times 40 \to 50 \times 50 \to 80 \times 80$). Mean Nusselt converges monotonically to $\overline{\text{Nu}} = 4.5478$ (+0.64% vs 4.519 benchmark on $80 \times 80$), while peak velocities match within 1–2% ($v_{\max}^* = 68.82$, +0.33%; $u_{\max}^* = 35.11$, +1.09%).
-* **2D Pure Gallium Melting (Brent et al. 1988, Ye & Arıcı 2023)**: Ra ≈ $6.06 \times 10^5$, Pr = $0.0216$, Ste = $0.0391$. Simulated $f_L(17\text{ min}) = 0.5736$ agrees within **+0.58%** with the 2D grid-converged numerical correlation of Ye & Arıcı (2023, Vol. 144, 106780, Eq. 6: $0.5703$). Discrete energy closure is **-0.13%** evaluated via right-endpoint Riemann flux summation. A systematic positive offset relative to Brent et al. (1988: $0.5334$) is observed across all times; later literature reports higher values ($f_L \approx 0.570\text{--}0.574$), but the root cause of the offset against Brent's 1988 result has not been isolated.
-* **2D Pure Tin Melting (Early-Conduction Consistency Check; Convection in Progress)** (Bertrand et al. 1999 / Hannoun et al. 2003): Modeled with case dimensional properties yielding $\text{Ra} = 2.50 \times 10^5, \text{Pr} = 0.020, \text{Ste} = 0.010$. At $t = 100$ s, computed $f_L = 0.0881$ matches the 1D Stefan similarity limit ($0.0893$, $-1.34\%$) as an early-conduction consistency check. Late-time multi-roll convective benchmark ($t = 2500$ s, target $f_L \approx 0.60$ Hannoun et al. 2003 / $[0.54, 0.57]$ Gobin & Le Quéré 2000) is in progress.
-
-![Gallium 2D Melting Animation](docs/images/gallium_melting_brent_comparison.gif)
-
-![Gallium Melt Front & Liquid Fraction Comparison](docs/images/gallium_melt_front_comparison.png)
-
-### Tier 3: Physical Experimental Validation (In Progress)
-* **3D Pure Gallium Melting with Sidewall Drag (Gau & Viskanta 1986) [Screening Run]**: Modeling the physical 3D test cell ($W = 88.9$ mm, $H = 63.5$ mm, $D = 38.1$ mm) with physical no-slip inspection windows ($z = 0, z = D$). Laminar sidewall boundary layers exert viscous drag, retarding circulation velocity. In a preliminary screening run ($32 \times 24 \times 16$ grid, $t = 120$ s), midplane front position at $y = H/2$ is $11.24$ mm vs measured traced value $8.50 \pm 1.0$ mm (deviation = $2.74$ mm, which is **32.2% of the melted distance $s = 8.50$ mm**, or 3.08% of cavity width $W$). The computed front matches the theoretical 1D Stefan step-conduction limit (~$11.3$ mm); the experimental front lags, likely due to experimental heater warm-up inertia (a working hypothesis to be tested against later-time data at 6, 10, 17 min and fitted $T_{\text{hot}}(t)$). Formal validation requires completing the ASME V&V 20 uncertainty quantification framework ($|E| \le u_{\text{val}}$).
-* **Paraffin PCM Thermal Hysteresis (Bony & Citherlet 2007)**: Stateful direction-dependent model logic is verified in Tier 1; experimental validation requires calibrating model curves to measured DSC data and predicting an independent physical experiment (e.g. storage unit temperature history).
-
-For full quantitative tables, ASME GCI grid studies, and parametric sweeps ($\Delta t$, $\Delta T_m$, $C_u$), see [`docs/validation.md`](docs/validation.md).
-
----
-
-## Limitations and Validation Scope
-
-* **Verification and validation status**: The solver suite is **verified against exact analytical solutions** (Stefan problem, contact temperature, conservation physics, Lee thermodynamic limits, hysteresis state logic) and **benchmarked against numerical CFD literature** (de Vahl Davis natural convection, Ye & Arıcı gallium melting). **Physical experimental validation is in progress** (3D gallium vs Gau & Viskanta); full physical validation is not yet claimed. High Rayleigh number turbulent regimes are not modeled.
-* **Fluid-region PCM property constraint**: In fluid regions with solid-liquid PCM, thermophysical properties must satisfy $\rho_s = \rho_l = \rho_{\text{thermo}}$ and $C_{p,s} = C_{p,l} = C_{p,\text{thermo}}$ (constant-property Boussinesq approximation).
-* **Lee model kinetics**: Models volumetric boiling and condensation driven by deviation from total-pressure saturation temperature $T_{\text{sat}}(p)$; it does not model sub-boiling partial-pressure surface evaporation or free-surface liquid-gas interfaces.
-* **Parallel execution**: Multi-region parallel decomposition (`decomposePar`) is currently untested; all verification runs have been performed in serial execution.
-* **Inter-region mass transfer**: Phase change mass transfer is confined within each region; mass does not cross conjugate solid-fluid boundaries.
-* **Diffuse interface**: Phase boundaries are represented across a numerical transition window ($\Delta T_m$), not as discontinuous sharp interfaces.
-
----
-
-## Requirements and Environment
+## Requirements
 
 * **OpenFOAM**: OpenFOAM-v2412 (tested on Ubuntu 24.04 LTS x86_64, GCC 13.3).
-* **Python**: Python 3.8+ with NumPy, Matplotlib, and Pillow (PIL) (for automated verification suites and report generation).
+* **Python**: Python 3.8+ with NumPy, Matplotlib, and Pillow (PIL) (required for running automated verification and validation suites).
 
 ---
 
-## Build Instructions
+## Installation and Compilation
 
-Source your OpenFOAM installation and compile with `./Allwmake`:
+Source your OpenFOAM environment and compile with `./Allwmake`:
 
 ```bash
-# Source OpenFOAM environment (path depends on your installation)
+# Source OpenFOAM environment (adjust path to match your installation)
 source /usr/lib/openfoam/openfoam2412/etc/bashrc
 
 # Compile solvers and utilities
@@ -115,18 +74,20 @@ docker run --rm -it -v "$PWD":/home/openfoam/run -w /home/openfoam/run \
 
 ---
 
-## Quick Start and Verification
+## Quick Start and Test Suites
 
 > [!NOTE]
-> Tutorial cases and demonstration workflows are currently a work in progress and will be provided in a future release. Please refer to the verification and validation test suites below for runnable cases.
+> **No Standalone Tutorials Included**: No standalone tutorial cases are included in this release. The runnable simulation cases provided in this repository are **verification and validation test suites** rather than conventional tutorials. Users looking to build custom cases should inspect the case setups in [`verification/`](verification/) and [`validation/`](validation/).
 
-### Running Test Suites
+### Running the Test Suites
+
+To verify your installation and test solver behavior against analytical and literature benchmarks:
 
 ```bash
-# 1. Master verification suite (13 suites)
+# 1. Master verification suite (13 analytical and discrete physics test suites)
 python3 verification/runAll.py
 
-# 2. Validation ladder fast gate (Rung 1 natural convection & DSC hysteresis, ~5 s)
+# 2. Validation ladder fast gate (Rung 1 natural convection & cyclic hysteresis path-logic, ~5 s)
 python3 validation/runAll.py --fast
 
 # 3. Full validation ladder (All 5 benchmark and experimental rungs, ~3.5 min)
@@ -137,21 +98,59 @@ python3 validation/runAll.py
 
 ## Documentation Index
 
-Detailed reference documentation is versioned in the `docs/` directory:
+Detailed reference documentation is versioned in the [`docs/`](docs/) directory:
 
 | Document | Description |
 | :--- | :--- |
 | [`docs/models.md`](docs/models.md) | Governing equations, thermodynamic consistency, species evaporation, and PCM formulations |
 | [`docs/dictionary.md`](docs/dictionary.md) | Keyword reference tables, minimal templates per model, and solver controls |
-| [`docs/tutorials.md`](docs/tutorials.md) | Tutorial status note (work in progress) |
+| [`docs/case-setup.md`](docs/case-setup.md) | Case setup guide and reference case navigation |
 | [`docs/validation.md`](docs/validation.md) | Verification and validation guide: analytic suites, benchmark ladder, sensitivity studies, and experimental roadmap |
 | [`docs/development.md`](docs/development.md) | Code architecture, PIMPLE execution sequence, Picard loop, and adding new models |
 
 ---
 
-## References
+## Verification and Validation
 
-To cite the `phaseChangeFoam` software, see [`CITATION.cff`](CITATION.cff).
+The solver is assessed at three levels: analytical verification, comparison against numerical benchmarks, and validation against experimental measurements. Headline results are summarized below; detailed convergence sequences, ASME GCI calculations, and parametric sweeps are documented in [`docs/validation.md`](docs/validation.md).
+
+### Tier 1: Analytical & Thermodynamic Verification
+* **Two-Phase Stefan Melting (Carslaw & Jaeger 1959)**: Moving boundary problem $s(t) = 2\lambda\sqrt{\alpha_l t}$. Achieves **0.43% front position error** at 2000 s with 1st-order temporal self-convergence ($p = 0.96$).
+* **Two-Slab Contact Temperature (Carslaw & Jaeger 1959)**: Interface contact temperature across solid-PCM boundary matches analytical prediction within **0.024% relative error** ($\Delta T = 0.088$ K).
+* **Conservation Physics & Restart Consistency**: Discrete mass error $< 10^{-10}$, energy closure $< 0.01\%$, and restart consistency to write precision ($< 10^{-9}$ K).
+* **Lee Thermodynamic Audit**: Interspecies mass closure ($\lvert \Delta Y_l + \Delta Y_v \rvert < 10^{-12}$) and interface relaxation to Clausius-Clapeyron $T_{\text{sat}}(p)$ within 0.05 K.
+* **Cyclic Hysteresis Path Logic**: Verifies state-variable tracking (`phaseState`, `T_reversal`) and subcooling retention under cyclic thermal loading.
+
+### Tier 2: Numerical CFD Benchmarks
+* **Natural Convection Cavity (de Vahl Davis 1983)**: Ra = $10^5$, Pr = $0.71$. Mean Nusselt converges monotonically to $\overline{\text{Nu}} = 4.548$ (+0.64% on $80 \times 80$), with peak velocities agreeing within 1–2%.
+* **2D Pure Gallium Melting (Brent et al. 1988, Ye & Arıcı 2023)**: At $t = 17$ min, the simulated liquid fraction ($f_L = 0.5736$) matches the 2D numerical correlation of Ye & Arıcı ($0.5703$) within +0.58%, with $-0.13\%$ discrete energy closure. Across all simulated times, our results show a persistent positive offset relative to the original solution of Brent et al. (1988: $0.5334$). Later CFD studies report higher values consistent with our result ($f_L \approx 0.570\text{--}0.574$), though the specific cause of the offset against Brent's original 1988 calculation remains unresolved. Spatial GCI estimates for this benchmark show oscillatory behavior on coarser meshes; full details are discussed in [`docs/validation.md`](docs/validation.md#spatial-grid-convergence--gci-ehcdarcy).
+* **2D Pure Tin Melting (Bertrand et al. 1999 / Hannoun et al. 2003)**: At early time ($t = 100$ s), computed $f_L = 0.0881$ matches the 1D Stefan similarity limit ($0.0893$, $-1.34\%$) as an early-conduction consistency check. Full late-time convective benchmark ($t = 2500$ s, target $f_L \approx 0.60$) is in progress.
+
+![Gallium 2D Melting Animation](docs/images/gallium_melting_brent_comparison.gif)
+
+![Gallium Melt Front & Liquid Fraction Comparison](docs/images/gallium_melt_front_comparison.png)
+
+### Tier 3: Physical Experimental Validation (In Progress)
+* **3D Pure Gallium Melting with Sidewall Drag (Gau & Viskanta 1986) [Preliminary Screening Run]**: A preliminary simulation of the 3D Gau & Viskanta test cell captures viscous braking along the inspection endwalls. At $t = 120$ s, the computed midplane front is 11.24 mm, which is close to the one-dimensional Stefan conduction limit. The experimental front advances more slowly ($8.50 \pm 1.0$ mm traced from pour-out data, a difference of 2.74 mm or 32% of the melted distance). One working hypothesis is that the thermal inertia of the physical copper heat exchanger contributes to the early-time discrepancy, which will be evaluated using later-time measurements. Formal experimental validation under ASME V&V 20 is actively in progress.
+* **Paraffin PCM Thermal Hysteresis (Bony & Citherlet 2007)**: Synthetic path logic is verified in Tier 1; experimental validation against measured DSC curves and storage unit histories is planned.
+
+For full quantitative tables, ASME GCI grid studies, and parametric sweeps ($\Delta t$, $\Delta T_m$, $C_u$), see [`docs/validation.md`](docs/validation.md).
+
+---
+
+## Limitations
+
+* **Validation scope**: The solver is verified against exact analytical solutions and benchmarked against published numerical CFD literature. Experimental validation is currently in progress, and full experimental validation is not yet claimed. Turbulent convection at high Rayleigh numbers is not modeled.
+* **Fluid-region PCM property constraint**: In fluid regions with solid-liquid PCM, thermophysical properties must satisfy $\rho_s = \rho_l = \rho_{\text{thermo}}$ and $C_{p,s} = C_{p,l} = C_{p,\text{thermo}}$ (constant-property Boussinesq approximation).
+* **Lee model kinetics**: Models volumetric boiling and condensation driven by deviation from total-pressure saturation temperature $T_{\text{sat}}(p)$; it does not model sub-boiling partial-pressure surface evaporation or free-surface liquid-gas interfaces.
+* **Parallel execution**: Multi-region parallel decomposition (`decomposePar`) is currently untested; all verification runs have been performed in serial execution.
+* **Inter-region mass transfer**: Phase change mass transfer is confined within each region; mass does not cross conjugate solid-fluid boundaries.
+* **Thermal hysteresis model scope**: Stateful thermal hysteresis and separate melting/freezing curves are supported exclusively by `EHC` and `EHCDarcy`. The `enthalpyPorosity` implementation supports a single phase-transition window (`direction both`).
+* **Diffuse interface**: Phase boundaries are represented across a numerical transition window ($\Delta T_m$), not as discontinuous sharp interfaces.
+
+---
+
+## References
 
 ### Physical and Numerical Model References
 
@@ -179,7 +178,23 @@ To cite the `phaseChangeFoam` software, see [`CITATION.cff`](CITATION.cff).
 
 ---
 
-## License and Trademark Notice
+## Citation and License
+
+### Citation
+
+If you use `phaseChangeFoam` in your research or publications, please cite it as detailed in [`CITATION.cff`](CITATION.cff):
+
+```bibtex
+@software{patil2026phasechangefoam,
+  author       = {Patil, Chinmay S.},
+  title        = {{phaseChangeFoam}: Multi-Region Phase Change and Conjugate Heat Transfer Suite for {OpenFOAM}},
+  version      = {0.2.1},
+  year         = {2026},
+  url          = {https://github.com/chinmay-s-patil/phaseChangeFoam}
+}
+```
+
+### License and Trademark Notice
 
 `phaseChangeFoam` is free software licensed under GPL-3.0-or-later; see [`LICENSE`](LICENSE).
 

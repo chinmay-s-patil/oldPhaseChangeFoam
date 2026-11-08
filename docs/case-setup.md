@@ -1,15 +1,13 @@
-# Tutorials & Case Setup
+# Case Setup & Reference Configurations
 
 > [!NOTE]
-> **Work in Progress**
-> 
-> Standalone tutorial cases are currently not included in this repository. Tutorial cases and demonstration workflows are under active development and will be provided in a future release.
+> No standalone tutorial cases are included in this release. The runnable simulation setups provided in this repository are **verification and validation test suites**. Users configuring new simulations should consult the verified case setups in [`verification/`](../verification/) and [`validation/`](../validation/) as reference configurations.
 
 ---
 
-## Verifying the Solvers
+## Reference Case Setups
 
-In the meantime, verified simulation cases and automated runners are available in the test suites:
+Verified simulation cases and automated runners are available in the test suites:
 
 * **Verification Suite**: [`verification/`](../verification/) — Quantitative verification cases covering phase change kinetics, energy conservation, and thermal hysteresis.
 * **Validation Benchmarks**: [`validation/`](../validation/) — Physical validation cases including pure gallium melting benchmarks.

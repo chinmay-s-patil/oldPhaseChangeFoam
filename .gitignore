@@ -46,6 +46,7 @@ scratch/
 validation/papers/
 **/papers/
 *.pdf
+*.zip
 tutorials/
 log.tree
 

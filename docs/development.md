@@ -86,7 +86,14 @@ Models are instantiated via OpenFOAM runtime selection tables (`runTimeSelection
 
 ### 1. Adding a Solid / PCM Model (`phaseChangeModel`)
 
-To implement a new solid-liquid phase change formulation (e.g. `myPCMModel`):
+> [!IMPORTANT]
+> **Custom PCM Model Architecture & Implementation Limitation**:
+> The current `phaseChangeModel` base class performs model-name validation and dictionary-key validation internally. Registering a new class in the runtime selection table (`addToRunTimeSelectionTable`) is therefore not sufficient by itself to introduce an independent PCM formulation:
+> 1. **Model Name Validation**: In `phaseChangeModel::readDict()`, the solver explicitly checks the configured `phaseChangeMode` against `"ehc"`, `"ehcdarcy"`, and `"enthalpyporosity"`. An unrecognized model name will be marked inactive (`active_ = false`) by the base class unless the base-class selection and dictionary-reading logic in [`src/solvers/phaseChangeMultiRegionFoam/solid/phaseChangeModel.C`](../src/solvers/phaseChangeMultiRegionFoam/solid/phaseChangeModel.C) is extended to recognise the new model.
+> 2. **Dictionary Key Validation**: `phaseChangeModel::readDict()` strictly validates keys in `phaseChangeDict` via `checkAllowedKeys()`. Custom subdictionaries (such as `myPCMCoeffs`) must be registered in the allowed-key list.
+> 3. **Base Implementation Reuse vs. Independent Formulations**: In the code example below, delegation calls such as `phaseChangeModel::correct()`, `phaseChangeModel::CpEff()`, and `phaseChangeModel::latentHeatSource()` reuse the existing base implementation (which computes path-secant heat capacity and thermal hysteresis). A genuinely different formulation must implement its own phase-change state updates and provide appropriate field contributions rather than delegating to the base class.
+>
+> The following example illustrates the class structure and available virtual extension points; it is an architectural reference rather than a drop-in implementation.
 
 #### Header: `myPCMModel.H`
 ```cpp
@@ -134,13 +141,13 @@ public:
     virtual tmp<volScalarField> rhoEff() const override;
 
     //- Effective thermal conductivity field [W/(m K)]
-    virtual tmp<volScalarField> kEff() const override;
+    virtual tmp<volScalarField> k() const override;
 
     //- Explicit latent heat source term [W/m3]
-    virtual tmp<volScalarField> Su() const override;
+    virtual tmp<volScalarField> latentHeatSource() const override;
 
     //- Implicit linearisation coefficient [kg/(m3 s)]
-    virtual tmp<volScalarField> Sp() const override;
+    virtual tmp<volScalarField> latentHeatSp() const override;
 
     //- Darcy momentum drag coefficient [kg/(m3 s)] (for fluid regions)
     virtual tmp<volScalarField> momentumSp() const override;
@@ -165,8 +172,32 @@ addToRunTimeSelectionTable(phaseChangeModel, myPCMModel, dictionary);
 myPCMModel::myPCMModel(const fvMesh& mesh, const basicThermo& thermo)
 :
     phaseChangeModel(mesh, thermo),
-    myParam_(subOrEmptyDict("myPCMCoeffs").getOrDefault<scalar>("myParam", 1.0))
-{}
+    myParam_(1.0)
+{
+    // Read model-specific parameters from constant/<regionName>/phaseChangeDict
+    IOobject dictIO
+    (
+        "phaseChangeDict",
+        mesh_.time().constant(),
+        mesh_,
+        IOobject::READ_IF_PRESENT,
+        IOobject::NO_WRITE
+    );
+
+    if (dictIO.typeHeaderOk<dictionary>(true))
+    {
+        IOdictionary dict(dictIO);
+        if (dict.found("phaseChange"))
+        {
+            const dictionary& pcDict = dict.subDict("phaseChange");
+            if (pcDict.found("myPCMCoeffs"))
+            {
+                const dictionary& modelDict = pcDict.subDict("myPCMCoeffs");
+                myParam_ = modelDict.getOrDefault<scalar>("myParam", 1.0);
+            }
+        }
+    }
+}
 
 void myPCMModel::correct()
 {
@@ -197,19 +228,19 @@ tmp<volScalarField> myPCMModel::rhoEff() const
     return phaseChangeModel::rhoEff();
 }
 
-tmp<volScalarField> myPCMModel::kEff() const
+tmp<volScalarField> myPCMModel::k() const
 {
-    return phaseChangeModel::kEff();
+    return phaseChangeModel::k();
 }
 
-tmp<volScalarField> myPCMModel::Su() const
+tmp<volScalarField> myPCMModel::latentHeatSource() const
 {
-    return phaseChangeModel::Su();
+    return phaseChangeModel::latentHeatSource();
 }
 
-tmp<volScalarField> myPCMModel::Sp() const
+tmp<volScalarField> myPCMModel::latentHeatSp() const
 {
-    return phaseChangeModel::Sp();
+    return phaseChangeModel::latentHeatSp();
 }
 
 tmp<volScalarField> myPCMModel::momentumSp() const
@@ -240,6 +271,8 @@ class myFluidPhaseChangeModel
 :
     public fluidPhaseChangeModel
 {
+    scalar myRateConst_;
+
 public:
 
     TypeName("myFluidModel");
@@ -258,22 +291,104 @@ public:
     //- Net mixture mass source rate per unit volume [kg/(m3 s)]
     virtual tmp<volScalarField> massSource() const override;
 
+    //- Species mass production rate by specie index [kg/(m3 s)] (pure virtual)
+    virtual tmp<volScalarField> speciesSource(const label specieIndex) const override;
+
+    //- Species mass production rate by specie name [kg/(m3 s)] (optional overload)
+    virtual tmp<volScalarField> speciesSource(const word& specieName) const override;
+
     //- Net mixture energy source rate per unit volume [W/m3]
     virtual tmp<volScalarField> energySource() const override;
-
-    //- Species mass production rate [kg/(m3 s)]
-    virtual tmp<volScalarField> speciesSource(const word& speciesName) const override;
 
     //- Update rate fields and kinetic state
     virtual void correct() override;
 
-    //- Diagnostics check for mass conservation
-    virtual void checkMassConservation() const override;
+    //- Diagnostics check for mass conservation: returns true if sum(speciesSource(i)) == massSource()
+    virtual bool checkMassConservation
+    (
+        const scalar relTol = 1e-4,
+        const scalar absTol = 1e-10
+    ) const override;
 };
 
 } // End namespace Foam
 
 #endif
+```
+
+#### Source: `myFluidPhaseChangeModel.C`
+```cpp
+#include "myFluidPhaseChangeModel.H"
+#include "addToRunTimeSelectionTable.H"
+
+namespace Foam
+{
+
+defineTypeNameAndDebug(myFluidPhaseChangeModel, 0);
+addToRunTimeSelectionTable(fluidPhaseChangeModel, myFluidPhaseChangeModel, dictionary);
+
+myFluidPhaseChangeModel::myFluidPhaseChangeModel
+(
+    const fvMesh& mesh,
+    const rhoReactionThermo& thermo,
+    const volVectorField& U,
+    const surfaceScalarField& phi
+)
+:
+    fluidPhaseChangeModel(mesh, thermo, U, phi),
+    myRateConst_(dict_.getOrDefault<scalar>("myRateConst", 1.0))
+{}
+
+tmp<volScalarField> myFluidPhaseChangeModel::massSource() const
+{
+    return tmp<volScalarField>::New
+    (
+        IOobject("massSource", mesh_.time().timeName(), mesh_),
+        mesh_,
+        dimensionedScalar("zero", dimMass/dimVolume/dimTime, 0.0)
+    );
+}
+
+tmp<volScalarField> myFluidPhaseChangeModel::speciesSource(const label specieIndex) const
+{
+    return tmp<volScalarField>::New
+    (
+        IOobject("speciesSource", mesh_.time().timeName(), mesh_),
+        mesh_,
+        dimensionedScalar("zero", dimMass/dimVolume/dimTime, 0.0)
+    );
+}
+
+tmp<volScalarField> myFluidPhaseChangeModel::speciesSource(const word& specieName) const
+{
+    return fluidPhaseChangeModel::speciesSource(specieName);
+}
+
+tmp<volScalarField> myFluidPhaseChangeModel::energySource() const
+{
+    return tmp<volScalarField>::New
+    (
+        IOobject("energySource", mesh_.time().timeName(), mesh_),
+        mesh_,
+        dimensionedScalar("zero", dimEnergy/dimVolume/dimTime, 0.0)
+    );
+}
+
+void myFluidPhaseChangeModel::correct()
+{
+    // Update kinetic rates and mass/energy transfer fields
+}
+
+bool myFluidPhaseChangeModel::checkMassConservation
+(
+    const scalar relTol,
+    const scalar absTol
+) const
+{
+    return fluidPhaseChangeModel::checkMassConservation(relTol, absTol);
+}
+
+} // End namespace Foam
 ```
 
 ---
