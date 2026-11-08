@@ -65,7 +65,7 @@ Steady-state solver: phaseChangeMultiRegionSimpleFoam
 - **Directory**: [`tin2D/`](tin2D/)
 - **Solver**: `phaseChangeMultiRegionFoam`
 - **Physics**: Low-Prandtl liquid metal melting in a square cavity ($\text{Ra} = 2.50 \times 10^5, \text{Pr} = 0.02, \text{Ste} = 0.01$).
-- **Headline Result**: Early conduction front ($t = 100\text{ s}$) matches the 1D Stefan limit within $-1.34\%$ ($f_L = 0.0881$ vs $0.0893$).
+- **Headline Result**: Early conduction front ($t = 100\text{ s}$) matches the 1D Stefan limit within $-1.34\%$ ($f_L = 0.0881$ vs $0.0893$). Full late-time convective benchmark ($t = 2500\text{ s}$) is in progress (literature targets $f_L \approx 0.54\text{--}0.60$ depend on resolved $\text{Pr}$).
 - **Runtime**: $\approx 15\text{ s}$.
 
 ### Rung 4: Brent (1988) / Ye & Arıcı (2023) 2D Gallium Melting
@@ -87,7 +87,7 @@ Steady-state solver: phaseChangeMultiRegionSimpleFoam
 ## Reference Data & Literature Sources
 - **Brent, Voller, Reid (1988)**: "Enthalpy-Porosity Technique for Modeling Convection-Diffusion Phase Change: Application to the Melting of a Pure Metal", *Numerical Heat Transfer*, 13(3), pp. 297–318. DOI: [10.1080/10407788808913615](https://doi.org/10.1080/10407788808913615).
 - **de Vahl Davis (1983)**: "Natural convection of air in a square cavity: a bench mark numerical solution", *Int. J. Numer. Meth. Fluids*, 3, pp. 249–264. DOI: [10.1002/fld.1650030305](https://doi.org/10.1002/fld.1650030305).
-- **Hannoun, Alexiades, Mai (2003)**: "Resolving the Controversy over Tin and Gallium Melting in a Rectangular Cavity", *Numerical Heat Transfer, Part B: Fundamentals*, 44(3), pp. 253–276. DOI: [10.1080/10407790390226974](https://doi.org/10.1080/10407790390226974).
+- **Hannoun, Alexiades, Mai (2003)**: "Resolving the Controversy over Tin and Gallium Melting in a Rectangular Cavity Heated from the Side", *Numerical Heat Transfer, Part B: Fundamentals*, 44(3), pp. 253–276. DOI: [10.1080/10407790390226974](https://doi.org/10.1080/10407790390226974).
 - **Ye & Arıcı (2023a)**: "3D validation, 2D feasibility, corrected and developed correlations for pure solid-gallium phase change modeling by enthalpy-porosity methodology", *International Communications in Heat and Mass Transfer*, 144, 106780. DOI: [10.1016/j.icheatmasstransfer.2023.106780](https://doi.org/10.1016/j.icheatmasstransfer.2023.106780). *(Source of Eq. 6 liquid fraction benchmark correlation)*.
 - **Ye & Arıcı (2023b)**: "Redefined interface error, 2D verification and validation for pure solid-gallium phase change modeling by enthalpy-porosity methodology", *International Communications in Heat and Mass Transfer*, 147, 106952. DOI: [10.1016/j.icheatmasstransfer.2023.106952](https://doi.org/10.1016/j.icheatmasstransfer.2023.106952). *(Source of 2D grid-converged interface benchmarks)*.
 - **Gau & Viskanta (1986)**: "Melting and Solidification of a Metal System—I. Melting from a Vertical Wall", *Int. J. Heat Mass Transfer*, 29(12), pp. 1951–1963. DOI: [10.1016/0017-9310(86)90011-2](https://doi.org/10.1016/0017-9310(86)90011-2). Traced midplane targets from Fig. 5 ($t = 30, 60, 120, 360, 600, 1020\text{ s}$) carry an estimated digitization uncertainty of $\pm 1.0\text{ mm}$.

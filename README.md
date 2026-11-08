@@ -67,9 +67,9 @@ Compiled binaries (`phaseChangeMultiRegionFoam`, `phaseChangeMultiRegionSimpleFo
 A container image pre-equipped with OpenFOAM-v2412 and compiled `phaseChangeFoam` binaries is available via GitHub Container Registry:
 
 ```bash
-# Pull and start an interactive simulation shell mounting current directory (pinned release v0.1.0)
+# Pull and start an interactive simulation shell mounting current directory (pinned release 0.1.0)
 docker run --rm -it -v "$PWD":/home/openfoam/run -w /home/openfoam/run \
-    ghcr.io/chinmay-s-patil/phasechangefoam:v0.1.0
+    ghcr.io/chinmay-s-patil/phasechangefoam:0.1.0
 ```
 
 ---
@@ -125,7 +125,7 @@ The solver is assessed at three levels: analytical verification, comparison agai
 ### Tier 2: Numerical CFD Benchmarks
 * **Natural Convection Cavity (de Vahl Davis 1983)**: Ra = $10^5$, Pr = $0.71$. Mean Nusselt converges monotonically to $\overline{\text{Nu}} = 4.548$ (+0.64% on $80 \times 80$), with peak velocities agreeing within 1–2%.
 * **2D Pure Gallium Melting (Brent et al. 1988, Ye & Arıcı 2023)**: At $t = 17$ min, the simulated liquid fraction ($f_L = 0.5736$) matches the 2D numerical correlation of Ye & Arıcı ($0.5703$) within +0.58%, with $-0.13\%$ discrete energy closure. Across all simulated times, our results show a persistent positive offset relative to the original solution of Brent et al. (1988: $0.5334$). Later CFD studies report higher values consistent with our result ($f_L \approx 0.570\text{--}0.574$), though the specific cause of the offset against Brent's original 1988 calculation remains unresolved. Spatial GCI estimates for this benchmark show oscillatory behavior on coarser meshes; full details are discussed in [`docs/validation.md`](docs/validation.md#spatial-grid-convergence--gci-ehcdarcy).
-* **2D Pure Tin Melting (Bertrand et al. 1999 / Hannoun et al. 2003)**: At early time ($t = 100$ s), computed $f_L = 0.0881$ matches the 1D Stefan similarity limit ($0.0893$, $-1.34\%$) as an early-conduction consistency check. Full late-time convective benchmark ($t = 2500$ s, target $f_L \approx 0.60$) is in progress.
+* **2D Pure Tin Melting (Bertrand et al. 1999 / Hannoun et al. 2003)**: At early time ($t = 100$ s), computed $f_L = 0.0881$ matches the 1D Stefan similarity limit ($0.0893$, $-1.34\%$) as an early-conduction consistency check. Full late-time convective benchmark ($t = 2500$ s) is in progress; published convective targets report $f_L \approx 0.60$ (Hannoun et al. 2003) vs $f_L \in [0.54, 0.57]$ (Gobin & Le Quéré 2000), noting that Hannoun's tabulated physical properties correspond to $\text{Pr} = 0.020$ rather than the printed $\text{Pr} = 0.040$.
 
 ![Gallium 2D Melting Animation](docs/images/gallium_melting_brent_comparison.gif)
 
@@ -166,7 +166,7 @@ For full quantitative tables, ASME GCI grid studies, and parametric sweeps ($\De
 
 ### Benchmark and Experimental Validation References
 
-* Ben-David, O., Levy, A., and Mikic, B. (2013). "3D numerical and experimental study of gallium melting in a rectangular cavity", *Int. J. Heat Mass Transfer*, 67, pp. 260–271.
+* Ben-David, O., Levy, A., Mikhailovich, B., and Azulay, A. (2013). "3D numerical and experimental study of gallium melting in a rectangular container", *Int. J. Heat Mass Transfer*, 67, pp. 260–271. [DOI: 10.1016/j.ijheatmasstransfer.2013.07.058](https://doi.org/10.1016/j.ijheatmasstransfer.2013.07.058).
 * Bertrand, O., Binet, B., Combeau, H., Couturier, S., Delannoy, Y., Gobin, D., Lacroix, M., Le Quéré, P., Médale, M., Mencinger, J., Sadat, H., and Vieira, G. (1999). "Melting driven by natural convection: A comparison exercise. First results", *Int. J. Thermal Sci.*, 38(1), pp. 5–26. [DOI: 10.1016/S1290-0729(99)80018-8](https://doi.org/10.1016/S1290-0729(99)80018-8).
 * Bony, J., and Citherlet, S. (2007). "Numerical model and experimental validation of heat storage with phase change materials", *Energy and Buildings*, 39(10), pp. 1065–1072. [DOI: 10.1016/j.enbuild.2006.10.017](https://doi.org/10.1016/j.enbuild.2006.10.017).
 * de Vahl Davis, G. (1983). "Natural convection of air in a square cavity: a bench mark numerical solution", *Int. J. Numer. Meth. Fluids*, 3(3), pp. 249–264. [DOI: 10.1002/fld.1650030305](https://doi.org/10.1002/fld.1650030305).

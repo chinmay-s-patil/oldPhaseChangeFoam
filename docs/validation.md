@@ -223,7 +223,7 @@ $$1.67\text{ mm (1.88% } W) \to 1.87\text{ mm (2.10% } W) \to 2.35\text{ mm (2.6
 
 In OpenFOAM's finite-volume formulation with implicit backward-Euler time discretization (`Euler ddtScheme`), discrete energy storage over time step $\Delta t_n$ is evaluated at time level $t^n$. Evaluating boundary energy input using the conjugate **right-endpoint Riemann sum** ($E_{\text{net, in}} = \sum \dot{Q}_{\text{net}}(t_n)\Delta t_n$) achieves exact discrete mathematical consistency with the backward-Euler equations, eliminating the artificial $+3.63\text{ J}$ offset introduced by composite trapezoidal quadrature on the initial conduction surge.
 
-- **EHCDarcy Efficiency**: Achieves strictly bounded energy closure ($|\epsilon_{\text{energy}}| \le 0.38\%$) with only $n_{\text{outer}} = 3$ passes ($15.6\text{ s}$ CPU), whereas explicit Enthalpy-Porosity requires $n_{\text{outer}} \ge 10\text{--}12$ passes ($56.6\text{ s}$ CPU) to damp Newton oscillations below $0.5\%$.
+- **EHCDarcy Efficiency**: Achieves strictly bounded energy closure ($|\epsilon_{\text{energy}}| \le 0.38\%$) with only $n_{\text{outer}} = 3$ passes ($15.6\text{ s}$ CPU), whereas explicit Enthalpy-Porosity requires $n_{\text{outer}} \ge 12$ passes ($56.6\text{ s}$ CPU) to damp Newton oscillations below $0.5\%$ (the $-0.06\%$ closure at $n=8$ is a zero-crossing between $-7.3\%$ at $n=5$ and $+1.75\%$ at $n=10$, settling below $0.5\%$ only at $n \ge 12$).
 - **Startup Transient**: Halving $\Delta t$ ($0.10 \to 0.05\text{ s}$) reduces the small remaining 2-minute deficit by $76.7\%$, confirming it as a temporal startup artifact rather than a formulation defect.
 
 #### Summary of Spatial Sensitivity & Parametric Sweeps
@@ -385,7 +385,7 @@ python3 validation/gallium3D_experimental/runTest.py
 * Voller, V. R., and Prakash, C. (1987). "A fixed grid numerical modelling methodology for convection-diffusion mushy region phase-change problems", *Int. J. Heat Mass Transfer*, 30(8), pp. 1709–1719. [DOI: 10.1016/0017-9310(87)90317-6](https://doi.org/10.1016/0017-9310(87)90317-6).
 
 ### Benchmark & Validation References
-* Ben-David, O., Levy, A., and Mikic, B. (2013). "3D numerical and experimental study of gallium melting in a rectangular cavity", *Int. J. Heat Mass Transfer*, 67, pp. 260–271.
+* Ben-David, O., Levy, A., Mikhailovich, B., and Azulay, A. (2013). "3D numerical and experimental study of gallium melting in a rectangular container", *Int. J. Heat Mass Transfer*, 67, pp. 260–271. [DOI: 10.1016/j.ijheatmasstransfer.2013.07.058](https://doi.org/10.1016/j.ijheatmasstransfer.2013.07.058).
 * Bertrand, O., Binet, B., Combeau, H., Couturier, S., Delannoy, Y., Gobin, D., Lacroix, M., Le Quéré, P., Médale, M., Mencinger, J., Sadat, H., and Vieira, G. (1999). "Melting driven by natural convection: A comparison exercise. First results", *Int. J. Thermal Sci.*, 38(1), pp. 5–26. [DOI: 10.1016/S1290-0729(99)80018-8](https://doi.org/10.1016/S1290-0729(99)80018-8).
 * Bony, J., and Citherlet, S. (2007). "Numerical model and experimental validation of heat storage with phase change materials", *Energy and Buildings*, 39(10), pp. 1065–1072. [DOI: 10.1016/j.enbuild.2006.10.017](https://doi.org/10.1016/j.enbuild.2006.10.017).
 * Brent, A. D., Voller, V. R., and Reid, K. J. (1988). "Enthalpy-Porosity Technique for Modeling Convection-Diffusion Phase Change: Application to the Melting of a Pure Metal", *Numerical Heat Transfer*, 13(3), pp. 297–318. [DOI: 10.1080/10407788808913615](https://doi.org/10.1080/10407788808913615).

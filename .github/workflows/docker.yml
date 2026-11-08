@@ -36,6 +36,7 @@ jobs:
           images: ghcr.io/${{ steps.lowercase.outputs.repository }}
           tags: |
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=ref,event=tag
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=sha,enable=false

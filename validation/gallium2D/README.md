@@ -21,7 +21,7 @@ The baseline benchmark uses the `EHCDarcy` formulation with a $42 \times 32$ str
 
 For this benchmark configuration, `EHCDarcy` accounts for sensible heat-capacity variation through the path-based effective heat capacity with linearised latent heat sources, achieving discrete energy closure ($|\epsilon_{\text{energy}}| \le 0.38\%$) within the specified regression tolerance using three outer correctors ($n_{\text{outer}} = 3$).
 
-The alternative `enthalpyPorosity` formulation (Brent et al. 1988) updates liquid fraction via Newton projection. For this benchmark problem, under-relaxation with $\lambda = 0.2$ leads to incomplete latent heat addition per time step unless compensated by additional outer correctors, whereas the full Newton step ($\lambda = 1.0$) requires higher corrector counts ($n_{\text{outer}} \ge 10\text{--}12$) to achieve comparable energy conservation.
+The alternative `enthalpyPorosity` formulation (Brent et al. 1988) updates liquid fraction via Newton projection. For this benchmark problem, under-relaxation with $\lambda = 0.2$ leads to incomplete latent heat addition per time step unless compensated by additional outer correctors, whereas the full Newton step ($\lambda = 1.0$) requires higher corrector counts ($n_{\text{outer}} \ge 12$) to achieve comparable energy conservation.
 
 Detailed comparisons between `EHCDarcy` and `enthalpyPorosity`, including relaxation-factor sensitivity, backward-Euler energy quadrature, and computational cost, are documented in [ANALYSIS_REPORT.md](analysis/ANALYSIS_REPORT.md).
 
@@ -29,18 +29,22 @@ Detailed comparisons between `EHCDarcy` and `enthalpyPorosity`, including relaxa
 
 ## 3. Benchmark Execution
 
+The baseline comparative summary is committed in [`gallium_validation_results.txt`](gallium_validation_results.txt) and can be reproduced or extended using `runTest.py`:
+
 ### Quick Verification Run (2 Minutes, Baseline Grid $42 \times 32$)
 
 ```bash
-# Run default EHCDarcy (passes all criteria, |energy closure| <= 0.38%):
+# Run default EHCDarcy (passes all criteria, |energy closure| <= 0.38%, ~35 s runtime):
 python3 runTest.py
 
 # Run alternative enthalpyPorosity with full Newton step (lambda = 1.0):
 python3 runTest.py --model enthalpyPorosity --lambda 1.0
 
-# Run with custom parameters:
-python3 runTest.py --model EHCDarcy --endTime 120 --nx 42 --ny 32
+# Run full 17-minute benchmark transient (~3.5--5 min runtime):
+python3 runTest.py --model EHCDarcy --endTime 1020 --plot
 ```
+
+`runTest.py` updates `gallium_validation_results.txt` upon completion.
 
 ### Authoritative Report Generation
 
@@ -50,6 +54,5 @@ All tables, metrics, and narrative numbers are dynamically compiled from committ
 python3 analysis/generate_report.py
 ```
 
-Generated reports:
-
+Generated report:
 - [ANALYSIS_REPORT.md](analysis/ANALYSIS_REPORT.md)
