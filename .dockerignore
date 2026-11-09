@@ -1,7 +1,5 @@
 .git
 .github
-ideas
-scratch
 **/Make/linux*
 Make/linux*
 *.o

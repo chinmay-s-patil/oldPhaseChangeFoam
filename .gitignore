@@ -40,15 +40,10 @@ validation/**/ep_relaxation_study/**
 !validation/**/ep_relaxation_study/*.json
 !validation/**/ep_relaxation_study/*.py
 
-ideas/
-scratch/
-# src/solvers/phaseChangeMultiRegionSimpleFoam/
 validation/papers/
 **/papers/
 *.pdf
 *.zip
-tutorials/
-log.tree
-validation/gallium2D/analysis/complete_17min_analysis_results.txt
 validation/gallium2D/*.png
+
 
