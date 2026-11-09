@@ -28,21 +28,6 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 \*---------------------------------------------------------------------------*/
 
-/*---------------------------------------------------------------------------*\
-  =========                 |
-  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
-   \\    /   O peration     |
-    \\  /    A nd           | www.openfoam.com
-     \\/     M anipulation  |
--------------------------------------------------------------------------------
-    Copyright (C) 2018-2024 OpenCFD Ltd.
-    Copyright (C) 2026 Chinmay S Patil
--------------------------------------------------------------------------------
-License
-    This file is part of OpenFOAM, with modifications for phaseChangeFoam.
-    SPDX-License-Identifier: GPL-3.0-or-later
-\*---------------------------------------------------------------------------*/
-
 {
     fvScalarMatrix rhoEqn
     (

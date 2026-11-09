@@ -186,8 +186,6 @@ Melting of pure tin in a square cavity ($L = 0.10$ m) following the physical pro
 
 Melting of pure gallium in a rectangular enclosure ($W = 0.0889\text{ m}$, $H = 0.0635\text{ m}$, height-to-width aspect ratio $A_{H/W} = H/W = 0.714$, width-to-height ratio $A_{W/H} = W/H = 1.40$) subject to an isothermal hot vertical wall ($T_h = 38.0^\circ\text{C} = 311.15$ K) and subcooled initial cavity ($T_{\text{init}} = T_c = 28.3^\circ\text{C} = 301.45$ K, $T_m = 29.78^\circ\text{C} = 302.93$ K, $\text{Ra} \approx 6.06 \times 10^5$, $\text{Pr} = 0.0216$, $\text{Ste} = 0.0391$).
 
-![Gallium 2D Melting Animation](images/gallium_melting_brent_comparison.gif)
-
 #### Multi-Model Comparison across Full 17-Minute Transient ($42 \times 32$ Grid, $\Delta t = 0.1$ s)
 
 | Metric | Benchmark Target | EP ($\lambda = 0.2$) | EP ($\lambda = 1.0, n_{\text{outer}}=8$) | EHCDarcy ($n_{\text{outer}}=3$) | EHCDarcy ($n_{\text{outer}}=8$) |
