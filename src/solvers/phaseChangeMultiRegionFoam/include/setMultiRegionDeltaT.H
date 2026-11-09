@@ -13,7 +13,6 @@ License
     SPDX-License-Identifier: GPL-3.0-or-later
     Modified 2026-10 by Chinmay S Patil: Added adaptive time-step limiting based on maximum phase-fraction change rate (maxAlphaCo).
 
-
     OpenFOAM is free software: you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or

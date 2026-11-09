@@ -45,5 +45,4 @@ validation/papers/
 *.pdf
 *.zip
 validation/gallium2D/*.png
-
-
+docs/images/

@@ -15,7 +15,6 @@ Generates:
 import os
 import csv
 import json
-import shutil
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')

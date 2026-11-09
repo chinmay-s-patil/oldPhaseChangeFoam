@@ -14,7 +14,6 @@ License
     SPDX-License-Identifier: GPL-3.0-or-later
     Modified 2026-10 by Chinmay S Patil: Read solid region maxDi diffusion-number time step limits.
 
-
     OpenFOAM is free software: you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or

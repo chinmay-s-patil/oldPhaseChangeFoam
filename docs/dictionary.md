@@ -285,7 +285,7 @@ Used when distinct solid and liquid thermal conductivities or heat capacities ar
 | `C_evap` | scalar | `0.1` | 1/s | Evaporation rate constant |
 | `C_cond` | scalar | `0.1` | 1/s | Condensation rate constant |
 | `latentHeat` | scalar | mandatory | J/kg | Latent heat of vaporization |
-| `Tsat` | scalar | `373.15` | K | Reference saturation temperature |
+| `Tsat` (or `T_sat`) | scalar | `373.15` | K | Reference saturation temperature |
 | `enableTsatP` | bool | `false` | - | Enables Clausius-Clapeyron pressure dependence |
 | `pRef` | scalar | `101325` | Pa | Reference saturation pressure |
 
@@ -305,6 +305,8 @@ Used when distinct solid and liquid thermal conductivities or heat capacities ar
 ### Multi-Region Coupling & Picard Loop (`system/fvSolution`)
 
 ```foam
+coupledEnergyField   false;      // Enable monolithic implicit energy matrix coupling across interfaces
+
 PIMPLE
 {
     nOuterCorrectors     8;          // Multi-region outer iterations (requires >= 2 with phase change)
@@ -317,6 +319,7 @@ PIMPLE
 ```
 
 * **Guardrail constraint**: When phase change is active in a fluid region or multi-region domain, `createCoupledRegions.H` enforces `nOuterCorrectors >= 2`. Setting `nOuterCorrectors 1` triggers a `FatalError`.
+* **`coupledEnergyField`**: Optional boolean setting at the root of `system/fvSolution` (default: `false`). When set to `true`, or when any conjugate patch sets `useImplicit true;`, `phaseChangeMultiRegionFoam` activates monolithic implicit matrix assembly across solid-fluid and solid-solid interfaces (`createCoupledRegions.H`). The energy equations of the coupled regions are assembled into a unified block matrix (`fvMatrixAssemblyPtr`) and solved simultaneously, eliminating Picard interface iteration lag across conjugate heat transfer boundaries.
 * **`frozenFlow`**: Optional boolean setting in fluid `PIMPLE` or `SIMPLE` subdictionaries (default: `false`). When set to `true`, fluid momentum, pressure correction, continuity, and turbulence equations (`UEqn`, `pEqn`, `rhoEqn`) are bypassed. The solver holds velocity $\mathbf{U}$ and mass flux $\phi$ static, advancing only thermal energy (`EEqn`), species transport (`YEqn`), and phase change.
 
 ### Time-Stepping Controls (`system/controlDict`)
