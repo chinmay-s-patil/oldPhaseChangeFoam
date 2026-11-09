@@ -20,8 +20,6 @@ import re
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 ENERGY_DIR = os.path.join(SCRIPT_DIR, "energy_balance")
 REPORT_PATH = os.path.join(SCRIPT_DIR, "ANALYSIS_REPORT.md")
-ARTIFACT_DIR = os.environ.get("ARTIFACT_DIR")
-ARTIFACT_PATH = os.path.join(ARTIFACT_DIR, "gallium_validation_analysis_report.md") if ARTIFACT_DIR else None
 
 BRENT_FL_17M = 0.5334
 YE_ARICI_FL_17M = 0.5703
@@ -706,12 +704,6 @@ To preserve complete arithmetic traceability for how the initial post-processing
     with open(REPORT_PATH, 'w') as f:
         f.write(report_content)
     print(f"Generated report at: {REPORT_PATH}")
-
-    # Copy to artifact if configured
-    if ARTIFACT_PATH and ARTIFACT_DIR:
-        os.makedirs(ARTIFACT_DIR, exist_ok=True)
-        shutil.copyfile(REPORT_PATH, ARTIFACT_PATH)
-        print(f"Synchronized artifact at: {ARTIFACT_PATH}")
 
 if __name__ == "__main__":
     generate_report()

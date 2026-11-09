@@ -385,13 +385,6 @@ def main():
     plt.close(fig)
     print(f"\nSaved master comparison plot to: {out_png}")
 
-    # Copy to brain artifact directory if configured
-    brain_dir = os.environ.get("ARTIFACT_DIR")
-    if brain_dir and os.path.exists(brain_dir):
-        dst_art = os.path.join(brain_dir, "gallium_melt_fraction_comparison.png")
-        shutil.copyfile(out_png, dst_art)
-        print(f"Copied master plot to artifact directory: {dst_art}")
-
     # Write text summary
     summary_path = os.path.join(root_dir, "gallium_validation_results.txt")
     with open(summary_path, "w") as f:
