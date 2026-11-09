@@ -12,7 +12,7 @@
 License
     This file is part of OpenFOAM, with modifications for phaseChangeFoam.
     SPDX-License-Identifier: GPL-3.0-or-later
-    Modified 2026-10 by Chinmay S Patil: Added phase change control parameter reading.
+    Modified 2026-10 by Chinmay S Patil: Read frozenFlow flag and region-specific PIMPLE solution parameters.
 
     OpenFOAM is free software: you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by

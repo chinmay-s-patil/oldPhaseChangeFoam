@@ -69,7 +69,7 @@ adjustTimeStep false;
 """)
 
 def run_case(case_dir):
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
     cmd = f"bash -c '{of_env}; cd {case_dir} && rm -rf [1-9]* 0.* && blockMesh && mkdir -p constant/fluid && rm -rf constant/fluid/polyMesh && cp -r constant/polyMesh constant/fluid/polyMesh && phaseChangeMultiRegionFoam > log.simulation 2>&1'"
     run_cmd(cmd)
 
@@ -84,7 +84,7 @@ def run_brent_schedule(base_dir, case_dir):
     with open(ctrl_path, "w") as f:
         f.write(c)
 
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
     # Run stage 1 (0 -> 20s)
     cmd1 = f"bash -c '{of_env}; cd {case_dir} && rm -rf [1-9]* 0.* && blockMesh && mkdir -p constant/fluid && rm -rf constant/fluid/polyMesh && cp -r constant/polyMesh constant/fluid/polyMesh && phaseChangeMultiRegionFoam > log.stage1 2>&1'"
     run_cmd(cmd1)

@@ -19,7 +19,7 @@ from runTest import setup_case, run_cmd, find_solver, parse_scalar_field
 
 def run_timestep_study():
     solver = find_solver()
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
 
     time_steps = [0.05, 0.10, 0.20]
     nx, ny = 42, 32

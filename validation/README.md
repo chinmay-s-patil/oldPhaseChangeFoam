@@ -55,7 +55,7 @@ Steady-state solver: phaseChangeMultiRegionSimpleFoam
 - **Runtime**: $\approx 2\text{ s}$ (500 iterations).
 
 ### Rung 2: EHC Cyclic Thermal Hysteresis
-- **Directory**: [`pcmHysteresis_experimental/`](pcmHysteresis_experimental/)
+- **Directory**: [`pcmHysteresis/`](pcmHysteresis/)
 - **Solver**: `phaseChangeMultiRegionFoam`
 - **Physics**: Direction-dependent cyclic melting ($[308, 312]\text{ K}$) and freezing ($[303, 307]\text{ K}$) loop with state-variable subcooling retention.
 - **Headline Result**: Complete phase cycle recovery with subcooling delay (100% molten $\to$ subcooling retention $\to$ 100% solid crystallization).
@@ -108,7 +108,7 @@ python3 validation/runAll.py --fast
 
 # Run individual benchmarks:
 python3 validation/deVahlDavis2D/runTest.py
-python3 validation/pcmHysteresis_experimental/runTest.py
+python3 validation/pcmHysteresis/runTest.py
 python3 validation/tin2D/runTest.py
 python3 validation/gallium2D/runTest.py --endTime 120 --plot
 python3 validation/gallium3D_experimental/runTest.py

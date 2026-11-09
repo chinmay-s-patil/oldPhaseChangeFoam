@@ -151,7 +151,7 @@ phaseChange
 """)
 
 def run_case(case_dir):
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
     cmd = f"bash -c '{of_env}; cd {case_dir} && rm -rf [1-9]* 0.* postProcessing && blockMesh && mkdir -p constant/fluid && rm -rf constant/fluid/polyMesh && cp -r constant/polyMesh constant/fluid/polyMesh && phaseChangeMultiRegionFoam > log.simulation 2>&1'"
     print(f"Running simulation in {case_dir} ...")
     run_cmd(cmd)

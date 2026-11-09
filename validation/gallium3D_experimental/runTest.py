@@ -343,7 +343,7 @@ boundaryField
 """)
 
     # Mesh generation
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
     run_cmd(f"bash -c '{of_env}; blockMesh && mkdir -p constant/fluid && rm -rf constant/fluid/polyMesh && cp -r constant/polyMesh constant/fluid/polyMesh'", cwd=case_dir)
 
 def parse_openfoam_field(file_path):
@@ -385,7 +385,7 @@ def parse_openfoam_vector_field(file_path):
 
 def run_gallium3d_validation(case_dir, nx=32, ny=24, nz=16, endTime=120):
     solver_bin = find_solver()
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
 
     print("=" * 80)
     print("  3D GALLIUM MELTING EXPERIMENTAL VALIDATION (Gau & Viskanta 1986 / Ben-David et al. 2013)")

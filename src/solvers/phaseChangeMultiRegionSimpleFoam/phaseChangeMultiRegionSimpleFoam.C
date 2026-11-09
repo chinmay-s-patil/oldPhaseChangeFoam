@@ -12,7 +12,7 @@
 License
     This file is part of OpenFOAM, with modifications for phaseChangeFoam.
     SPDX-License-Identifier: GPL-3.0-or-later
-    Modified 2026-10 by Chinmay S Patil: Added steady-state phase change models
+    Modified 2026-10 by Chinmay S Patil: Integrated steady-state phase change models and multi-region energy coupling.
     and multi-region energy coupling.
 
     OpenFOAM is free software: you can redistribute it and/or modify it

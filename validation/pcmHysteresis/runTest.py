@@ -294,7 +294,7 @@ boundaryField { ".*" { type calculated; value uniform 101325; } emptyFaces { typ
 """)
 
     # Mesh generation
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
     run_cmd(f"bash -c '{of_env}; blockMesh && mkdir -p constant/pcm && rm -rf constant/pcm/polyMesh && cp -r constant/polyMesh constant/pcm/polyMesh'", cwd=case_dir)
 
 def parse_openfoam_field(file_path):
@@ -318,7 +318,7 @@ def parse_openfoam_field(file_path):
 
 def run_hysteresis_validation(case_dir):
     solver_bin = find_solver()
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
 
     print("=" * 80)
     print("  BONY & CITHERLET (2007) / DSC PARAFFIN THERMAL HYSTERESIS VALIDATION")

@@ -48,7 +48,7 @@ def parse_openfoam_field(file_path, num_cells=100):
 
 def setup_case(case_dir, model_type):
     os.makedirs(case_dir, exist_ok=True)
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
     
     # system/controlDict
     os.makedirs(os.path.join(case_dir, "system"), exist_ok=True)
@@ -234,7 +234,7 @@ def main():
     print(f"=== EHC vs Enthalpy-Porosity 1D Stefan Analytical Benchmark in {base_dir} ===")
     
     solver_bin = find_solver()
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
 
     ehc_dir = os.path.join(base_dir, "case_ehc")
     ep_dir = os.path.join(base_dir, "case_porosity")

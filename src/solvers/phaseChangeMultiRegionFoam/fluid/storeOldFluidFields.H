@@ -12,7 +12,7 @@
 License
     This file is part of OpenFOAM, with modifications for phaseChangeFoam.
     SPDX-License-Identifier: GPL-3.0-or-later
-    Modified 2026-10 by Chinmay S Patil: Stored old fluid fields for time step adaptation.
+    Modified 2026-10 by Chinmay S Patil: Stored previous iteration p_rgh and rho for convergence monitoring.
 
     OpenFOAM is free software: you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by

@@ -302,7 +302,7 @@ heatSource
 """)
 
     # Mesh generation and region directory copies
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
     run_cmd(f"cd {case_dir} && bash -c '{of_env}; blockMesh'", cwd=case_dir)
     run_cmd(f"mkdir -p {case_dir}/constant/air {case_dir}/system/air")
     run_cmd(f"cp -r {case_dir}/constant/polyMesh {case_dir}/constant/air/polyMesh 2>/dev/null || true")
@@ -314,7 +314,7 @@ heatSource
 def main():
     base_dir = os.path.dirname(os.path.abspath(__file__))
     solver_bin = find_solver()
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
 
     print("=== Lee Fluid Phase Change Model Quantitative Verification Suite ===")
 
@@ -868,7 +868,7 @@ phaseChange
         f.write(f"  - Final E_abs                         : {E_abs_final:.6f} J/m^3\n")
         f.write(f"  - Absolute Enthalpy Rel Error         : {err_E9:.6e}\n")
         f.write("-------------------------------------------------------\n")
-        f.write("ALL LEE MODEL VERIFICATION TESTS PASSED SUCCESSFULLY!\n")
+        f.write("All Lee model verification tests passed.\n")
 
     print("\n=========================================================================")
     print("      LEE FLUID PHASE CHANGE MODEL QUANTITATIVE VERIFICATION PASS        ")

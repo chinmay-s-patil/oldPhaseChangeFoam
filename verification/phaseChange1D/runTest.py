@@ -69,7 +69,7 @@ def find_melt_front(T_list, alpha_list, dx=0.001):
     return 0.0
 
 def setup_case():
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
     run_cmd(f"bash -c '{of_env}; blockMesh'")
     run_cmd("mkdir -p constant/pcm system/pcm")
     run_cmd("cp -r constant/polyMesh constant/pcm/polyMesh 2>/dev/null || true")
@@ -81,7 +81,7 @@ def main():
     print(f"=== 1D Phase Change Timestep Sweep & Accuracy Test in {case_dir} ===")
     
     os.chdir(case_dir)
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
     solver_bin = find_solver()
 
     timesteps = [1, 2, 5, 10, 25, 50, 100, 200, 500]

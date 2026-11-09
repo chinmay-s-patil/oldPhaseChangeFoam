@@ -427,7 +427,7 @@ if __name__ == "__main__":
 
     setup_ehc_case(case_dir, nx=42, ny=32, end_time=1020, deltaT_melt=0.5, cu=1.6e6)
 
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
     solver_bin = find_solver("phaseChangeMultiRegionFoam")
 
     cmd = f"bash -c '{of_env}; cd {case_dir} && rm -rf [1-9]* 0.* && blockMesh && mkdir -p constant/fluid && rm -rf constant/fluid/polyMesh && cp -r constant/polyMesh constant/fluid/polyMesh && {solver_bin} > log.simulation 2>&1'"

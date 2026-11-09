@@ -12,7 +12,7 @@
 License
     This file is part of OpenFOAM, with modifications for phaseChangeFoam.
     SPDX-License-Identifier: GPL-3.0-or-later
-    Modified 2026-10 by Chinmay S Patil: Initial time step adjustment considering phase change.
+    Modified 2026-10 by Chinmay S Patil: Adjusted initial time step against maxCo, maxDi, and maxAlphaCo limits.
 \*---------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------*\

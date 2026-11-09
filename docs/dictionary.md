@@ -16,7 +16,7 @@ where `<regionName>` matches the region declared in `constant/regionProperties` 
 
 ## Minimal Working Templates
 
-All phase change configurations require a top-level `phaseChange` subdictionary in `constant/<regionName>/phaseChangeDict`. The solver validates keys strictly using `checkAllowedKeys()`.
+All phase change configurations require a top-level `phaseChange` subdictionary in `constant/<regionName>/phaseChangeDict`. The solver validates keys using `checkAllowedKeys()`.
 
 ### 1. Solid-Liquid PCM with Effective Heat Capacity (`EHCDarcy`)
 
@@ -56,7 +56,7 @@ phaseChange
 
 ### 2. Solid-Liquid PCM with Thermal Hysteresis (`EHC`)
 
-Suitable for solid PCM regions or pure-conduction domains exhibiting supercooling (e.g., salt hydrates or organic waxes). Does not include Darcy momentum drag; for fluid regions with convection, use `EHCDarcy`:
+Suitable for solid PCM regions or pure-conduction domains exhibiting supercooling (e.g., salt hydrates or organic waxes). Does not include Darcy momentum drag; for fluid regions with convection, use `EHCDarcy` (or set `convection { suppress true; }` to run pure conduction in a fluid domain):
 
 ```foam
 FoamFile
@@ -238,6 +238,14 @@ Active for `EHCDarcy` and `enthalpyPorosity` when operating in fluid regions:
 
 ---
 
+### Convection Suppression Subdictionary (`convection`)
+Optional subdictionary to control fluid velocity coupling and Darcy momentum drag:
+| Keyword | Type | Default | Unit | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `suppress` | bool | `true` (solid/no $\mathbf{U}$), `false` (`EHCDarcy`/`enthalpyPorosity`) | - | Suppresses fluid velocity coupling and Darcy momentum drag in the energy and momentum equations. In `EHC`, requires `true` if instantiated in a fluid region with velocity field $\mathbf{U}$. In pure solid/conduction regions without $\mathbf{U}$, defaults to `true` (setting `false` throws a `FatalIOError`). In `EHCDarcy`, setting `suppress true` freezes flow coupling while retaining the model formulation. |
+
+---
+
 ### Optional Thermophysical Overrides (`thermophysical`)
 Used when distinct solid and liquid thermal conductivities or heat capacities are specified in solid regions:
 | Keyword | Type | Default | Unit | Description |
@@ -304,20 +312,24 @@ PIMPLE
     nNonLinearCorrectors 25;         // Solid region Picard non-linear corrector passes
     nonLinearTolerance   1e-4;       // Solid region temperature convergence tolerance [K]
     nonLinearToleranceAlpha 1e-4;    // Solid region phase fraction convergence tolerance [-]
+    frozenFlow           false;      // Freeze velocity/momentum solve and only advance energy & phase change
 }
 ```
 
 * **Guardrail constraint**: When phase change is active in a fluid region or multi-region domain, `createCoupledRegions.H` enforces `nOuterCorrectors >= 2`. Setting `nOuterCorrectors 1` triggers a `FatalError`.
+* **`frozenFlow`**: Optional boolean setting in fluid `PIMPLE` or `SIMPLE` subdictionaries (default: `false`). When set to `true`, fluid momentum, pressure correction, continuity, and turbulence equations (`UEqn`, `pEqn`, `rhoEqn`) are bypassed. The solver holds velocity $\mathbf{U}$ and mass flux $\phi$ static, advancing only thermal energy (`EEqn`), species transport (`YEqn`), and phase change.
 
 ### Time-Stepping Controls (`system/controlDict`)
 
 ```foam
 deltaT          0.1;
 maxCo           0.5;
+maxDi           10.0;    // Limits time step based on solid thermal diffusion number
 maxAlphaCo      0.2;     // Limits time step based on rate of phase fraction change
 ```
 
-* `maxAlphaCo`: Bounds time step such that cell-wise phase fraction cannot change by more than `maxAlphaCo` within a single step: $\Delta t \le \text{maxAlphaCo} / \max(d\alpha/dt)$, preventing the interface from skipping cells.
+* **`maxDi`**: Maximum allowable diffusion number in solid/conduction regions ($\text{Di} = \frac{k}{\rho c_p} \frac{\Delta t}{\Delta x^2}$), read from `controlDict` (default: `10.0`). In multi-region transient runs with adjustable time stepping, the time step is bounded by both fluid Courant limits and solid diffusion: $\Delta t_{\text{solid}} \le \text{maxDi} / (\text{Di}_{\text{num}} + \epsilon)$.
+* **`maxAlphaCo`**: Bounds time step such that cell-wise phase fraction cannot change by more than `maxAlphaCo` within a single step: $\Delta t \le \text{maxAlphaCo} / \max(d\alpha/dt)$, preventing the interface from skipping cells.
 
 ---
 

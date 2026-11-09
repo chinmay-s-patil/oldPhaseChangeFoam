@@ -52,7 +52,7 @@ def parse_openfoam_field(file_path):
 
 def setup_base_case(case_dir):
     os.makedirs(case_dir, exist_ok=True)
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
     
     os.makedirs(os.path.join(case_dir, "system"), exist_ok=True)
     with open(os.path.join(case_dir, "system/controlDict"), "w") as f:
@@ -156,7 +156,7 @@ boundaryField { ".*" { type calculated; value uniform 101325; } emptyFaces { typ
 
 def setup_fluid_base_case(case_dir):
     os.makedirs(case_dir, exist_ok=True)
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
     os.makedirs(os.path.join(case_dir, "system"), exist_ok=True)
     with open(os.path.join(case_dir, "system/controlDict"), "w") as f:
         f.write("""
@@ -292,7 +292,7 @@ def main():
     print(f"=== Model Features & Validation Verification Suite in {base_dir} ===")
     
     solver_bin = find_solver()
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
 
     # Test 1: Convection suppress false FatalIOError check
     print("\n--- Test 1: convection { suppress false; } FatalIOError Check ---")
@@ -788,7 +788,7 @@ phaseChange {
                 pass_t7 and pass_t8 and pass_t9 and pass_t10 and pass_t11 and pass_t12 and
                 pass_t13 and pass_t14 and pass_t15 and pass_t16 and pass_t17 and pass_t18)
     if all_pass:
-        print("\nALL MODEL FEATURE & ERROR TESTS PASSED SUCCESSFULLY!")
+        print("\nAll model feature and error tests passed.")
     else:
         print("\nSTATUS: TEST FAILED")
         sys.exit(1)

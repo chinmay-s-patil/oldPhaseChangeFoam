@@ -205,7 +205,7 @@ dimensions [1 -1 -2 0 0 0 0]; internalField uniform 101325;
 boundaryField { walls { type empty; } }
 """)
 
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
     solver_bin = find_solver()
 
     run_cmd(f"bash -c '{of_env}; blockMesh'")
@@ -474,7 +474,7 @@ heatSource { type scalarSemiImplicitSource; active true; selectionMode all; volu
 FoamFile { version 2.0; format ascii; class dictionary; location "system"; object controlDict; }
 application phaseChangeMultiRegionFoam; startFrom latestTime; startTime 100; stopAt endTime; endTime 200; deltaT 100; writeControl timeStep; writeInterval 1;
 """)
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
     solver_bin = find_solver()
     run_cmd(f"mkdir -p {case12_dir}/100/phaseChange/polyMesh && cp -r {case12_dir}/constant/phaseChange/polyMesh/* {case12_dir}/100/phaseChange/polyMesh/ 2>/dev/null || true")
     run_cmd(f"cd {case12_dir} && bash -c '{of_env}; {solver_bin}'")
@@ -707,7 +707,7 @@ heatSource {{ type scalarSemiImplicitSource; active true; selectionMode all; vol
 """
     with open(f"{case21_dir}/system/fvOptions", "w") as f: f.write(fvOpt21_cool)
     with open(f"{case21_dir}/system/phaseChange/fvOptions", "w") as f: f.write(fvOpt21_cool)
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
     solver_bin = find_solver()
     run_cmd(f"mkdir -p {case21_dir}/100/phaseChange/polyMesh && cp -r {case21_dir}/constant/phaseChange/polyMesh/* {case21_dir}/100/phaseChange/polyMesh/ 2>/dev/null || true")
     run_cmd(f"cd {case21_dir} && bash -c '{of_env}; {solver_bin}'")
@@ -746,7 +746,7 @@ heatSource {{ type scalarSemiImplicitSource; active true; selectionMode all; vol
 """
     with open(f"{case22_dir}/system/fvOptions", "w") as f: f.write(fvOpt22_step2)
     with open(f"{case22_dir}/system/phaseChange/fvOptions", "w") as f: f.write(fvOpt22_step2)
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
     solver_bin = find_solver()
     run_cmd(f"mkdir -p {case22_dir}/100/phaseChange/polyMesh && cp -r {case22_dir}/constant/phaseChange/polyMesh/* {case22_dir}/100/phaseChange/polyMesh/ 2>/dev/null || true")
     run_cmd(f"cd {case22_dir} && bash -c '{of_env}; {solver_bin}'")
@@ -870,7 +870,7 @@ heatSource
     ]
 
     if all_passed:
-        summary_lines.append("ALL SINGLE-CELL VERIFICATION TESTS PASSED SUCCESSFULLY!")
+        summary_lines.append("All single-cell verification tests passed.")
     else:
         summary_lines.append("SOME TESTS FAILED!")
 

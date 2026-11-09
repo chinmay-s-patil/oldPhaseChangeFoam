@@ -12,7 +12,7 @@
 License
     This file is part of OpenFOAM, with modifications for phaseChangeFoam.
     SPDX-License-Identifier: GPL-3.0-or-later
-    Modified 2026-10 by Chinmay S Patil: Added diffusion number and phase-change time step limits.
+    Modified 2026-10 by Chinmay S Patil: Read solid region maxDi diffusion-number time step limits.
 \*---------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------*\

@@ -24,11 +24,14 @@ RUN bash -c '\
         FOAM_BASHRC=$(find /usr/lib/openfoam /opt -name bashrc 2>/dev/null | grep etc/bashrc | head -n 1); \
     fi; \
     echo "Using OpenFOAM bashrc: $FOAM_BASHRC"; \
-    source "$FOAM_BASHRC" && \
-    ./Allwmake && \
-    cp -f ${FOAM_USER_APPBIN}/* ${FOAM_APPBIN}/ 2>/dev/null || true && \
-    cp -f ${FOAM_USER_APPBIN}/* /usr/local/bin/ 2>/dev/null || true && \
-    chmod 755 /usr/local/bin/phaseChangeMultiRegion* /usr/local/bin/writePCDict 2>/dev/null || true'
+    set +e; \
+    source "$FOAM_BASHRC"; \
+    set -e; \
+    ./Allwmake; \
+    mkdir -p /usr/local/bin; \
+    cp -f "${FOAM_USER_APPBIN}"/* "${FOAM_APPBIN}"/; \
+    cp -f "${FOAM_USER_APPBIN}"/* /usr/local/bin/; \
+    chmod 755 /usr/local/bin/phaseChangeMultiRegion* /usr/local/bin/writePCDict'
 
 # Smoke test binaries to guarantee successful compilation and linking
 RUN bash -c '\

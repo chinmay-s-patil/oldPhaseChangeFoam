@@ -26,4 +26,4 @@ Test 6 (Two-Slab Contact Temperature): PASSED
   - Computed Interface Temperature   : 366.754405 K
   - Relative Interface Error         : 2.3929e-02%
 -------------------------------------------------------
-ALL COUPLED MULTI-REGION VERIFICATION TESTS PASSED SUCCESSFULLY!
+All coupled multi-region verification tests passed.

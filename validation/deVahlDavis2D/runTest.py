@@ -360,7 +360,7 @@ def run_devahldavis(case_dir, n_cells=50, iters=400):
 
     setup_case(case_dir, n_cells=n_cells, iters=iters)
 
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
     solver_bin = find_solver("phaseChangeMultiRegionSimpleFoam")
 
     # Clean old time steps and set up region mesh

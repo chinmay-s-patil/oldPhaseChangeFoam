@@ -20,7 +20,7 @@ import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from exact_energy_balance_audit import run_exact_audit, parse_openfoam_field
 
-OF_ENV = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+OF_ENV = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
 BASE_CASE = os.path.abspath("validation/gallium2D/case")
 SWEEP_DIR = os.path.abspath("validation/gallium2D/analysis/energy_balance/sweep_runs")
 STUDY_17MIN_DIR = os.path.abspath("validation/gallium2D/analysis/study_17min")

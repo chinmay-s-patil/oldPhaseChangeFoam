@@ -21,7 +21,7 @@ from runTest import setup_case, run_cmd, find_solver, parse_scalar_field, evalua
 
 def run_mesh_study():
     solver = find_solver()
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
 
     meshes = [(32, 24), (42, 32), (63, 48), (84, 64)]
     W = 0.0889
@@ -64,7 +64,7 @@ def run_mesh_study():
     lines.append("\nConclusions:")
     lines.append("  * Increasing mesh resolution from 42x32 to 84x64 (a 4x increase in cell count)")
     lines.append("    alters the global liquid fraction by 0.0000 (0.00%) and the front interface position by 0.0017 (<1.3%).")
-    lines.append("  * Spatial grid convergence is rigorously established at the 42x32 resolution.")
+    lines.append("  * Spatial grid convergence is established at the 42x32 resolution.")
     lines.append("=" * 80 + "\n")
 
     report_text = "\n".join(lines)

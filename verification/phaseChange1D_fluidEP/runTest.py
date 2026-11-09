@@ -88,7 +88,7 @@ def setup_fluid_case(case_dir, frozen_flow=True, Cu=1e12, init_T=None, init_U=No
         num_cells = 100
 
     os.makedirs(case_dir, exist_ok=True)
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
     if init_U:
         if isinstance(init_U, list):
             u_field = f"nonuniform List<vector> {num_cells} (\n" + "\n".join(f"({u[0]} {u[1]} {u[2]})" for u in init_U) + "\n);"
@@ -287,7 +287,7 @@ boundaryField { ".*" { type calculated; value uniform 1967; } emptyFaces { type 
 
 def setup_solid_case(case_dir, Cu=1e12, init_T=None, end_time=2000, delta_t=10, write_interval=200):
     os.makedirs(case_dir, exist_ok=True)
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
     num_cells = len(init_T) if init_T else 100
     
     # system/controlDict
@@ -451,7 +451,7 @@ def main():
     print(f"=== Fluid Region Enthalpy-Porosity Verification Suite in {base_dir} ===")
     
     solver_bin = find_solver()
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
 
     # Test 1: OpenFOAM momentumSp() Field Verification
     print("\n--- Test 1: OpenFOAM Solver momentumSp() Field Verification ---")
@@ -582,7 +582,7 @@ def main():
 
     all_pass = pass_t1 and pass_t2 and pass_t3
     if all_pass:
-        print("\nALL FLUID ENTHALPY-POROSITY VERIFICATION TESTS PASSED SUCCESSFULLY!")
+        print("\nAll fluid enthalpy-porosity verification tests passed.")
     else:
         print("\nSTATUS: TEST FAILED")
         sys.exit(1)

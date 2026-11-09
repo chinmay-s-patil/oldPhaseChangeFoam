@@ -32,7 +32,7 @@ Parameters:
       Ste = cp * Delta T / L = 0.010
     (Note: Hannoun et al. Table 1 listed Ra = 2.25e5 / Pr = 0.04 in its summary row,
      which was inconsistent with its own tabulated physical properties; the case
-     modeled here strictly preserves the dimensional properties, yielding Ra = 2.50e5.)
+     modeled here preserves the dimensional properties, yielding Ra = 2.50e5.)
 """
 
 import os
@@ -327,7 +327,7 @@ boundaryField
 """)
 
     # Generate mesh
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
     run_cmd(f"bash -c '{of_env}; blockMesh && mkdir -p constant/fluid && rm -rf constant/fluid/polyMesh && cp -r constant/polyMesh constant/fluid/polyMesh'", cwd=case_dir)
 
 def parse_openfoam_field(file_path):
@@ -347,7 +347,7 @@ def parse_openfoam_field(file_path):
 
 def run_tin_benchmark(case_dir, endTime=100):
     solver_bin = find_solver()
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
 
     print("=" * 80)
     print("  PURE TIN MELTING BENCHMARK (Ra = 2.50e5, Pr = 0.02, Ste = 0.01)")

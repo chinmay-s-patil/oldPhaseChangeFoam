@@ -24,4 +24,4 @@ Case 20 (Reverse Non-Hys Heat) : PASSED (err = 0.000000 K)
 Case 21 (Forward Restart Test) : PASSED (err = 0.000000 K)
 Case 22 (Hysteresis Restart)   : PASSED (err = 0.000000 K)
 -------------------------------------------------------
-ALL SINGLE-CELL VERIFICATION TESTS PASSED SUCCESSFULLY!
+All single-cell verification tests passed.

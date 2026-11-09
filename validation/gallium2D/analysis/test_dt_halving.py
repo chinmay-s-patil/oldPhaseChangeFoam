@@ -65,7 +65,7 @@ functions
 """)
 
     solver = find_solver()
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
     cmd = f"bash -c '{of_env}; cd {case_dir} && rm -rf [1-9]* 0.* && blockMesh && mkdir -p constant/fluid && cp -r constant/polyMesh constant/fluid/polyMesh && {solver} > log.simulation 2>&1'"
     
     print(f"Running EHCDarcy at dt = 0.05s to 120s (2400 steps)...")

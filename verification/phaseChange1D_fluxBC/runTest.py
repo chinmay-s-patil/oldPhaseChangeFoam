@@ -51,7 +51,7 @@ def main():
     print(f"=== 1D PCM Fixed Heat Flux BC & Conservation Test in {case_dir} ===")
     
     os.chdir(case_dir)
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
     solver_bin = find_solver()
 
     # 1. Setup base 1D mesh

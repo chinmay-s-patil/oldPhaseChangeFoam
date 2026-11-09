@@ -12,7 +12,7 @@
 License
     This file is part of OpenFOAM, with modifications for phaseChangeFoam.
     SPDX-License-Identifier: GPL-3.0-or-later
-    Modified 2026-10 by Chinmay S Patil: Added multi-region phase change models,
+    Modified 2026-10 by Chinmay S Patil: Integrated multi-region phase change models, maxAlphaCo limiting, and coupled energy solve.
     stateful thermal hysteresis, and adaptive time-step controls.
 
     OpenFOAM is free software: you can redistribute it and/or modify it

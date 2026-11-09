@@ -12,7 +12,7 @@
 License
     This file is part of OpenFOAM, with modifications for phaseChangeFoam.
     SPDX-License-Identifier: GPL-3.0-or-later
-    Modified 2026-10 by Chinmay S Patil: Adaptive time step adjustment based on alpha rate.
+    Modified 2026-10 by Chinmay S Patil: Added adaptive time-step limiting based on maximum phase-fraction change rate (maxAlphaCo).
 \*---------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------*\

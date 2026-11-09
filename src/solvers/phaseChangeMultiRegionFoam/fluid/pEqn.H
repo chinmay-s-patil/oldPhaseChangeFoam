@@ -12,7 +12,7 @@
 License
     This file is part of OpenFOAM, with modifications for phaseChangeFoam.
     SPDX-License-Identifier: GPL-3.0-or-later
-    Modified 2026-10 by Chinmay S Patil: Added phase change mass/density source terms to pressure correction.
+    Modified 2026-10 by Chinmay S Patil: Integrated phase change mass source (rhoPhCh) into pressure correction equation.
 
     OpenFOAM is free software: you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by

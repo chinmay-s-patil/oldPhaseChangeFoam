@@ -137,7 +137,7 @@ phaseChange
     with open("system/pcm/fvSchemes", "w") as f: f.write(open("system/fvSchemes").read())
     with open("system/pcm/fvSolution", "w") as f: f.write(open("system/fvSolution").read())
 
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
     run_cmd(f"bash -c '{of_env}; blockMesh'")
     run_cmd("mkdir -p constant/pcm")
     run_cmd("cp -r constant/polyMesh constant/pcm/polyMesh 2>/dev/null || true")
@@ -268,7 +268,7 @@ mixture {{ specie {{ molWeight 100; }} transport {{ kappa 2.00; }} thermodynamic
         with open(f"system/{region}/fvSolution", "w") as f: f.write(open("system/fvSolution").read())
 
     # Create meshes
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
     run_cmd(f"bash -c '{of_env}; blockMesh'")
     run_cmd(f"bash -c '{of_env}; splitMeshRegions -cellZones -overwrite'")
 
@@ -335,7 +335,7 @@ def main():
     print(f"=== Coupled Multi-Region PCM Phase Change Verification Test in {base_dir} ===")
 
     solver_bin = find_solver()
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
 
     # Reference: Single-region
     print("\n--- Running Single-Region Reference Case ---")
@@ -720,7 +720,7 @@ boundaryField {{
 
     all_coupled_passed = pass_t1 and pass_t2 and pass_t3 and pass_t4 and pass_t5 and pass_t6
     if all_coupled_passed:
-        summary_lines.append("ALL COUPLED MULTI-REGION VERIFICATION TESTS PASSED SUCCESSFULLY!")
+        summary_lines.append("All coupled multi-region verification tests passed.")
     else:
         summary_lines.append("COUPLED TEST FAILED!")
 

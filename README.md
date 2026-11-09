@@ -18,7 +18,7 @@
 `phaseChangeFoam` extends OpenFOAM's standard `chtMultiRegionFoam` (OpenCFD / ESI-OpenCFD) conjugate heat transfer architecture and monolithic coupled energy framework (`coupledEnergyField`, `useImplicit`) with dedicated phase change capabilities:
 
 * **Thermal hysteresis in solid-liquid PCM**: Stateful direction-dependent melting and freezing paths with subcooling tracking (`phaseState`, `T_reversal`).
-* **Effective heat capacity (`EHC`, `EHCDarcy`)**: Uses a path-based sensible heat capacity to account for temperature-dependent solid and liquid properties. Latent heat is handled separately through source and linearisation terms. `EHC` is designed for solid regions or conduction-only domains (lacking momentum damping; convection is explicitly guarded against in fluid regions), while `EHCDarcy` adds implicit Darcy momentum damping when fluid motion is modeled.
+* **Effective heat capacity (`EHC`, `EHCDarcy`)**: Uses a path-based sensible heat capacity to account for temperature-dependent solid and liquid properties. Latent heat is handled separately through source and linearisation terms. `EHC` is designed for solid regions or conduction-only domains (lacking momentum damping; convection is prevented in fluid regions), while `EHCDarcy` adds implicit Darcy momentum damping when fluid motion is modeled.
 * **Adaptive time-step limiting (`maxAlphaCo`)**: Constrains $\Delta t$ based on the maximum cell-wise rate of phase fraction change, preventing the interface from skipping cells without resolving the phase transition.
 * **Volumetric species phase change (`Lee`)**: Implements volumetric evaporation and boiling within fluid regions, with thermal energy coupled across solid-fluid conjugate boundaries via CHT interfaces (species mass transfer is confined within fluid domains).
 
@@ -134,7 +134,7 @@ The solver is assessed at three levels: analytical verification, comparison agai
 * **Two-Phase Stefan Melting (Carslaw & Jaeger 1959)**: Moving boundary problem $s(t) = 2\lambda\sqrt{\alpha_l t}$. Achieves **0.43% front position error** at 2000 s with 1st-order temporal self-convergence ($p = 0.96$).
 * **Two-Slab Contact Temperature (Carslaw & Jaeger 1959)**: Interface contact temperature across solid-PCM boundary matches analytical prediction within **0.024% relative error** ($\Delta T = 0.088$ K).
 * **Conservation Physics & Restart Consistency**: Discrete mass error $< 10^{-10}$, energy closure $< 0.01\%$, and restart consistency to write precision ($< 10^{-9}$ K).
-* **Lee Thermodynamic Audit**: Interspecies mass closure ($\lvert \Delta Y_l + \Delta Y_v \rvert < 10^{-12}$) and interface relaxation to Clausius-Clapeyron $T_{\text{sat}}(p)$ within 0.05 K.
+* **Lee Thermodynamic Audit**: Interspecies mass closure ($\lvert \Delta Y_l + \Delta Y_v \rvert < 10^{-10}$, observed $2 \times 10^{-13}$) and interface relaxation to Clausius-Clapeyron $T_{\text{sat}}(p)$ within $10^{-4}$ K.
 * **Cyclic Hysteresis Path Logic**: Verifies state-variable tracking (`phaseState`, `T_reversal`) and subcooling retention under cyclic thermal loading.
 
 ### Tier 2: Numerical CFD Benchmarks

@@ -261,7 +261,7 @@ boundaryField { walls { type zeroGradient; } }
 """)
 
     # Mesh generation and region directory copies
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
     run_cmd(f"cd {case_dir} && bash -c '{of_env}; blockMesh'", cwd=case_dir)
     run_cmd(f"mkdir -p {case_dir}/constant/air {case_dir}/system/air")
     run_cmd(f"cp -r {case_dir}/constant/polyMesh {case_dir}/constant/air/polyMesh 2>/dev/null || true")
@@ -274,7 +274,7 @@ def main():
     print(f"=== constantSource Fluid Phase Change Plumbing Verification in {case_dir} ===")
     
     solver_bin = find_solver()
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
 
     if os.path.exists(case_dir):
         shutil.rmtree(case_dir)

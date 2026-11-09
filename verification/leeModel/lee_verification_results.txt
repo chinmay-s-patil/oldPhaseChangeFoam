@@ -45,4 +45,4 @@ Test 9 (Unequal-Cp Enthalpy Cons.)     : PASSED
   - Final E_abs                         : 110944.584397 J/m^3
   - Absolute Enthalpy Rel Error         : 5.681456e-06
 -------------------------------------------------------
-ALL LEE MODEL VERIFICATION TESTS PASSED SUCCESSFULLY!
+All Lee model verification tests passed.

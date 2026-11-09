@@ -91,10 +91,10 @@ def main():
     print(f"Total Verification Execution Time: {total_duration:.2f}s")
 
     if all_passed:
-        print("\nALL 13 VERIFICATION SUITES PASSED SUCCESSFULLY! (GATE GREEN)")
+        print(f"\nAll {total_count} verification suites passed.")
         sys.exit(0)
     else:
-        print(f"\n{total_count - passed_count} VERIFICATION SUITE(S) FAILED! (GATE RED)")
+        print(f"\n{total_count - passed_count} of {total_count} verification suite(s) failed.")
         sys.exit(1)
 
 if __name__ == "__main__":

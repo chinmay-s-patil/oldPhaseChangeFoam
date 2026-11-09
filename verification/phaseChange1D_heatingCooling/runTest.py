@@ -54,7 +54,7 @@ def main():
     print(f"=== 1D PCM Heating-Cooling Reversal Verification Test in {case_dir} ===")
     
     os.chdir(case_dir)
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
     solver_bin = find_solver()
 
     # 1. Setup base 1D mesh
@@ -215,7 +215,7 @@ writeControl runTime; writeInterval 100; purgeWrite 0; writeFormat ascii; writeP
     mean_a_cool = sum(alpha_cool) / len(alpha_cool)
     print(f"Cooling t=4000s: Mean T = {mean_T_cool:.2f} K, Mean alphaL = {mean_a_cool:.4f}")
 
-    # Check bounds: liquid fraction must strictly be in [0, 1]
+    # Check bounds: liquid fraction must lie in [0, 1]
     min_a_cool = min(alpha_cool)
     max_a_cool = max(alpha_cool)
     alpha_bounded = (min_a_cool >= -1e-6) and (max_a_cool <= 1.000001)

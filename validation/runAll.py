@@ -26,9 +26,9 @@ VALIDATION_SUITES = [
         "description": "Steady natural convection cavity at Ra = 10^5, Nu_mean benchmark target 4.519 (+/- 5%) (~3s)"
     },
     {
-        "name": "pcmHysteresis_experimental",
+        "name": "pcmHysteresis",
         "title": "EHC Thermal Hysteresis Cyclic Path Logic (Model Verification)",
-        "script": "pcmHysteresis_experimental/runTest.py",
+        "script": "pcmHysteresis/runTest.py",
         "fast": True,
         "description": "Direction-dependent melting and freezing loop with 5 K hysteresis window (~2s)"
     },
@@ -129,11 +129,13 @@ def main():
     print("-" * 80)
     print(f"Total Validation Execution Time: {total_duration:.2f}s")
 
+    passed_count = sum(1 for _, status, _ in results if status == "PASSED")
+    total_count = len(results)
     if all_passed:
-        print("\nALL VALIDATION BENCHMARKS PASSED SUCCESSFULLY! (GATE GREEN)")
+        print(f"\nAll {total_count} validation benchmarks passed.")
         sys.exit(0)
     else:
-        print("\nONE OR MORE VALIDATION BENCHMARKS FAILED! (GATE RED)")
+        print(f"\n{total_count - passed_count} of {total_count} validation benchmark(s) failed.")
         sys.exit(1)
 
 if __name__ == "__main__":

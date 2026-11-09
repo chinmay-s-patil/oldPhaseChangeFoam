@@ -135,7 +135,7 @@ For materials exhibiting subcooling, freezing begins at a lower temperature ($T_
 
 > [!IMPORTANT]
 > **Domain Applicability & Convection Guard**:
-> `EHC` is designed for solid regions or pure-conduction domains. It does **not** include Darcy momentum damping. If `EHC` is applied to a fluid region with an active velocity field $\mathbf{U}$ and unsuppressed convection, the solver throws a runtime fatal error. When modeling phase change with natural convection or fluid motion, use `EHCDarcy` or `enthalpyPorosity`, or explicitly suppress convection via `convection { suppress true; }`.
+> `EHC` is designed for solid regions or pure-conduction domains. It does **not** include Darcy momentum damping. If `EHC` is applied to a fluid region with an active velocity field $\mathbf{U}$ and unsuppressed convection, the solver throws a runtime fatal error. When modeling phase change with natural convection or fluid motion, use `EHCDarcy` or `enthalpyPorosity`, or suppress convection via `convection { suppress true; }`.
 
 ---
 

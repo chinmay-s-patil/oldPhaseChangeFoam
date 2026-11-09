@@ -500,7 +500,7 @@ def run_gallium(case_dir, nx=42, ny=32, end_time=120, deltaT_melt=0.5, cu=1.6e6,
 
     setup_case(case_dir, nx=nx, ny=ny, end_time=end_time, deltaT_melt=deltaT_melt, cu=cu, model=model, lam=lam)
 
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
     solver_bin = find_solver("phaseChangeMultiRegionFoam")
 
     # Clean and mesh

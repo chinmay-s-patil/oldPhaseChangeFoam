@@ -183,7 +183,7 @@ phaseChange
         f.write(pc_text)
 
 def launch_case_process(case_dir):
-    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || source /usr/lib/openfoam/openfoam2406/etc/bashrc || true"
+    of_env = "source /usr/lib/openfoam/openfoam2412/etc/bashrc || true"
     prep_cmd = f"bash -c '{of_env}; cd {case_dir} && rm -rf [1-9]* 0.* postProcessing && blockMesh && mkdir -p constant/fluid && rm -rf constant/fluid/polyMesh && cp -r constant/polyMesh constant/fluid/polyMesh'"
     run_cmd(prep_cmd)
     sim_cmd = f"bash -c '{of_env}; cd {case_dir} && phaseChangeMultiRegionFoam > log.simulation 2>&1'"

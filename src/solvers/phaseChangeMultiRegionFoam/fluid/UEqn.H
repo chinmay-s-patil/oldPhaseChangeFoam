@@ -12,7 +12,7 @@
 License
     This file is part of OpenFOAM, with modifications for phaseChangeFoam.
     SPDX-License-Identifier: GPL-3.0-or-later
-    Modified 2026-10 by Chinmay S Patil: Added Darcy-type mushy-zone drag and interfacial phase change momentum terms.
+    Modified 2026-10 by Chinmay S Patil: Added Carman-Kozeny Darcy drag damping and phase change momentum source terms.
 
     OpenFOAM is free software: you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by
