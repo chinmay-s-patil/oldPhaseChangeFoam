@@ -26,3 +26,9 @@ Columns in front CSVs:
 - `y_m`: Vertical position of front in meters
 - `x_norm`: Normalized horizontal position $x / W \in [0, 1]$
 - `y_norm`: Normalized vertical position $y / H \in [0, 1]$
+
+---
+
+## Attribution & Legal Notice
+
+The digitised coordinate dataset is copyright © 2026 Chinmay S Patil and licensed under GPL-3.0-or-later for benchmark reproduction and regression testing. No license or copyright is claimed or granted on the original published figures, plots, or underlying article contents of Brent, Voller, and Reid (1988) / Taylor & Francis.
