@@ -129,7 +129,7 @@ def main():
     print("-" * 80)
     print(f"Total Validation Execution Time: {total_duration:.2f}s")
 
-    passed_count = sum(1 for _, status, _ in results if status == "PASSED")
+    passed_count = sum(1 for _, _, status, _ in results if status == "PASSED")
     total_count = len(results)
     if all_passed:
         print(f"\nAll {total_count} validation benchmarks passed.")
