@@ -50,4 +50,5 @@ validation/papers/
 tutorials/
 log.tree
 validation/gallium2D/analysis/complete_17min_analysis_results.txt
+validation/gallium2D/*.png
 

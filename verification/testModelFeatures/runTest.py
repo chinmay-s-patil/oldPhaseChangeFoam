@@ -790,7 +790,7 @@ phaseChange {
     if all_pass:
         print("\nAll model feature and error tests passed.")
     else:
-        print("\nSTATUS: TEST FAILED")
+        print("\nStatus: Test failed")
         sys.exit(1)
 
 if __name__ == "__main__":

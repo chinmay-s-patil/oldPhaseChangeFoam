@@ -255,10 +255,10 @@ writeControl runTime; writeInterval 100; purgeWrite 0; writeFormat ascii; writeP
     print("-------------------------------------------------------")
 
     if reg_a_passed and reg_T_passed and reg_T_cool_passed and reg_H_cool_passed and alpha_bounded:
-        print("\nSTATUS: HEATING-COOLING REVERSAL VERIFICATION PASSED!")
+        print("\nStatus: Heating-cooling reversal verification passed.")
         print("The solver committed alphaL_old statefully without edge shortcut artifacts, matching 286.02 K cooling mean T and 5.56 MJ/m^2 extracted enthalpy.")
     else:
-        print("\nSTATUS: TEST FAILED")
+        print("\nStatus: Test failed")
         if not reg_a_passed or not reg_T_passed:
             print(f"Reason: Heating phase regression failed (Mean alphaL={mean_a_heat:.4f} vs 0.2887, Mean T={mean_T_heat:.2f} K vs 299.37 K)")
         if not reg_T_cool_passed:

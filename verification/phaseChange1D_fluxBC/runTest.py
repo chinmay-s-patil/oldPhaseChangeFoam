@@ -239,10 +239,10 @@ boundaryField { ".*" { type calculated; value uniform 101325; } "(top|bottom|fro
     is_conserved = rel_err < 1e-3
 
     if has_melted and is_conserved:
-        print("\nSTATUS: FIXED HEAT FLUX MELTING & CONSERVATION TEST PASSED!")
-        print("Active phase change (solid, mushy, liquid) occurred and energy was 100% conserved.")
+        print("\nStatus: Fixed heat flux melting and conservation test passed.")
+        print("Active phase change (solid, mushy, liquid) occurred and energy was conserved.")
     else:
-        print("\nSTATUS: TEST FAILED")
+        print("\nStatus: Test failed")
         if not has_melted:
             print(f"Reason: Domain did not undergo full phase change (max_T={max_T:.2f} K, max_alpha={max_alpha:.4f})")
         if not is_conserved:

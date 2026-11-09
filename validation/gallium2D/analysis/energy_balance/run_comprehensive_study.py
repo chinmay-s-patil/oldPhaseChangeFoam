@@ -391,7 +391,7 @@ def main():
         json.dump(histories, f, indent=2)
 
     print(f"\nSaved scorecard and transient data to:\n  - {scorecard_json_path}\n  - {history_json_path}")
-    print("\nALL RUNS AND AUDITS COMPLETED SUCCESSFULLY!")
+    print("\nAll runs and audits completed successfully.")
 
 if __name__ == "__main__":
     main()

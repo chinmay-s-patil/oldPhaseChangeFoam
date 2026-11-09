@@ -302,9 +302,9 @@ def main():
     print(f"Exact T     = 350.000000 K, alphaL = 1.000000")
     print(f"Temperature Error = {err1:.6f} K")
     if err1 < 0.01 and abs(a1 - 1.0) < 0.001:
-        print("STATUS: CASE 1 PASSED!")
+        print("Status: Case 1 passed.")
     else:
-        print("STATUS: CASE 1 FAILED!")
+        print("Status: Case 1 failed.")
         all_passed = False
 
     # --- Case 2: Single-Step Cooling Overshoot ---
@@ -316,9 +316,9 @@ def main():
     print(f"Exact T     = 290.000000 K, alphaL = 0.000000")
     print(f"Temperature Error = {err2:.6f} K")
     if err2 < 0.01 and abs(a2 - 0.0) < 0.001:
-        print("STATUS: CASE 2 PASSED!")
+        print("Status: Case 2 passed.")
     else:
-        print("STATUS: CASE 2 FAILED!")
+        print("Status: Case 2 failed.")
         all_passed = False
 
     # --- Case 3: Partial Window Crossing ---
@@ -331,9 +331,9 @@ def main():
     print(f"Exact T     = 305.000000 K, alphaL = 0.500000")
     print(f"Temperature Error = {err3:.6f} K, Alpha Error = {err_a3:.6f}")
     if err3 < 0.01 and err_a3 < 0.001:
-        print("STATUS: CASE 3 PASSED!")
+        print("Status: Case 3 passed.")
     else:
-        print("STATUS: CASE 3 FAILED!")
+        print("Status: Case 3 failed.")
         all_passed = False
 
     # --- Case 4: Realistic Latent Heat (L = 163 kJ/kg) ---
@@ -346,9 +346,9 @@ def main():
     print(f"Exact T     = 350.000000 K, alphaL = 1.000000")
     print(f"Temperature Error = {err4:.6f} K")
     if err4 < 0.01 and abs(a4 - 1.0) < 0.001:
-        print("STATUS: CASE 4 PASSED!")
+        print("Status: Case 4 passed.")
     else:
-        print("STATUS: CASE 4 FAILED!")
+        print("Status: Case 4 failed.")
         all_passed = False
 
     # --- Case 5: Mushy Start State & Partial Melt Heating (T0 = 305 K, alpha0 = 0.5 -> T = 308 K, alphaL = 0.80) ---
@@ -361,9 +361,9 @@ def main():
     print(f"Exact T     = 308.000000 K, alphaL = 0.800000")
     print(f"Temperature Error = {err5:.6f} K, Alpha Error = {err_a5:.6f}")
     if err5 < 0.001 and err_a5 < 0.001:
-        print("STATUS: CASE 5 PASSED!")
+        print("Status: Case 5 passed.")
     else:
-        print("STATUS: CASE 5 FAILED!")
+        print("Status: Case 5 failed.")
         all_passed = False
 
     # --- Case 6: Cooling Reversal Plateau (T0 = 308 K, alpha0 = 0.8 -> T = 306 K, alphaL = 0.80) ---
@@ -377,9 +377,9 @@ def main():
     print(f"Exact T     = 306.000000 K, alphaL = 0.800000")
     print(f"Temperature Error = {err6:.6f} K, Alpha Error = {err_a6:.6f}")
     if err6 < 0.001 and err_a6 < 0.001:
-        print("STATUS: CASE 6 PASSED!")
+        print("Status: Case 6 passed.")
     else:
-        print("STATUS: CASE 6 FAILED!")
+        print("Status: Case 6 failed.")
         all_passed = False
 
     # --- Case 7: Heating Reversal Plateau (T0 = 297 K, alpha0 = 0.2 -> T = 298 K, alphaL = 0.20) ---
@@ -393,9 +393,9 @@ def main():
     print(f"Exact T     = 298.000000 K, alphaL = 0.200000")
     print(f"Temperature Error = {err7:.6f} K, Alpha Error = {err_a7:.6f}")
     if err7 < 0.001 and err_a7 < 0.001:
-        print("STATUS: CASE 7 PASSED!")
+        print("Status: Case 7 passed.")
     else:
-        print("STATUS: CASE 7 FAILED!")
+        print("Status: Case 7 failed.")
         all_passed = False
 
     # --- Case 8: Exact Base Cp (Cps = 1980, Cpl = 2320 J/(kg.K), T0 = 280 K -> 350 K) ---
@@ -408,9 +408,9 @@ def main():
     print(f"Exact T     = 350.000000 K, alphaL = 1.000000")
     print(f"Temperature Error = {err8:.6f} K")
     if err8 < 0.01 and abs(a8 - 1.0) < 0.001:
-        print("STATUS: CASE 8 PASSED!")
+        print("Status: Case 8 passed.")
     else:
-        print("STATUS: CASE 8 FAILED!")
+        print("Status: Case 8 failed.")
         all_passed = False
 
     # --- Case 9: Variable Density (rhoS = 1967, rhoL = 1850 kg/m^3, T0 = 280 K -> 350 K) ---
@@ -423,9 +423,9 @@ def main():
     print(f"Exact T     = 350.000000 K, alphaL = 1.000000")
     print(f"Temperature Error = {err9:.6f} K")
     if err9 < 0.01 and abs(a9 - 1.0) < 0.001:
-        print("STATUS: CASE 9 PASSED!")
+        print("Status: Case 9 passed.")
     else:
-        print("STATUS: CASE 9 FAILED!")
+        print("Status: Case 9 failed.")
         all_passed = False
 
     # --- Case 10: Cooling Jump with Unequal Cp (Cps = 1980, Cpl = 2320 J/(kg.K), T0 = 350 K -> 290 K) ---
@@ -438,9 +438,9 @@ def main():
     print(f"Exact T     = 290.000000 K, alphaL = 0.000000")
     print(f"Temperature Error = {err10:.6f} K")
     if err10 < 0.01 and abs(a10 - 0.0) < 0.001:
-        print("STATUS: CASE 10 PASSED!")
+        print("Status: Case 10 passed.")
     else:
-        print("STATUS: CASE 10 FAILED!")
+        print("Status: Case 10 failed.")
         all_passed = False
 
     # --- Case 11: Cooling Reversal Plateau with Unequal Cp ---
@@ -454,9 +454,9 @@ def main():
     print(f"Exact T     = 306.000000 K, alphaL = 0.800000")
     print(f"Temperature Error = {err11:.6f} K, Alpha Error = {err_a11:.6f}")
     if err11 < 0.001 and err_a11 < 0.001:
-        print("STATUS: CASE 11 PASSED!")
+        print("Status: Case 11 passed.")
     else:
-        print("STATUS: CASE 11 FAILED!")
+        print("Status: Case 11 failed.")
         all_passed = False
 
     # --- Case 12: Closed Thermal Cycle Net Enthalpy Conservation ---
@@ -486,9 +486,9 @@ application phaseChangeMultiRegionFoam; startFrom latestTime; startTime 100; sto
     print(f"Exact T     = 280.000000 K, alphaL = 0.000000")
     print(f"Temperature Error = {err12:.6f} K, Alpha Error = {err_a12:.6f}")
     if err12 < 0.01 and err_a12 < 0.001:
-        print("STATUS: CASE 12 PASSED!")
+        print("Status: Case 12 passed.")
     else:
-        print("STATUS: CASE 12 FAILED!")
+        print("Status: Case 12 failed.")
         all_passed = False
     # --- Case 13: Continuous Multi-Step Cooling Reversal with Unequal Cp (308 -> 306 -> 304 -> 302 K) ---
     print("\n--- Case 13: Continuous Multi-Step Cooling Reversal with Unequal Cp (308 -> 306 -> 304 -> 302 K) ---")
@@ -555,9 +555,9 @@ heatSource
     print(f"Step 2 (306->304 K): Simulated T = {T13b:.6f} K, alpha = {a13b:.6f}")
     print(f"Step 3 (304->302 K): Simulated T = {T13c:.6f} K, alpha = {a13c:.6f}")
     if err13 < 0.001 and abs(a13a - 0.8) < 0.001 and abs(a13b - 0.8) < 0.001 and abs(a13c - 0.7) < 0.001:
-        print("STATUS: CASE 13 PASSED!")
+        print("Status: Case 13 passed.")
     else:
-        print("STATUS: CASE 13 FAILED!")
+        print("Status: Case 13 failed.")
         all_passed = False
 
     # --- Case 14: Closed Thermal Cycle with Unequal Cp & Hysteresis (280 -> 350 -> 280 K) ---
@@ -590,9 +590,9 @@ heatSource {{ type scalarSemiImplicitSource; active true; selectionMode all; vol
     print(f"Exact T     = 280.000000 K, alphaL = 0.000000")
     print(f"Temperature Error = {err14:.6f} K, Alpha Error = {err_a14:.6f}")
     if err14 < 0.01 and err_a14 < 0.001:
-        print("STATUS: CASE 14 PASSED!")
+        print("Status: Case 14 passed.")
     else:
-        print("STATUS: CASE 14 FAILED!")
+        print("Status: Case 14 failed.")
         all_passed = False
 
     # --- Case 15: Liquid Reversal Heating Plateau (T0 = 309 K, alpha0 = 1.0 -> 312 K) ---
@@ -606,9 +606,9 @@ heatSource {{ type scalarSemiImplicitSource; active true; selectionMode all; vol
     print(f"Exact T     = 312.000000 K, alphaL = 1.000000")
     print(f"Temperature Error = {err15:.6f} K, Alpha Error = {err_a15:.6f}")
     if err15 < 0.01 and err_a15 < 0.001:
-        print("STATUS: CASE 15 PASSED!")
+        print("Status: Case 15 passed.")
     else:
-        print("STATUS: CASE 15 FAILED!")
+        print("Status: Case 15 failed.")
         all_passed = False
 
     # --- Case 16: Direction Forward Locked Plateau Cooling (T0 = 306 K, alpha0 = 0.6 -> 295 K) ---
@@ -622,9 +622,9 @@ heatSource {{ type scalarSemiImplicitSource; active true; selectionMode all; vol
     print(f"Exact T     = 295.000000 K, alphaL = 0.600000")
     print(f"Temperature Error = {err16:.6f} K, Alpha Error = {err_a16:.6f}")
     if err16 < 0.01 and err_a16 < 0.001:
-        print("STATUS: CASE 16 PASSED!")
+        print("Status: Case 16 passed.")
     else:
-        print("STATUS: CASE 16 FAILED!")
+        print("Status: Case 16 failed.")
         all_passed = False
 
     # --- Case 17: Forward-Locked Fully Liquid Split Path Cooling (T0 = 315 K, alpha0 = 1.0 -> 295 K) ---
@@ -638,9 +638,9 @@ heatSource {{ type scalarSemiImplicitSource; active true; selectionMode all; vol
     print(f"Exact T     = 295.000000 K, alphaL = 1.000000")
     print(f"Temperature Error = {err17:.6f} K, Alpha Error = {err_a17:.6f}")
     if err17 < 0.01 and err_a17 < 0.001:
-        print("STATUS: CASE 17 PASSED!")
+        print("Status: Case 17 passed.")
     else:
-        print("STATUS: CASE 17 FAILED!")
+        print("Status: Case 17 failed.")
         all_passed = False
 
     # --- Case 18: Reverse-Locked Fully Solid Split Path Heating (T0 = 290 K, alpha0 = 0.0 -> 310 K) ---
@@ -654,9 +654,9 @@ heatSource {{ type scalarSemiImplicitSource; active true; selectionMode all; vol
     print(f"Exact T     = 310.000000 K, alphaL = 0.000000")
     print(f"Temperature Error = {err18:.6f} K, Alpha Error = {err_a18:.6f}")
     if err18 < 0.01 and err_a18 < 0.001:
-        print("STATUS: CASE 18 PASSED!")
+        print("Status: Case 18 passed.")
     else:
-        print("STATUS: CASE 18 FAILED!")
+        print("Status: Case 18 failed.")
         all_passed = False
 
     # --- Case 19: Forward-Locked Non-Hysteresis Cooling (hysteresis active false) ---
@@ -669,9 +669,9 @@ heatSource {{ type scalarSemiImplicitSource; active true; selectionMode all; vol
     print(f"Exact T     = 295.000000 K, alphaL = 1.000000")
     print(f"Temperature Error = {err19:.6f} K, Alpha Error = {err_a19:.6f}")
     if err19 < 0.01 and err_a19 < 0.001:
-        print("STATUS: CASE 19 PASSED!")
+        print("Status: Case 19 passed.")
     else:
-        print("STATUS: CASE 19 FAILED!")
+        print("Status: Case 19 failed.")
         all_passed = False
 
     # --- Case 20: Reverse-Locked Non-Hysteresis Heating (hysteresis active false) ---
@@ -684,9 +684,9 @@ heatSource {{ type scalarSemiImplicitSource; active true; selectionMode all; vol
     print(f"Exact T     = 310.000000 K, alphaL = 0.000000")
     print(f"Temperature Error = {err20:.6f} K, Alpha Error = {err_a20:.6f}")
     if err20 < 0.01 and err_a20 < 0.001:
-        print("STATUS: CASE 20 PASSED!")
+        print("Status: Case 20 passed.")
     else:
-        print("STATUS: CASE 20 FAILED!")
+        print("Status: Case 20 failed.")
         all_passed = False
 
     # --- Case 21: Direction Forward Restart Test (disk field state restoration) ---
@@ -719,9 +719,9 @@ heatSource {{ type scalarSemiImplicitSource; active true; selectionMode all; vol
     print(f"Exact T     = 295.000000 K, alphaL = 0.500000")
     print(f"Temperature Error = {err21:.6f} K, Alpha Error = {err_a21:.6f}")
     if err21 < 0.01 and err_a21 < 0.001:
-        print("STATUS: CASE 21 PASSED!")
+        print("Status: Case 21 passed.")
     else:
-        print("STATUS: CASE 21 FAILED!")
+        print("Status: Case 21 failed.")
         all_passed = False
 
     # --- Case 22: Continued-Cooling Restart Test under direction both with hysteresis active true ---
@@ -835,9 +835,9 @@ heatSource
 
     pass22 = err22 < 0.01 and err_a22 < 0.001 and err22_ref < 0.01 and err_a22_ref < 0.001 and abs(disk_traj200 - 0.0) < 1e-4 and abs(disk_Trev200 - 303.0) < 1e-4
     if pass22:
-        print("STATUS: CASE 22 PASSED!")
+        print("Status: Case 22 passed.")
     else:
-        print("STATUS: CASE 22 FAILED!")
+        print("Status: Case 22 failed.")
         all_passed = False
 
     summary_lines = [
@@ -872,7 +872,7 @@ heatSource
     if all_passed:
         summary_lines.append("All single-cell verification tests passed.")
     else:
-        summary_lines.append("SOME TESTS FAILED!")
+        summary_lines.append("Some tests failed.")
 
     for line in summary_lines:
         print(line)

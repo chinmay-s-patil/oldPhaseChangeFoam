@@ -229,15 +229,15 @@ def main():
 
     stefan_passed = front_err_pct < 1.0  # Gate: front error < 1%
     if stefan_passed:
-        print(f"STATUS: EXACT STEFAN VERIFICATION PASSED (Front Error {front_err_pct:.3f}% < 1.0% Gate)")
+        print(f"Status: Exact Stefan verification passed (front error {front_err_pct:.3f}% < 1.0% gate)")
     else:
-        print(f"STATUS: EXACT STEFAN VERIFICATION FAILED (Front Error {front_err_pct:.3f}% >= 1.0% Gate)")
+        print(f"Status: Exact Stefan verification failed (front error {front_err_pct:.3f}% >= 1.0% gate)")
         sys.exit(1)
 
     if 0.7 <= expected_order <= 1.4:
-        print("STATUS: VERIFICATION SUCCESSFUL! Verified 1st-order numerical error convergence.")
+        print("Status: Verification successful. Verified 1st-order numerical error convergence.")
     else:
-        print(f"STATUS: VERIFICATION PASSED with observed order p = {expected_order:.2f}")
+        print(f"Status: Verification passed with observed order p = {expected_order:.2f}")
 
 if __name__ == "__main__":
     main()

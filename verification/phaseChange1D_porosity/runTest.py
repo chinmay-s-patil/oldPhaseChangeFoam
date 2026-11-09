@@ -327,9 +327,9 @@ def main():
 
     all_pass = pass_ehc_stefan and pass_ep_stefan and pass_ehc_melting and pass_ep_melting and pass_match and pass_flux_balance
     if all_pass:
-        print("\nSTATUS: EHC VS ENTHALPY-POROSITY STEFAN BENCHMARK PASSED!")
+        print("\nStatus: EHC vs enthalpy-porosity Stefan benchmark passed.")
     else:
-        print("\nSTATUS: TEST FAILED")
+        print("\nStatus: Test failed")
         sys.exit(1)
 
 if __name__ == "__main__":

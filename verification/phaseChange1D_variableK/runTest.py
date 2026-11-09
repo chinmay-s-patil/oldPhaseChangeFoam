@@ -215,10 +215,10 @@ boundaryField { ".*" { type calculated; value uniform 101325; } "(top|bottom|fro
     # 1. k in liquid cells is 0.5, k in solid cells is 1.0
     # 2. Lower k_l retards heat transfer, so mean_a matches reference solution 0.1989 within 1%
     if k_solid_correct and k_liquid_correct and (0.19 < mean_a < 0.21):
-        print("\nSTATUS: VARIABLE CONDUCTIVITY VERIFICATION PASSED!")
+        print("\nStatus: Variable conductivity verification passed.")
         print("The solver correctly updated cell-wise thermal conductivity k(alphaL) and boundary fields.")
     else:
-        print("\nSTATUS: TEST FAILED")
+        print("\nStatus: Test failed")
         sys.exit(1)
 
 if __name__ == "__main__":

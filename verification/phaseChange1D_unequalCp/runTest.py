@@ -374,9 +374,9 @@ writeControl runTime; writeInterval 2; purgeWrite 0; writeFormat ascii; writePre
     print(f"Phase 3 Equal-Rho (<0.01%)    : {'PASS' if pass_flux_balance3 else 'FAIL'} ({rel_flux_bal3*100:.6f}%)")
 
     if all_pass:
-        print("\nSTATUS: 1D UNEQUAL CP & VARIABLE DENSITY TEST PASSED!")
+        print("\nStatus: 1D unequal Cp and variable density test passed.")
     else:
-        print("\nSTATUS: TEST FAILED")
+        print("\nStatus: Test failed")
         sys.exit(1)
 
 if __name__ == "__main__":

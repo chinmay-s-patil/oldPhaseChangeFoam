@@ -722,7 +722,7 @@ boundaryField {{
     if all_coupled_passed:
         summary_lines.append("All coupled multi-region verification tests passed.")
     else:
-        summary_lines.append("COUPLED TEST FAILED!")
+        summary_lines.append("Coupled test failed.")
 
     for line in summary_lines:
         print(line)
